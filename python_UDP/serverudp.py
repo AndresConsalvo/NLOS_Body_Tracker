@@ -44,6 +44,9 @@ while(True):
 
     clientMsg = "Message from Client:{}".format(message)
     clientIP  = "Client IP Address:{}".format(address)
+    print(type(message))
+
+    print(message.hex(sep = ' '))
     
     print(clientMsg)
     print(clientIP)
@@ -53,3 +56,7 @@ while(True):
     # Sending a reply to client
 
     UDPServerSocket.sendto(bytesToSend, address)
+
+
+
+ 
