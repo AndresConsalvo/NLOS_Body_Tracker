@@ -2,7 +2,7 @@ import socket
 
  
 
-localIP     = "127.0.0.1"
+localIP     = "192.168.1.31"
 
 localPort   = 20001
 
