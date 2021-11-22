@@ -12,7 +12,7 @@ boolean connected = false;
 
 WiFiUDP udp;
 
-// (Ax_L, Ax_H, Ay_L, Ay_H, Az_L, Az_H, Gx_L, Gx_H, Gy_L, Gy_H, Gz_L, Gz_H)
+// (Gx_L, Gx_H, Gy_L, Gy_H, Gz_L, Gz_H, Ax_L, Ax_H, Ay_L, Ay_H, Az_L, Az_H)
 byte data[12];
 
 
@@ -31,40 +31,27 @@ short read_from_imu(byte reg_addr, byte num_bytes);
 void write_to_imu(byte reg_addr, byte command);
 
 void loop() { 
-  write_to_imu(0x7E, (0x11));
+  write_to_imu(0x7E, (0x11 | 0x15));
 
-  short accel_x, accel_y, accel_z;
-  short gyro_x, gyro_y, gyro_z;
 
-  accel_x = read_from_imu((byte) 0x12, 2);
-  accel_y = read_from_imu((byte) 0x14, 2);
-  accel_z = read_from_imu((byte) 0x16, 2);
-  
-  gyro_x = read_from_imu((byte) 0x0C, 2);
-  gyro_y = read_from_imu((byte) 0x0E, 2);
-  gyro_z = read_from_imu((byte) 0x10, 2);
-  
-  data[0] = (byte) ((accel_x >> 0) & 0xFF);
-  data[1] = (byte) ((accel_x >> 8) & 0xFF);
-  data[2] = (byte) ((accel_y >> 0) & 0xFF);
-  data[3] = (byte) ((accel_y >> 8) & 0xFF);
-  data[4] = (byte) ((accel_z >> 0) & 0xFF);
-  data[5] = (byte) ((accel_z >> 8) & 0xFF);
-  data[6] = (byte) ((gyro_x >> 0) & 0xFF);
-  data[7] = (byte) ((gyro_x >> 8) & 0xFF);
-  data[8] = (byte) ((gyro_y >> 0) & 0xFF);
-  data[9] = (byte) ((gyro_y >> 8) & 0xFF);
-  data[10] = (byte) ((gyro_z >> 0) & 0xFF);
-  data[11] = (byte) ((gyro_z >> 8) & 0xFF);
+  short temp;
+  for (byte i = 0; i < 6; i++){
+      temp = read_from_imu((0x0C + 2*i), 2);
+      data[2*i] = (byte) ((temp >> 0) & 0xFF); // lower byte
+      data[2*i + 1] = (byte) ((temp >> 8) & 0xFF); // upper byte
 
-  
-
-//  data[0] = accel_x;
-//  data[2] = accel_y;
-//  data[4] = accel_z;
-//  data[6] = gyro_x;
-//  data[8] = gyro_y;
-//  data[10] = gyro_z;
+  }
+   
+  for (byte i = 0; i < 6; i++){
+    temp = ((((short) data[2 * i+1]) << 8) | data[2 * i]);
+    if (i < 5) {
+        Serial.print(temp);
+        Serial.print(",");
+    }
+    else {
+        Serial.println(temp);
+    }
+  } 
 
   if(connected){
     //Send a packet
@@ -74,20 +61,8 @@ void loop() {
     udp.endPacket();
   }
   //Wait for 1 second
-  delay(1000);
-
-  Serial.print(accel_x, HEX);
-  Serial.print(",");
-  Serial.print(accel_y, HEX);
-  Serial.print(",");
-  Serial.print(accel_z, HEX);
-  Serial.print(",");
-  Serial.print(gyro_x, HEX);
-  Serial.print(",");
-  Serial.print(gyro_y, HEX);
-  Serial.print(",");
-  Serial.println(gyro_z, HEX);
-
+  delay(6);
+  //delay(1000);
 }
 
 short read_from_imu(byte reg_addr, byte num_bytes) {

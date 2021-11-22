@@ -1,4 +1,7 @@
 import socket
+import time
+import timer
+from struct import unpack
 
  
 
@@ -30,32 +33,42 @@ UDPServerSocket.bind((localIP, localPort))
 
 print("UDP server up and listening")
 
- 
-
+count = 0
+start_time = time.process_time()
+total_time = 0
 # Listen for incoming datagrams
-
 while(True):
-
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
 
-    message = bytesAddressPair[0]
 
-    address = bytesAddressPair[1]
+    count = count + 1
+    total_time = total_time + (time.process_time() - start_time)
+    print(total_time)
+    if (total_time > 1.00):
+        total_time = 0
+        print(count)
+        count = 0
 
-    clientMsg = "Message from Client:{}".format(message)
-    clientIP  = "Client IP Address:{}".format(address)
-    print(type(message))
 
-    print(message.hex(sep = ' '))
+   
+    #message = bytesAddressPair[0]
+
+    #address = bytesAddressPair[1]
+
+    #clientMsg = "Message from Client:{}".format(message)
+    #clientIP  = "Client IP Address:{}".format(address)
+
+    #tuple_of_shorts = unpack('<' + 'h'*(len(message)//2),message)
+    #print(tuple_of_shorts)
     
-    print(clientMsg)
-    print(clientIP)
+    #print(clientMsg)
+    #print(clientIP)
 
    
 
     # Sending a reply to client
 
-    UDPServerSocket.sendto(bytesToSend, address)
+    #UDPServerSocket.sendto(bytesToSend, address)
 
 
 
