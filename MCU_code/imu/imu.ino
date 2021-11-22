@@ -42,26 +42,26 @@ void loop() {
 
   }
    
-  for (byte i = 0; i < 6; i++){
-    temp = ((((short) data[2 * i+1]) << 8) | data[2 * i]);
-    if (i < 5) {
-        Serial.print(temp);
-        Serial.print(",");
-    }
-    else {
-        Serial.println(temp);
-    }
-  } 
+//  for (byte i = 0; i < 6; i++){
+//    temp = ((((short) data[2 * i+1]) << 8) | data[2 * i]);
+//    if (i < 5) {
+//        Serial.print(temp);
+//        Serial.print(",");
+//    }
+//    else {
+//        Serial.println(temp);
+//    }
+//  } 
 
   if(connected){
     //Send a packet
-    Serial.print("Still connected! \n");
+    // Serial.print("Still connected! \n");
     udp.beginPacket(udpAddress,udpPort);
     udp.write(data, 12);
     udp.endPacket();
   }
   //Wait for 1 second
-  delay(6);
+  //delay(6);
   //delay(1000);
 }
 
