@@ -15,7 +15,7 @@ void setup() {
   write_to_imu(0x7E, (0x15));
 
   Wire.setClock(100000);
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 byte comm;
@@ -25,12 +25,21 @@ void loop() {
   }
 
   if (Serial.available()) {
-    data = Serial.read();
-    if (data == 'A') {
+    comm = Serial.read();
+    if (comm == 'A') {
+      Serial.println(short_data[0]);
+    } else if (comm == 'B') {
+      Serial.println(short_data[1]);
+    } else if (comm == 'C') {
+      Serial.println(short_data[2]);
+    } else if (comm == 'D') {
       Serial.println(short_data[3]);
+    } else if (comm == 'E') {
+      Serial.println(short_data[4]);
+    } else if (comm == 'F') {
+      Serial.println(short_data[5]);
     }
   }
-  
 }
 
 short read_from_imu(byte reg_addr) {
