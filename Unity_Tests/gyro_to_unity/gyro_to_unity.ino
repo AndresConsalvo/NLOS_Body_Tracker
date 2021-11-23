@@ -12,7 +12,8 @@ void print_from_imu(void);
 
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
-  write_to_imu(0x7E, (0x11 | 0x15));
+  write_to_imu(0x7E, (0x15));
+
   Wire.setClock(100000);
   Serial.begin(9600);
 }
@@ -28,17 +29,17 @@ void loop() {
     data[2 * i + 1] = (byte) ((temp >> 8) & 0xFF); // upper byte
   }
 
-  Serial.print((short) ((short) data[1] << 8) | data[0]);
+  Serial.print((short) (data[1] << 8) | data[0]);
   Serial.print(",");
-  Serial.print((short) ((short) data[3] << 8) | data[2]);
+  Serial.print((short) (data[3] << 8) | data[2]);
   Serial.print(",");
-  Serial.print((short) ((short) data[5] << 8) | data[4]);
+  Serial.print((short) (data[5] << 8) | data[4]);
   Serial.print(",");
-  Serial.print((short) ((short) data[7] << 8) | data[6]);
+  Serial.print((short) (data[7] << 8) | data[6]);
   Serial.print(",");
-  Serial.print((short) ((short) data[9] << 8) | data[8]);
+  Serial.print((short) (data[9] << 8) | data[8]);
   Serial.print(",");
-  Serial.print((short) ((short) data[11] << 8) | data[10]);
+  Serial.print((short) (data[11] << 8) | data[10]);
   Serial.println(",");
   
   
