@@ -1,8 +1,8 @@
 #include <Wire.h>
 #define BMX160_ADDRESS (0x68)
 
-// (Gx_L, Gx_H, Gy_L, Gy_H, Gz_L, Gz_H, Ax_L, Ax_H, Ay_L, Ay_H, Az_L, Az_H)
-byte data[12];
+// (Gx, Gy, Gz, Ax, Ay, Az)
+short short_data[6];
 
 short read_from_imu(byte reg_addr, byte num_bytes);
 
@@ -18,43 +18,33 @@ void setup() {
   Serial.begin(9600);
 }
 
+byte comm;
 void loop() {
-  // When Unity needs the gyroscope data, it sends a character
-  // Store gyroscope data as a packet, send it all at once
-  // 6 bytes
-  short temp;
   for (byte i = 0; i < 6; i++) {
-    temp = read_from_imu((0x0C + 2 * i), 2);
-    data[2 * i] = (byte) ((temp >> 0) & 0xFF); // lower byte
-    data[2 * i + 1] = (byte) ((temp >> 8) & 0xFF); // upper byte
+    short_data[i] = read_from_imu(0x0C + 2 * i);
   }
 
-  Serial.print((short) (data[1] << 8) | data[0]);
-  Serial.print(",");
-  Serial.print((short) (data[3] << 8) | data[2]);
-  Serial.print(",");
-  Serial.print((short) (data[5] << 8) | data[4]);
-  Serial.print(",");
-  Serial.print((short) (data[7] << 8) | data[6]);
-  Serial.print(",");
-  Serial.print((short) (data[9] << 8) | data[8]);
-  Serial.print(",");
-  Serial.print((short) (data[11] << 8) | data[10]);
-  Serial.println(",");
-  
+  if (Serial.available()) {
+    data = Serial.read();
+    if (data == 'A') {
+      Serial.println(short_data[3]);
+    }
+  }
   
 }
 
-short read_from_imu(byte reg_addr, byte num_bytes) {
-  short res_value = 0;
+short read_from_imu(byte reg_addr) {
   Wire.beginTransmission((byte) BMX160_ADDRESS);
   Wire.write((uint8_t) reg_addr);
   if (Wire.endTransmission(false) != 0) return 0;
-  Wire.requestFrom((byte) BMX160_ADDRESS, num_bytes);
+  Wire.requestFrom((byte) BMX160_ADDRESS, (byte) 2);
+  
+  short res_value = 0;
   byte x = 0;
   int i = 0;
   while (Wire.available()) {
     x = Wire.read();
+    //res_value = (short) Wire.read() | (Wire.read() << 8);
     res_value += x << (8 * i++);
   }
   return res_value;
@@ -68,15 +58,15 @@ void write_to_imu(byte reg_addr, byte command) {
 }
 
 void print_from_imu() {
-  short temp;
-  for (byte i = 0; i < 6; i++){
-      temp = ((((short) data[2 * i+1]) << 8) | data[2 * i]);
-      if (i < 5) {
-          Serial.print(temp);
-          Serial.print(",");
-      }
-      else {
-          Serial.println(temp);
-      }
-    }
+  Serial.print((short) short_data[0]);
+  Serial.print(",");
+  Serial.print((short) short_data[1]);
+  Serial.print(",");
+  Serial.print((short) short_data[2]);
+  Serial.print(",");
+  Serial.print((short) short_data[3]);
+  Serial.print(",");
+  Serial.print((short) short_data[4]);
+  Serial.print(",");
+  Serial.println((short) short_data[5]);
 }
