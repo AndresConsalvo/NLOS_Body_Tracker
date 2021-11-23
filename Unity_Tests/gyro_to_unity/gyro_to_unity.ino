@@ -1,18 +1,5 @@
 #include <Wire.h>
-#include <WiFi.h>
-#include <WiFiUdp.h>
-
 #define BMX160_ADDRESS (0x68)
-
-const char * networkName = "uam8nsw9dt9q";
-const char * networkPswd = "K-jRAw9YC5-U";
-
-const char * udpAddress = "192.168.1.31";
-const int udpPort = 20001;
-
-boolean connected = false;
-
-WiFiUDP udp;
 
 // (Gx_L, Gx_H, Gy_L, Gy_H, Gz_L, Gz_H, Ax_L, Ax_H, Ay_L, Ay_H, Az_L, Az_H)
 byte data[12];
@@ -25,13 +12,15 @@ void print_from_imu(void);
 
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
-  Wire.setClock(100000);
   write_to_imu(0x7E, (0x11 | 0x15));
+  Wire.setClock(100000);
   Serial.begin(9600);
-  connectToWiFi(networkName, networkPswd);
 }
 
 void loop() {
+  // When Unity needs the gyroscope data, it sends a character
+  // Store gyroscope data as a packet, send it all at once
+  // 6 bytes
   short temp;
   for (byte i = 0; i < 6; i++) {
     temp = read_from_imu((0x0C + 2 * i), 2);
@@ -39,15 +28,20 @@ void loop() {
     data[2 * i + 1] = (byte) ((temp >> 8) & 0xFF); // upper byte
   }
 
-  if (connected) {
-    //Send a packet
-    // Serial.print("Still connected! \n");
-    udp.beginPacket(udpAddress, udpPort);
-    udp.write(data, 12);
-    udp.endPacket();
-  }
-  //Wait for 1 second
-  //delay(1000);
+  Serial.print((short) ((short) data[1] << 8) | data[0]);
+  Serial.print(",");
+  Serial.print((short) ((short) data[3] << 8) | data[2]);
+  Serial.print(",");
+  Serial.print((short) ((short) data[5] << 8) | data[4]);
+  Serial.print(",");
+  Serial.print((short) ((short) data[7] << 8) | data[6]);
+  Serial.print(",");
+  Serial.print((short) ((short) data[9] << 8) | data[8]);
+  Serial.print(",");
+  Serial.print((short) ((short) data[11] << 8) | data[10]);
+  Serial.println(",");
+  
+  
 }
 
 short read_from_imu(byte reg_addr, byte num_bytes) {
@@ -65,7 +59,6 @@ short read_from_imu(byte reg_addr, byte num_bytes) {
   return res_value;
 }
 
-
 void write_to_imu(byte reg_addr, byte command) {
   Wire.beginTransmission((byte) BMX160_ADDRESS);
   Wire.write((uint8_t) reg_addr);
@@ -74,7 +67,7 @@ void write_to_imu(byte reg_addr, byte command) {
 }
 
 void print_from_imu() {
-  
+  short temp;
   for (byte i = 0; i < 6; i++){
       temp = ((((short) data[2 * i+1]) << 8) | data[2 * i]);
       if (i < 5) {
@@ -85,37 +78,4 @@ void print_from_imu() {
           Serial.println(temp);
       }
     }
-}
-
-void connectToWiFi(const char * ssid, const char * pwd) {
-  Serial.println("Connecting to WiFi network: " + String(ssid));
-
-  // delete old config
-  WiFi.disconnect(true);
-  //register event handler
-  WiFi.onEvent(WiFiEvent);
-
-  //Initiate connection
-  WiFi.begin(ssid, pwd);
-
-  Serial.println("Waiting for WIFI connection...");
-}
-
-//wifi event handler
-void WiFiEvent(WiFiEvent_t event) {
-  switch (event) {
-    case SYSTEM_EVENT_STA_GOT_IP:
-      //When connected set
-      Serial.print("WiFi connected! IP address: ");
-      Serial.println(WiFi.localIP());
-      //initializes the UDP state
-      //This initializes the transfer buffer
-      udp.begin(WiFi.localIP(), udpPort);
-      connected = true;
-      break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-      Serial.println("WiFi lost connection");
-      connected = false;
-      break;
-  }
 }
