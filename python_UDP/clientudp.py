@@ -6,7 +6,7 @@ msgFromClient       = "Hello UDP Server"
 
 bytesToSend         = str.encode(msgFromClient)
 
-serverAddressPort   = ("192.168.1.31", 9050)
+serverAddressPort   = ("172.20.10.10", 20001)
 
 bufferSize          = 1024
 
@@ -19,8 +19,8 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
  
 
 # Send to server using created UDP socket
-
-UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+while(1):
+    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
  
 

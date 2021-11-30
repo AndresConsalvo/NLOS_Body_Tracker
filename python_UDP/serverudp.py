@@ -4,9 +4,9 @@ from struct import unpack
 
  
 
-localIP     = "192.168.1.31"
+localIP     = "172.20.10.10"
 
-localPort   = 9050
+localPort   = 20001
 
 bufferSize  = 1024
 
@@ -30,7 +30,7 @@ UDPServerSocket.bind((localIP, localPort))
 
  
 
-print("UDP server up and listening")
+print("UDP server up and listening!")
 
 count = 0
 # Listen for incoming datagrams

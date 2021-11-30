@@ -12,7 +12,7 @@ void print_from_imu(void);
 
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
-  write_to_imu(0x7E, (0x11));
+  write_to_imu(0x7E, (0x11 | 0x15));
   write_to_imu(0x69, (0x04));
 
   Wire.setClock(100000);
