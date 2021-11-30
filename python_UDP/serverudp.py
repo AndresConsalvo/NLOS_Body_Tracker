@@ -6,7 +6,7 @@ from struct import unpack
 
 localIP     = "192.168.1.31"
 
-localPort   = 20001
+localPort   = 9050
 
 bufferSize  = 1024
 
@@ -38,30 +38,30 @@ while(True):
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
 
 
-    count = count + 1
-    if (count % 144 == 0):
-        print(count)
+    # count = count + 1
+    # if (count % 144 == 0):
+    #     print(count)
 
 
    
-    #message = bytesAddressPair[0]
+    message = bytesAddressPair[0]
 
-    #address = bytesAddressPair[1]
+    address = bytesAddressPair[1]
 
-    #clientMsg = "Message from Client:{}".format(message)
-    #clientIP  = "Client IP Address:{}".format(address)
+    clientMsg = "Message from Client:{}".format(message)
+    clientIP  = "Client IP Address:{}".format(address)
 
     #tuple_of_shorts = unpack('<' + 'h'*(len(message)//2),message)
     #print(tuple_of_shorts)
     
-    #print(clientMsg)
-    #print(clientIP)
+    print(clientMsg)
+    print(clientIP)
 
    
 
-    # Sending a reply to client
+    #Sending a reply to client
 
-    #UDPServerSocket.sendto(bytesToSend, address)
+    UDPServerSocket.sendto(bytesToSend, address)
 
 
 

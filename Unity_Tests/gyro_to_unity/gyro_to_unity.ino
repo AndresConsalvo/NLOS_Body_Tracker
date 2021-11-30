@@ -12,7 +12,7 @@ void print_from_imu(void);
 
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
-  write_to_imu(0x7E, (0x15));
+  write_to_imu(0x7E, (0x11));
   write_to_imu(0x69, (0x04));
 
   Wire.setClock(100000);
@@ -25,24 +25,24 @@ void loop() {
     short_data[i] = read_from_imu(0x0C + 2 * i);
   }
 
-//  if (Serial.available()) {
-//    comm = Serial.read();
-//    if (comm == 'A') {
-//      Serial.println(short_data[0]);
-//    } else if (comm == 'B') {
-//      Serial.println(short_data[1]);
-//    } else if (comm == 'C') {
-//      Serial.println(short_data[2]);
-//    } else if (comm == 'D') {
-//      Serial.println(short_data[3]);
-//    } else if (comm == 'E') {
-//      Serial.println(short_data[4]);
-//    } else if (comm == 'F') {
-//      Serial.println(short_data[5]);
-//    }
-//  }
+  if (Serial.available()) {
+    comm = Serial.read();
+    if (comm == 'A') {
+      Serial.println(short_data[0]);
+    } else if (comm == 'B') {
+      Serial.println(short_data[1]);
+    } else if (comm == 'C') {
+      Serial.println(short_data[2]);
+    } else if (comm == 'D') {
+      Serial.println(short_data[3]);
+    } else if (comm == 'E') {
+      Serial.println(short_data[4]);
+    } else if (comm == 'F') {
+      Serial.println(short_data[5]);
+    }
+  }
 
-print_from_imu();
+//print_from_imu();
 }
 
 short read_from_imu(byte reg_addr) {
