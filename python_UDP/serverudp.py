@@ -6,7 +6,7 @@ from struct import unpack
 
 localIP     = "172.20.10.10"
 
-localPort   = 20001
+localPort   = 20000
 
 bufferSize  = 1024
 
@@ -16,12 +16,9 @@ msgFromServer       = "Hello UDP Client"
 
 bytesToSend         = str.encode(msgFromServer)
 
- 
-
 # Create a datagram socket
 
 UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-
  
 
 # Bind to address and ip
@@ -37,13 +34,6 @@ count = 0
 while(True):
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
 
-
-    # count = count + 1
-    # if (count % 144 == 0):
-    #     print(count)
-
-
-   
     message = bytesAddressPair[0]
 
     address = bytesAddressPair[1]
@@ -57,12 +47,8 @@ while(True):
     print(clientMsg)
     print(clientIP)
 
-   
+    print(type(address))
 
     #Sending a reply to client
 
-    UDPServerSocket.sendto(bytesToSend, address)
-
-
-
- 
+    UDPServerSocket.sendto(message, ('172.20.10.10', 20000))

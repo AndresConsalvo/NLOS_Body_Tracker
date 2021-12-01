@@ -26,7 +26,8 @@ void print_from_imu(void);
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
   Wire.setClock(100000);
-  write_to_imu(0x7E, (0x11 | 0x15));
+  write_to_imu(0x7E, (0x11));
+  write_to_imu(0x7E, (0x15));
   Serial.begin(9600);
   connectToWiFi(networkName, networkPswd);
 }
