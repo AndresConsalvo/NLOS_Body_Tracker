@@ -16,11 +16,14 @@
   </div>
   
   <div class="main">
+    <div class="current">
+      <h1>Device Settings</h1>
+    </div>
     <table>
       <tr>
         <th>MAC Address</th>
         <th>Connect</th>
-        <th>MAC Address</th>
+        <th>Role</th>
       </tr>
       <tr>
         <td>2345678_name1</td>
@@ -29,10 +32,21 @@
             <span class="slider"></span>
           </label>
         </td>
-        <td>dropdown</td>
+        <td>
+          <div>
+            <button onclick="dropdwn()" class="dropbtn">Tracker Position</button>
+            <div id="myDropdown" class="dropdown-content">
+            <a href="#">Right Ankle</a>
+            <a href="#">Left Ankle</a>
+            <a href="#">Right Knee</a>
+            <a href="#">Left Knee</a>
+            <a href="#">Chest</a>
+            <a href="#">Back</a>
+          </div>
+        </td>
       </tr>
-
     </table>
   </div>
+  <script src="menu.js"></script>
 </body>
 </html>
