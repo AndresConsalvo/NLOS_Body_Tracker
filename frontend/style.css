@@ -122,7 +122,7 @@ input:checked + .slider:before {
 }
 
 .dropbtn {
-  background-color: #3498DB;
+  background-color: #2196F3;
   color: white;
   padding: 16px;
   font-size: 16px;
