@@ -44,11 +44,14 @@ void loop() {
   
   if (connected) {
     //Send a packet
-    Serial.print("Still connected! \n");
+    //Serial.print("Still connected! \n");
     udp.beginPacket(udpAddress, udpPort);
     udp.write(data, 12);
     udp.endPacket();
+  } else {
+    Serial.print("Not connected\n");
   }
+  delay(100);
 
 //print_from_imu();
 }
@@ -77,17 +80,17 @@ void write_to_imu(byte reg_addr, byte command) {
 }
 
 void print_from_imu() {
-  Serial.print((short) short_data[0]);
+  Serial.print((short) short_data[0], HEX);
   Serial.print(",");
-  Serial.print((short) short_data[1]);
+  Serial.print((short) short_data[1], HEX);
   Serial.print(",");
-  Serial.print((short) short_data[2]);
+  Serial.print((short) short_data[2], HEX);
   Serial.print(",");
-  Serial.print((short) short_data[3]);
+  Serial.print((short) short_data[3], HEX);
   Serial.print(",");
-  Serial.print((short) short_data[4]);
+  Serial.print((short) short_data[4], HEX);
   Serial.print(",");
-  Serial.println((short) short_data[5]);
+  Serial.println((short) short_data[5], HEX);
 }
 
 void connectToWiFi(const char * ssid, const char * pwd) {

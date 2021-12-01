@@ -42,7 +42,6 @@ void loop() {
     }
   }
 
-//print_from_imu();
 }
 
 short read_from_imu(byte reg_addr) {

@@ -1,6 +1,8 @@
 # Import libraries
+import os
 import socket
 import time
+import timeit
 
 # Set send IP adress and port
 UDP_IP = "172.20.10.10"
@@ -13,12 +15,22 @@ print("Sending to IP:" + UDP_IP + ":" + str(UDP_PORT_Unity))
 # Set socket to send udp messages and bind port
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 sock.bind(('',UDP_PORT_Rec))
+clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
 ## Keep sending message from file location
 while True:
-    print("Beginning receive")
+    #print("Beginning receive")
     data, addr = sock.recvfrom(1024) #buffer size, hopefully no problem if too big
-    print("Received")
+    clearConsole()
+    
+    tic = timeit.default_timer()
+    print(data)
+    tock = timeit.default_timer()
+    print(tock - tic)
+    #print("Received")
 
+    tic = timeit.default_timer()
     sock.sendto(data, (UDP_IP, UDP_PORT_Unity))
-    print("Send")
+    tock = timeit.default_timer()
+    print(tock - tic)
+    #print("Send")
