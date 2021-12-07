@@ -4,10 +4,10 @@
 
 #define BMX160_ADDRESS (0x68)
 
-const char * networkName = "Jaxson_iPhone";
-const char * networkPswd = "lizard02";
+const char * networkName = "uam8nsw9dt9q";
+const char * networkPswd = "K-jRAw9YC5-U";
 
-const char * udpAddress = "172.20.10.10";
+const char * udpAddress = "192.168.1.39";
 const int udpPort = 20001;
 
 boolean connected = false;
@@ -26,12 +26,17 @@ void print_from_imu(void);
 
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
-  write_to_imu(0x7E, (0x11 | 0x15));
+  write_to_imu(0x7E, (0x15));
   write_to_imu(0x69, (0x04));
 
   Wire.setClock(100000);
   Serial.begin(115200);
   connectToWiFi(networkName, networkPswd);
+
+  // Green
+  pinMode(D0, OUTPUT);
+  // Red
+  pinMode(D2, OUTPUT);
 }
 
 byte comm;
@@ -43,12 +48,16 @@ void loop() {
   }
   
   if (connected) {
+    digitalWrite(D0, HIGH);
+    digitalWrite(D2, LOW);
     //Send a packet
-    //Serial.print("Still connected! \n");
+    Serial.print("Still connected! \n");
     udp.beginPacket(udpAddress, udpPort);
     udp.write(data, 12);
     udp.endPacket();
   } else {
+    digitalWrite(D0, LOW);
+    digitalWrite(D2, HIGH);
     Serial.print("Not connected\n");
   }
   delay(100);

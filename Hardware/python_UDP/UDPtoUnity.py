@@ -5,7 +5,7 @@ import time
 import timeit
 
 # Set send IP adress and port
-UDP_IP = "172.20.10.10"
+UDP_IP = "192.168.1.39"
 UDP_PORT_Rec = 20001
 UDP_PORT_Unity = 20000
 
@@ -19,18 +19,10 @@ clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
 ## Keep sending message from file location
 while True:
-    #print("Beginning receive")
-    data, addr = sock.recvfrom(1024) #buffer size, hopefully no problem if too big
+    print("Beginning receive")
+    try:
+        data, addr = sock.recvfrom(1024) #buffer size, hopefully no problem if too big
+        sock.sendto(data, (UDP_IP, UDP_PORT_Unity))
+    except ConnectionResetError:
+        print("Connection closed")
     clearConsole()
-    
-    tic = timeit.default_timer()
-    print(data)
-    tock = timeit.default_timer()
-    print(tock - tic)
-    #print("Received")
-
-    tic = timeit.default_timer()
-    sock.sendto(data, (UDP_IP, UDP_PORT_Unity))
-    tock = timeit.default_timer()
-    print(tock - tic)
-    #print("Send")
