@@ -4,10 +4,10 @@
 
 #define BMX160_ADDRESS (0x68)
 
-const char * networkName = "uam8nsw9dt9q";
-const char * networkPswd = "K-jRAw9YC5-U";
+const char * networkName = "Jaxson_iPhone";
+const char * networkPswd = "lizard02";
 
-const char * udpAddress = "192.168.1.39";
+const char * udpAddress = "172.20.10.10";
 const int udpPort = 20001;
 
 boolean connected = false;

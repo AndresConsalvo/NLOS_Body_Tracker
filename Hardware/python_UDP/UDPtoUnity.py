@@ -5,7 +5,7 @@ import time
 import timeit
 
 # Set send IP adress and port
-UDP_IP = "192.168.1.39"
+UDP_IP = "172.20.10.10"
 UDP_PORT_Rec = 20001
 UDP_PORT_Unity = 20000
 

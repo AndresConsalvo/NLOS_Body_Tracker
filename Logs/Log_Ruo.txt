@@ -1,0 +1,4 @@
+Ruo Log:
+
+1/7/2022
+- Searched for alternative IMUs as the BMX160 is out of stock and has long lead times.
