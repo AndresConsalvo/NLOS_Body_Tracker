@@ -2,3 +2,11 @@ Ruo Log:
 
 1/7/2022
 - Searched for alternative IMUs as the BMX160 is out of stock and has long lead times.
+
+1/11/2022
+- Alternative components found and ordered.
+    - Voltage regulator changed
+    - BMS changed
+    - Port changed from micro-USB to USB-C
+    - IMU swapped from BMX160 to MPU
+- Modified original schematic to reflect swapped out components.
