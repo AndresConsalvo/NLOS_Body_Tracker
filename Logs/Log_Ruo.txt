@@ -17,6 +17,7 @@ Ruo Log:
 - Started researching filter implementations to correct gyroscope noise
 
 1/13/2022
+- Updated schematic; replaced battery placeholder and renamed port labels
 - Researched gyroscope data filtering 
     - Looked at "Optimization approach to adapt Kalman filters for the real-time application of accelerometer and gyroscope signals’ filtering" by Cezary Kownacki
 - Started work on PCB design
