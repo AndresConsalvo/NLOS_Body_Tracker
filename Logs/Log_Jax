@@ -1,0 +1,26 @@
+1/13/22 - 3hrs
+  - Worked with Ruo on part selection and finalizing schematic for PCB creation.
+  - Changed schematic switches to PCM12SMTR and FSM1LP
+1/12/22 - 2.5hrs
+  - Gave Ruo part data to build part designs easier in Altium
+  - Verified Ruo's implementations of devices with documentation available.
+  - Researched compatibility for parts and current/voltage protection
+  - Revised Gantt chart for PCB and casing creation
+1/11/22 - 4hrs
+  - Worked with Ruo in lab to find alternative components
+    - Voltage regulator changed on schematic
+    - BMS changed on schematic
+    - Port changed from micro-USB to USB-C on schematic
+    - IMU swapped from BMX160 to MPU on schematic
+  - Researched battery charging DOs and DONTs
+    - cannot use temperature sensor on Bat Manager since battery in a different case
+1/10/22 - 1hr
+  - Researching parts to order on mouser
+    - Batteries, USB to UART, Battery Manager, USB connector Type C
+  - Researched JST connectors to get the appropriate size and quality
+1/9/22 - 2hrs
+  - Revised Gantt chart to include alpha and beta build sprints, adjusted other timelines accordingly
+  - Held group meeting to hand out tasks and cover the new gantt chart
+  - Ordered IMU and WiFi/microcontroller modules to prevent stock issues
+1/7/22 - 2hrs
+  - Worked with Ruo to find a replacement IMU since the BMX160 went out of stock, replaced with 6-axis MPU-6881.
