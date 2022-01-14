@@ -1,6 +1,7 @@
 1/13/22 - 3hrs
   - Worked with Ruo on part selection and finalizing schematic for PCB creation.
   - Changed schematic switches to PCM12SMTR and FSM1LP
+  - Adding diode to schematic to prevent power consumption below 3.0V of battery
 1/12/22 - 2.5hrs
   - Gave Ruo part data to build part designs easier in Altium
   - Verified Ruo's implementations of devices with documentation available.
@@ -14,6 +15,8 @@
     - IMU swapped from BMX160 to MPU on schematic
   - Researched battery charging DOs and DONTs
     - cannot use temperature sensor on Bat Manager since battery in a different case
+    - decided on LDO voltage regulator over Switching regulator due to power consumption (Iq) and simplicity
+    - need a diode to prevent battery drainage past 3.0V as it could irreparably hurt the battery.
 1/10/22 - 1hr
   - Researching parts to order on mouser
     - Batteries, USB to UART, Battery Manager, USB connector Type C
