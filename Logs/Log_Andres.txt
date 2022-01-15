@@ -1,0 +1,7 @@
+Andres Log:
+
+1/14/2022
+- Researched ways to connect Python server script with Electron (JS) frontend.
+
+1/15/2022
+- Created a JavaScript server to listen to the Python server using socket.io
