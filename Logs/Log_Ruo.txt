@@ -21,3 +21,7 @@ Ruo Log:
 - Researched gyroscope data filtering 
     - Looked at "Optimization approach to adapt Kalman filters for the real-time application of accelerometer and gyroscope signals’ filtering" by Cezary Kownacki
 - Started work on PCB design
+
+1/16/2022
+- Replaced pushbutton switch Jaxson added as the footprint for the switch had an error.
+- Updated PCB design with new components Jaxson added, worked on routing and circuit board shape.
