@@ -5,3 +5,10 @@ Andres Log:
 
 1/15/2022
 - Created a JavaScript server to listen to the Python server using socket.io
+
+1/17/2022
+- Researched Node UDP server to connect with OpenVR.
+- Worked on the UDP server to communicate between tracker/GUI.
+
+1/18/2022
+- Continued previous work, eliminated need for UDP server implemented in Python.
