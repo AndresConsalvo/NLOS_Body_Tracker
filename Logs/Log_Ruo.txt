@@ -28,4 +28,8 @@ Ruo Log:
 
 1/17/2022
 - Replaced button again for a cheaper version
-- Routed new components in PCB schematic that Jaxson added
+- Began routing new components in PCB schematic that Jaxson added
+
+1/18/2022
+- Added routes between all components on the PCB.
+- Began verifying and correcting PCB design
