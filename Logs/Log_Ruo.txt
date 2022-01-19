@@ -9,7 +9,7 @@ Ruo Log:
     - BMS changed
     - Port changed from micro-USB to USB-C
     - IMU swapped from BMX160 to MPU
-- Modified original schematic to reflect swapped out components.
+- Modified original schematic to reflect swapped out components.    
 
 1/12/2022
 - Updated schematic components to ECAD (used to be custom-made blocks that were used as placeholders)
