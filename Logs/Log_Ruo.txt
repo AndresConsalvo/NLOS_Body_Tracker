@@ -33,7 +33,3 @@ Ruo Log:
 1/18/2022
 - Added routes between all components on the PCB.
 - Began verifying and correcting PCB design
-
-1/19/2022
-- Added changes to the schematic made by Jaxson to the PCB
-- Analyzed OpenVR API
