@@ -1,4 +1,10 @@
 3 different devices means that you will have 3 different .cpp class files inheriting from ITrackedDeviceServerDriver that will implement the class functions differently
     - The class being inherited from comes from openvr_driver.h
 
-DeviceProvider.cpp initializes instances of the classes
+DeviceProvider.cpp initializes instances of the classes; essentially loops through all devices initialized every frame.
+
+DeviceFactory.cpp returns an instance of the class defined in DeviceProvider.cpp, which is called every frame. Allows OpenVR to be updated with input
+from the controller.
+
+Essentailly, a class for the device just talks to the device, DeviceProvider manages these classes, and then the DeviceFactory returns an instance of the DeviceProvider
+to OpenVR.
