@@ -1,6 +1,9 @@
 3 different devices means that you will have 3 different .cpp class files inheriting from ITrackedDeviceServerDriver that will implement the class functions differently
     - The class being inherited from comes from openvr_driver.h
-
+    - https://github.com/ValveSoftware/openvr/wiki/vr%3A%3AITrackedDeviceServerDriver-Overview
+    - SlimeVR: Reference lines 93-94 of https://github.com/SlimeVR/SlimeVR-OpenVR-Driver/blob/21a5857a9f607bf815d5bb83000b530618b2f146/src/TrackerDevice.cpp
+        - Also reference line 219 of https://github.com/ValveSoftware/openvr/blob/4c85abcb7f7f1f02adaf3812018c99fc593bc341/headers/openvr_driver.h
+    
 DeviceProvider.cpp initializes instances of the classes; essentially loops through all devices initialized every frame.
 
 DeviceFactory.cpp returns an instance of the class defined in DeviceProvider.cpp, which is called every frame. Allows OpenVR to be updated with input
