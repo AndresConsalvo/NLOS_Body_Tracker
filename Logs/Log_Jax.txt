@@ -1,3 +1,26 @@
+1/20/21
+  - Checked in with Carsten over Teams to talk about design again. No obvious issues. Recommended to add test pads, an option to bypass the MOSFET, and silkscreens
+  - Considered adding another transistor to prevent possible current flow across the zener diode, Z1, when charging.
+  - Finalized circuit analytics with data from datasheets to ensure proper functions
+  - Spoke with all team members on plans for the 21st (happy bday to me) to finish the alpha build.
+  - Ran by the schematic to Fariha to get one last opinion. Will be replacing resistors with smaller values and will NOT add second MOSFET
+  - Checked over electrical characteristics for voltage regulator to ensure all parts were within the normal outputs of the battery/USB-C.
+1/19/21
+  - Replaced generic parts with sourced parts on Digikey (resistors, capacitors, MOSFETs)
+1/18/22
+  - Spoke with Carsten about the battery management section of the PCB and got a reference schematic that could help.
+  - Began reviewing other implementations of battery protection
+1/17/22
+  - Realized battery protection circuit uses a BJT instead of a MOSFET after looking for parts on Digikey over the weekend
+  - Added power source switching functionality with Schottky diodes after research
+  - Began replacing generic parts.
+1/14/22
+  - Worked with Ruo in deciding to use a simple circuit or IC for battery protection
+  - Reviewed the battery manager datasheet to ensure reverse current was not possible
+  - Discussed with Ruo on options for switching between power sources
+  - Added to PCB schematic with deep discharge protection circuit
+  - Reviewed MOSFETs to switch between power sources
+  - Found out that the ESP32 has an ADC that we could use to track battery charge as an option for the GUI
 1/13/22 - 3hrs
   - Worked with Ruo on part selection and finalizing schematic for PCB creation.
   - Changed schematic switches to PCM12SMTR and FSM1LP
