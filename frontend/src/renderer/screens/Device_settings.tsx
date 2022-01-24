@@ -1,0 +1,46 @@
+import { useSensors } from '../hooks/useSensors';
+
+interface Props extends ReturnType<typeof useSensors> {}
+export default (props: Props) => {
+  const { devices, changeRole } = props;
+  const handleClick = () => {
+    changeRole(Object.values(devices)[0], 'Nuevo rol');
+  };
+  return (
+    <div className="main">
+      <div className="current">
+        <button onClick={handleClick}>EOO</button>
+        <h1>Device Settings</h1>
+      </div>
+      <table>
+        <tr>
+          <th>MAC Address</th>
+          <th>Connect</th>
+          <th>Role</th>
+        </tr>
+        {Object.values(devices).map((device) => (
+          <tr>
+            <td>{device.MAC_ADRESS}</td>
+            <td>
+              <label className="switch">
+                <input type="checkbox" />
+                <span className="slider"></span>
+              </label>
+            </td>
+            <td>
+              <select name="Roles" id="Roles">
+                <option value="blank">Choose a position:</option>
+                <option value="Right Ankle">Right Ankle</option>
+                <option value="Left Ankle">Left Ankle</option>
+                <option value="Right Knee">Right Knee</option>
+                <option value="Left Knee">Left Knee</option>
+                <option value="Chest">Chest</option>
+                <option value="Back">Back</option>
+              </select>
+            </td>
+          </tr>
+        ))}
+      </table>
+    </div>
+  );
+};
