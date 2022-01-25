@@ -4,12 +4,17 @@ interface Props extends ReturnType<typeof useSensors> {}
 export default (props: Props) => {
   const { devices, changeRole } = props;
   const handleClick = () => {
-    changeRole(Object.values(devices)[0], 'Nuevo rol');
+    try {
+      changeRole(Object.values(devices)[0], 'New role');
+    } catch (error) {
+      console.error(error);
+      console.log('Tried to add a role to non existing tracker');
+    }
   };
   return (
     <div className="main">
       <div className="current">
-        <button onClick={handleClick}>EOO</button>
+        <button onClick={handleClick}>ADD new role</button>
         <h1>Device Settings</h1>
       </div>
       <table>
