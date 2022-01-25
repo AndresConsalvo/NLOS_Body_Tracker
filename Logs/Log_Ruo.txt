@@ -37,3 +37,9 @@ Ruo Log:
 
 1/20/2022
 - Began researching and taking notes on the OpenVR API and how to communicate with it
+
+1/24/2022
+- Added soldering jumpers and voltage test pads to the PCB
+
+1/25/2022
+- Added a resistor to an LED someone forgot
