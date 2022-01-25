@@ -43,3 +43,4 @@ Ruo Log:
 
 1/25/2022
 - Added a resistor to an LED someone forgot
+- Replaced zener circuit protection diodes with a different packaging as the old one was out of stock
