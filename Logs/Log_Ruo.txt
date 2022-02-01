@@ -48,3 +48,6 @@ Ruo Log:
 1/26/2022
 - Reorganized PCB layout, made it smaller and reduced the number of vias.
 - Double checked PCB components and connections.
+
+2/1/2022
+- Added ground pour to second layer of PCB to help with heat management and improving signal integrity.
