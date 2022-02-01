@@ -1,15 +1,17 @@
-1/09/2021
+1/09/2022
 Research with getting electron working where scripts are received.
 
-1/12/2021
+1/12/2022
 Work with scripting in Electron and running Pythin scripts on JS.
 
-1/17/2021
+1/17/2022
 Test preliminary script with socket.io in JS and researching correlation with UDP. Research a way to use C++ or C# to receive data instead in OpenVR documentation.
 
-1/19/2021
+1/19/2022
 Use different GitHub codes and modify to test server script receiving. 
 
-1/20/2021
+1/20/2022
 Work on alpha build and meet with team to solidify software sides of things.
 
+1/26/2022
+Testing server and client and GUI launch. Fixed install errors on local machine.
