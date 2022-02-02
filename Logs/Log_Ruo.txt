@@ -51,3 +51,6 @@ Ruo Log:
 
 2/1/2022
 - Added ground pour to second layer of PCB to help with heat management and improving signal integrity.
+
+2/2/2022
+- Added voltage test pads on board, changed designator label sizes
