@@ -14,4 +14,7 @@ Use different GitHub codes and modify to test server script receiving.
 Work on alpha build and meet with team to solidify software sides of things.
 
 1/26/2022
-Testing server and client and GUI launch. Fixed install errors on local machine.
+Testing server and client and GUI launch. Fixed install errors on local machine. Deleted previous Node.js installation, did npm install, and then nmp start.
+
+2/01/2022
+Working on bettering GUI options and display.
