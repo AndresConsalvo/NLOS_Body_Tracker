@@ -20,7 +20,7 @@
   - Fixed install errors on local machine
       - Deleted previous Node.js installation
       - npm install
-      - nmp start.
+      - nmp start
 
 2/01/2022
   - Working on bettering GUI options and display
