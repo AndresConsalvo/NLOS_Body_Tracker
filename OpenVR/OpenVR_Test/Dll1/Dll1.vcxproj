@@ -19,10 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ControllerDriver.cpp" />
+    <ClCompile Include="src\DeviceFactory.cpp" />
     <ClCompile Include="src\DeviceProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DeviceProvider.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\controller_profile.json" />
+    <None Include="resources\driver.vrdrivermanifest" />
+    <None Include="resources\game_controller.svg" />
+    <None Include="resources\legacy_bindings_example.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

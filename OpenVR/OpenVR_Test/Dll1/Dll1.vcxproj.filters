@@ -18,10 +18,22 @@
     <ClCompile Include="src\DeviceProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ControllerDriver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DeviceFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DeviceProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\controller_profile.json" />
+    <None Include="resources\driver.vrdrivermanifest" />
+    <None Include="resources\game_controller.svg" />
+    <None Include="resources\legacy_bindings_example.json" />
   </ItemGroup>
 </Project>

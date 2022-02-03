@@ -6,13 +6,13 @@
 
 
 
-class DeviceProvider : public	vr::IServerTrackedDeviceProvider {
+class DeviceProvider : public vr::IServerTrackedDeviceProvider {
 public:
-	vr::EVRInitError init(vr::IVRDriverContext* pDriverContext);
+	vr::EVRInitError Init(vr::IVRDriverContext* pDriverContext);
 
 	void Cleanup();
 
-	const char* const* GetInterfaceversions();
+	const char* const* GetInterfaceVersions();
 
 	// Updates drivers
 	void RunFrame();
@@ -22,4 +22,7 @@ public:
 	void EnterStandby();
 
 	void LeaveStandby();
+
+private:
+	ControllerDriver* controllerDriver;
 };
