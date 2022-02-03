@@ -1,11 +1,25 @@
 #include <TrackerDriver.h>
 
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
-	driverID = unObjectId;
+	objID = unObjectId;
+
+	// Props. Like JavaScript?
+	ulPropertyContainer = VRProperties()->TrackedDeviceToPropertyContainer(unObjectId);
+
+	// Tracked device is opting out of left/right hand selection -- According to API documentation
+	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut);
+
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_TrackingSystemName_String, "Motion_Tracker");
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_ModelNumber_String, model.c_str());
+
+	// This describes the path to get to the inputprofile which is ABSOLUTELY NECESSARY.
+	// Testing from earlier showed that even if it shouldn't be running the driver is still detected. Maybe when it runs it, reinstall the profile each time?
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_InputProfilePath_String, "{NLOS_Tracking}/input/imuFBT_profile.json");
+
 }
 
 void TrackerDriver::Deactivate() {
-	driverID = vr::k_unTrackedDeviceIndexInvalid;
+	objID = vr::k_unTrackedDeviceIndexInvalid;
 }
 
 void TrackerDriver::EnterStandby() {
@@ -13,8 +27,8 @@ void TrackerDriver::EnterStandby() {
 }
 
 void* TrackerDriver::GetComponent(const char* pchComponentNameandVersion) {
-	if (strcmp(vr::IVRDriverInput_Version, pchComponentNameandVersion) == 0) {
-		return this;
+	if (strcmp(IVRDisplayComponent_Version, pchComponentNameandVersion) == 0) {
+		return (IVRDisplayComponent*) this;
 	}
 
 	return NULL;
@@ -27,11 +41,47 @@ void TrackerDriver::DebugRequest(const char* pchRequest, char* pchResponseBuffer
 }
 
 DriverPose_t TrackerDriver::GetPose() {
+	DriverPose_t pose = { 0 };
+	bool SocketActivated = 1;
+
 	// Let's try tracking the left foot. Gotta start somewhere, right?
+	// If I can track one thing I can track others.
+	// First check if device is connected...
+
+	// If everything works here my foot should bug out.
+	// This is a good thing, as that means that it's connected with OpenVR.
+
+	if (SocketActivated) {
+		pose.poseIsValid = true;
+		pose.result = TrackingResult_Running_OK;
+		pose.deviceIsConnected = true;
+	}
+	else {
+		pose.poseIsValid = false;
+		pose.result = TrackingResult_Uninitialized;
+		pose.deviceIsConnected = false;
+	}
+
+	HmdQuaternion_t quat;
+	quat.x, quat.y, quat.z, quat.w = 0;
+
+	pose.qWorldFromDriverRotation = quat;
+	pose.qDriverFromHeadRotation = quat;
+
+	pose.vecPosition[0] = 0;
+	pose.vecPosition[1] = 0;
+	pose.vecPosition[2] = 0;
+
+	pose.qRotation.x = 0;
+	pose.qRotation.y = 0;
+	pose.qRotation.z = 0;
+	pose.qRotation.w = 0;
+
+	return pose;
 }
 
 void TrackerDriver::RunFrame() {
-	if (driverID != k_unTrackedDeviceIndexInvalid) {
-		VRServerDriverHost()->TrackedDevicePoseUpdated(driverID, GetPose(), sizeof(DriverPose_t));
+	if (objID != k_unTrackedDeviceIndexInvalid) {
+		VRServerDriverHost()->TrackedDevicePoseUpdated(objID, GetPose(), sizeof(DriverPose_t));
 	}
 }
