@@ -1,11 +1,52 @@
-1/20/21
+2/3/22
+  - Working on Beta Build docs.
+2/2/22
+  - Meeting with Joe, assigned him the task and gave insight on schematic to understand the requirements.
+  - Emails with Blanchard and communications through Evan concerning unable to deliver on upcoming milestones
+    
+    Current asks:
+    - Keep a log of all communications with Evan in check-ins and CC stakeholder on important notes
+    1) complete everything that can be done without the PCB(s) by Friday.
+    2) Keep Evan informed of *all* updates to the situation. As soon as you receive it, let him know.
+    3) Plan to immediately assemble hardware and complete any remaining tests for the beta as soon as the PCB(s) arrive.
+    4) construct a brief but complete report on any remaining tests that were completed, and email to Evan / CC myself and Carsten.
+  
+  - Finalized and ordered PCBs, expected arrival 2/12/22
+1/31/22
+  - Started when2meet for Beta Build work. Scheduled Wednesday for meeting with Joe to go over MCU firmware requirements which he is assigned to.
+1/28/22
+  - Got booster shot, felt bad all day
+  - Final parts arrived
+  - Did peer evaluation
+1/27/22
+  - Introduced Joe to the group and gave a rundown of the project.
+1/26/22
+  - Spoke with Evan regarding the status of the project and gave demos of the software side.
+  - Looked into PCB manufacturers to hopefully get ordered, but also need to ensure all parts arrive in case design needs to be changed.
+  - Reached out to Joseph Gross to extend invite to group Discord
+1/25/22
+  - Finished creating last parts list, replaced MOSFET that went OOS and immediately ordered parts.
+  - Updated schematic with all new parts with Ruo
+  - Messaged with Blanchard on the additional team member.
+1/24/22
+  - Added battery voltage metering circuit using the ESP32's ADC. Also added an LED indicator for the device On/Disconnected/Off states.
+  - Worked with Andres to test the build on a fresh install of dependencies
+  - Replaced transistors with higher rated SML-E12P8WT86, found that may need a different LDO voltage regulator due to minimum requirements listed on ESP32.
+  - Merged software branches to main and submitted Alpha Build.
+1/22/22
+  - Worked on modifying casings to meet size requirements of PCB.
+1/21/22
+  - Worked with team to finish Alpha test plan.
+  - Observed testing of the GUI application.
+  - Made descision to submit all Alpha documents this night and then resubmit Alpha Build on Monday due to production build bugs.
+1/20/22
   - Checked in with Carsten over Teams to talk about design again. No obvious issues. Recommended to add test pads, an option to bypass the MOSFET, and silkscreens
   - Considered adding another transistor to prevent possible current flow across the zener diode, Z1, when charging.
   - Finalized circuit analytics with data from datasheets to ensure proper functions
   - Spoke with all team members on plans for the 21st (happy bday to me) to finish the alpha build.
   - Ran by the schematic to Fariha to get one last opinion. Will be replacing resistors with smaller values and will NOT add second MOSFET
   - Checked over electrical characteristics for voltage regulator to ensure all parts were within the normal outputs of the battery/USB-C.
-1/19/21
+1/19/22
   - Replaced generic parts with sourced parts on Digikey (resistors, capacitors, MOSFETs)
 1/18/22
   - Spoke with Carsten about the battery management section of the PCB and got a reference schematic that could help.
