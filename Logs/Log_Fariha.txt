@@ -20,8 +20,12 @@
   - Fixed install errors on local machine
       - Deleted previous Node.js installation
       - npm install
-      - nmp start
+      - nmp audit fix
+      - yarn start
 
 2/01/2022
   - Working on bettering GUI options and display
+  
+ 2/03/2022
+ 2/04/2022
   
