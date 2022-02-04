@@ -25,6 +25,5 @@ public:
 	void LeaveStandby();
 
 private:
-	ControllerDriver* controllerDriver;
 	TrackerDriver* NLOS_Tracker;
 };

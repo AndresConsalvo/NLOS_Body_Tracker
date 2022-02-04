@@ -8,13 +8,11 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 
 	// Tracked device is opting out of left/right hand selection -- According to API documentation
 	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut);
-
-	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_TrackingSystemName_String, "Motion_Tracker");
-	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_ModelNumber_String, model.c_str());
+	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_GenericTracker);
 
 	// This describes the path to get to the inputprofile which is ABSOLUTELY NECESSARY.
 	// Testing from earlier showed that even if it shouldn't be running the driver is still detected. Maybe when it runs it, reinstall the profile each time?
-	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_InputProfilePath_String, "{NLOS_Tracking}/input/tracker_profile.json");
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_InputProfilePath_String, "{NLOS}/input/tracker_profile.json");
 
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDisplayComponent_Bool, false);
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasCameraComponent_Bool, false);

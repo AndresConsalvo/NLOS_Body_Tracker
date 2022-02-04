@@ -10,7 +10,7 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	VRDriverLog()->Log("Initializing test tracker...");
 
 	NLOS_Tracker = new TrackerDriver();
-	VRServerDriverHost()->TrackedDeviceAdded("example_controller", TrackedDeviceClass_GenericTracker, NLOS_Tracker);
+	VRServerDriverHost()->TrackedDeviceAdded("NLOS_Tracker", TrackedDeviceClass_GenericTracker, NLOS_Tracker);
 
 	return VRInitError_None;
 }
