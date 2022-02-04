@@ -1,31 +1,31 @@
 #include <DeviceProvider.h>
 
-vr::EVRInitError DeviceProvider::Init(vr::IVRDriverContext* pDriverContext) {
-	vr::EVRInitError initError = vr::InitServerDriverContext(pDriverContext);
+EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
+	EVRInitError initError = InitServerDriverContext(pDriverContext);
 
-	if (initError != vr::EVRInitError::VRInitError_None) {
+	if (initError != EVRInitError::VRInitError_None) {
 		return initError;
 	}
 
-	vr::VRDriverLog()->Log("Initializing example controller");
+	VRDriverLog()->Log("Initializing test tracker...");
 
-	controllerDriver = new ControllerDriver();
-	vr::VRServerDriverHost()->TrackedDeviceAdded("example_controller", vr::TrackedDeviceClass_Controller, controllerDriver);
+	NLOS_Tracker = new TrackerDriver();
+	VRServerDriverHost()->TrackedDeviceAdded("example_controller", TrackedDeviceClass_GenericTracker, NLOS_Tracker);
 
-	return vr::VRInitError_None;
+	return VRInitError_None;
 }
 
 void DeviceProvider::Cleanup() {
-	delete controllerDriver;
-	controllerDriver = NULL;
+	delete NLOS_Tracker;
+	NLOS_Tracker = NULL;
 }
 
 const char* const* DeviceProvider::GetInterfaceVersions() {
-	return vr::k_InterfaceVersions;
+	return k_InterfaceVersions;
 }
 
 void DeviceProvider::RunFrame() {
-	controllerDriver->RunFrame();
+	NLOS_Tracker->RunFrame();
 }
 
 bool DeviceProvider::ShouldBlockStandbyMode() {

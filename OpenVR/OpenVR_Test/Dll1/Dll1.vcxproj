@@ -29,10 +29,11 @@
     <ClInclude Include="include\TrackerDriver.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\tracker_profile.json" />
+    <None Include="resources\controller_profile.json" />
     <None Include="resources\driver.vrdrivermanifest" />
     <None Include="resources\game_controller.svg" />
-    <None Include="resources\legacy_bindings_example.json" />
+    <None Include="resources\legacy_bindings_NLOS.json" />
+    <None Include="resources\tracker_profile.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

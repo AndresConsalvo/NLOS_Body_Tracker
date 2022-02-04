@@ -1,26 +1,25 @@
 {
   "jsonid": "input_profile",
-  "controller_type": "example_controller",
-  "legacy_binding" : "{example}/input/legacy_bindings_example.json",
-  "device_class" : "TrackedDeviceClass_Controller",
+  "controller_type": "vive_tracker_left_foot",
+  "device_class": "TrackedDeviceClass_Controller",
+  "resource_root": "NLOS",
+  "driver_name": "NLOS",
+  "legacy_binding": "{NLOS}/input/legacy_bindings_NLOS.json",
+  "legacy_profile": "none",
   "input_bindingui_mode": "single_device",
-  "input_bindingui_right": {
-		"image": "{example}/icons/game_controller.svg"
-  },
   "should_show_binding_errors": true,
+  "input_bindingui_left": {
+    "transform": "scale(-1,1)",
+    "image": "{NLOS}/icons/game_controller.svg"
+  },
+  "input_bindingui_right": {
+    "image": "{NLOS}/icons/game_controller.svg"
+  },
+  "priority": 6,
   "input_source": {
-    "/input/joystick": {
-      "type": "joystick",
-      "click": false,
-      "touch": false,
-      "binding_image_point": [0,0]
-    },
-	"/input/trackpad" : { 
-        "type" : "trackpad",
-        "binding_image_point" : [ 0, 0 ],
-        "force" : false,
-        "click" : false,
-        "touch" : false
+    "/pose/raw": {
+      "type": "pose",
+      "binding_image_point": [ 0, 0 ]
     }
   }
 }

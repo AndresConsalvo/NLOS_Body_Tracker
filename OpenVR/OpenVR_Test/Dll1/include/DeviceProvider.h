@@ -3,8 +3,9 @@
 #include <openvr_driver.h>
 #include <Windows.h>
 #include <ControllerDriver.h>
+#include <TrackerDriver.h>
 
-
+using namespace vr;
 
 class DeviceProvider : public vr::IServerTrackedDeviceProvider {
 public:
@@ -25,4 +26,5 @@ public:
 
 private:
 	ControllerDriver* controllerDriver;
+	TrackerDriver* NLOS_Tracker;
 };

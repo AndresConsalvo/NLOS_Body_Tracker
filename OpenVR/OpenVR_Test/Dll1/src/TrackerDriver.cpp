@@ -14,8 +14,17 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 
 	// This describes the path to get to the inputprofile which is ABSOLUTELY NECESSARY.
 	// Testing from earlier showed that even if it shouldn't be running the driver is still detected. Maybe when it runs it, reinstall the profile each time?
-	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_InputProfilePath_String, "{NLOS_Tracking}/input/imuFBT_profile.json");
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_InputProfilePath_String, "{NLOS_Tracking}/input/tracker_profile.json");
 
+	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDisplayComponent_Bool, false);
+	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasCameraComponent_Bool, false);
+	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDriverDirectModeComponent_Bool, false);
+	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasVirtualDisplayComponent_Bool, false);
+
+	// Ignored as hand assignment
+	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_ControllerHandSelectionPriority_Int32, -1);
+
+	return VRInitError_None;
 }
 
 void TrackerDriver::Deactivate() {
