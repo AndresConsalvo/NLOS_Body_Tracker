@@ -1,5 +1,8 @@
 2/3/22
-  - Working on Beta Build docs.
+  - Working on Beta Build docs. Set new expectations for tests based on Alpha Build testing.
+  - Found backup plan for hardware in the event PCBs do not come in. Use SMD to DIP proto boards to test parts on breadboard and program MCU.
+  - Consulted Andres regarding specifics to testing refinement.
+  - Spruced up cases for hardware Beta Build portions.
 2/2/22
   - Meeting with Joe, assigned him the task and gave insight on schematic to understand the requirements.
   - Emails with Blanchard and communications through Evan concerning unable to deliver on upcoming milestones
