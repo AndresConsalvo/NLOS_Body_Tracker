@@ -1,10 +1,11 @@
 //foundational code for establihing wifi connection and begining data transfer 
-
-#include <Arduino.h>
+#include "global_includes.h"
 #include "WiFi.h"
+
 
 #define WIFI_NETWORK "my network name goes here"
 #define WIFI_PASSWORD "password here"
+
 //if cannot connect to wifi in x ms, abort
 #define WIFI_TIMEOUT_MS 10000
 
@@ -25,6 +26,6 @@ void wifiConnect(){
         //connected
     }
     else{
-        //not connected
+        //not connected, SOS led
     }
 }
