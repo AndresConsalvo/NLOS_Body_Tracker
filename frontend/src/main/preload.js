@@ -16,7 +16,11 @@ contextBridge.exposeInMainWorld('electron', {
       const validChannels = ['ipc-example', 'ipc-python'];
       if (validChannels.includes(channel)) {
         // Deliberately strip event as it includes `sender`
-        ipcRenderer.on(channel, (event, ...args) => func(...args));
+        console.log(channel, func);
+        ipcRenderer.on(channel, (event, ...args) => {
+          console.log('args', new TextDecoder().decode(args[0]))
+          return func(...args)
+        });
       }
     },
     once(channel, func) {
