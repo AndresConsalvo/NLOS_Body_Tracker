@@ -1,6 +1,6 @@
 {
   "jsonid": "input_profile",
-  "controller_type": "left_foot",
+  "controller_type": "waist",
   "device_class": "TrackedDeviceClass_Controller",
   "resource_root": "NLOS",
   "driver_name": "NLOS",

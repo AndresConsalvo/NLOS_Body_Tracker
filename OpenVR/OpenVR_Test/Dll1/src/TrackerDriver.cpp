@@ -70,19 +70,20 @@ DriverPose_t TrackerDriver::GetPose() {
 	}
 
 	HmdQuaternion_t quat;
-	quat.x, quat.y, quat.z, quat.w = 0;
+	quat.x, quat.y, quat.z = 0;
+	quat.w = 1;
 
 	pose.qWorldFromDriverRotation = quat;
 	pose.qDriverFromHeadRotation = quat;
 
 	pose.vecPosition[0] = 0;
-	pose.vecPosition[1] = 0;
+	pose.vecPosition[1] = 1;
 	pose.vecPosition[2] = 0;
 
 	pose.qRotation.x = 0;
 	pose.qRotation.y = 0;
 	pose.qRotation.z = 0;
-	pose.qRotation.w = 0;
+	pose.qRotation.w = 1;
 
 	return pose;
 }
