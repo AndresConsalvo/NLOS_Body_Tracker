@@ -19,6 +19,27 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+
+
+let pyshell = PythonShell.run(
+  __dirname + '/server.py',
+  {
+    mode: 'text',
+    pythonOptions: ['-u'],
+    args: ['True'],
+  },
+  function (err, results) {
+    console.log('python-shell finished');
+    if (err) console.log(err);
+  }
+);
+
+pyshell.on('message', function (message) {
+  console.log(message);
+});
+
+
+
 const s = dgram.createSocket('udp4');
 const PORT = 20001;
 export default class AppUpdater {
@@ -41,8 +62,11 @@ ipcMain.on('ipc-send-to-server', async (event, arg) => {
   console.log('ipc-send-to-server', event, arg);
   s.send(arg, PORT);
 });
+
 ipcMain.on('ipc-python', async (event, arg) => {
   // s.connect(20001);
+  console.log('event', event)
+  console.log('arg', arg)
 
   s.on('message', function (msg, rinfo) {
     console.log('message', new TextDecoder().decode(msg));
@@ -62,7 +86,7 @@ ipcMain.on('ipc-python', async (event, arg) => {
     PORT,
     'localhost',
     (err) => {
-      console.log('AQUI error', err);
+      console.log('[FAILED TO SEND HANDSHAKE TO SERVER]', err);
     }
   );
 });
@@ -118,18 +142,6 @@ const createWindow = async () => {
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
-    console.log('AQUI');
-    PythonShell.run(
-      __dirname + '/server.py',
-      {
-        mode: 'text',
-        pythonOptions: ['-u'],
-      },
-      function (err, results) {
-        console.log('server py callback');
-        if (err) throw err;
-      }
-    );
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }

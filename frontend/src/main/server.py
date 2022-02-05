@@ -33,12 +33,12 @@ def open_popup(title:str="WARNING!", text:str="Text") -> int:
 
 def store_new_tracker(trackers:dict, tracker:Tracker):
   if len(trackers) < 7:
-    trackers[tracker.id] = trackers
+    trackers[tracker.id] = tracker
   else:
     print("[ERROR] Maximum number of trackers reached")
 
 def update_tracker_info(trackers:dict, tracker:Tracker):
-  trackers[tracker.id] = tracker[tracker]
+  trackers[tracker.id] = tracker
 
 
 def start(verbose:bool = False):
@@ -65,6 +65,9 @@ def start(verbose:bool = False):
   print("[LISTENING] UDP socket is up and listening")
   listening = True
 
+  trackers = {}
+  electron_address = None
+
   try:
     while(listening):
 
@@ -88,12 +91,53 @@ def start(verbose:bool = False):
         if payload["type"] == DISCONNECT:
           listening = False
 
-        elif payload["type"] == 'DEVICE':
+        elif payload["type"] == "DEVICE":
+          # MESSAGE FROM CLIENT
+          print()
+          new_tracker = Tracker(payload["data"]["ip"],
+                                payload["data"]["accel"],
+                                payload["data"]["gyro"],
+                                payload["data"]["battery"],
+                                payload["data"]["id"],
+                                payload["data"]["body_part"])
+
+          new_tracker.battery = payload["data"]["battery"]
+
+          # if verbose:
+          #   print("[CLIENT] Data from tracker received.")
+          #   pprint.pprint(new_tracker.get_device())
+
+          if not (payload["data"]["id"] in trackers):
+            store_new_tracker(trackers, new_tracker)
+
+          else:
+            update_tracker_info(trackers, new_tracker)
+
+          if electron_address:
+            # Send data to app
+            pprint.pprint(trackers)
+            message_to_send = json.dumps(trackers['Tracker-1'].get_device())
+            bytes_to_send = str.encode(message_to_send)
+            UDP_server_socket.sendto(bytes_to_send, electron_address)
+
+
+        elif payload["type"] == "DEVICE_STATS":
+          pass
+
+        elif payload["type"] == "ELECTRON_HAND_SHAKE":
+          # message_from_server = "[CONNECTED] App and Server are communicating."
+          # bytes_to_send = str.encode(message_from_server)
+          # print(bytes_to_send)
+          # UDP_server_socket.sendto(bytes_to_send, address)
+          electron_address = address
+          pass
+
+        elif payload["type"] == "CHANGE_ROLE":
           pass
 
       if verbose:
         print("[INFO] message_json:")
-        pprint.pprint(type(payload))
+        pprint.pprint(payload)
         print(f"[INFO] Client Address:\n{address}\n")
 
 

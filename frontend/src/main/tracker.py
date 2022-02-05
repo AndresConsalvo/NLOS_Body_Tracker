@@ -5,7 +5,7 @@ MIN_VOLTAGE = 3.0
 
 
 class Tracker:
-  
+
   def __init__(self, ip:str, accel:list, gyro:list, battery:float, id=None, body_part=None) -> None:
     self.id = id
     self.ip = ip
@@ -14,7 +14,7 @@ class Tracker:
     self.battery = self.compute_battery_percent(battery)
     self.body_part = body_part
 
-  def get_data(self):
+  def get_data(self) -> dict:
     data = {
       "type" : 'TRACKER_POSITION',
       "data" : {
@@ -25,7 +25,7 @@ class Tracker:
     }
     return data
 
-  def get_device_stats(self):
+  def get_device_stats(self) -> dict:
     stats = {
       "type" : 'DEVICE_STATS',
       "data" : {
@@ -37,7 +37,7 @@ class Tracker:
     }
     return stats
 
-  def get_device(self):
+  def get_device(self) -> dict:
     device = {
       "type" : 'DEVICE',
       "data" : {
@@ -58,7 +58,7 @@ class Tracker:
     self.battery = self.compute_battery_percent(voltage)
 
   def compute_battery_percent(self,voltage):
-    return math.floor((MAX_VOLTAGE - voltage)/(MAX_VOLTAGE - MIN_VOLTAGE) * 100)
+    return math.floor(((MAX_VOLTAGE - voltage)/(MAX_VOLTAGE - MIN_VOLTAGE))* 100)
 
   def refresh(self, id=None, ip=None, accel=None, gyro=None, battery=None, body_part=None):
     if id is not None:

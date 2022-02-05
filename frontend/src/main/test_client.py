@@ -26,8 +26,10 @@ def handle_client(id:int, verbose=False):
   if verbose:
     print(f"[NEW CLIENT] Tracker-{id} connecting...")
 
-  sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-  tracker = Tracker(IP, generate_accel(), generate_gyro(), generate_voltage(), "Tracker-"+str(id))
+  sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM,)
+  voltage = generate_voltage()
+  print(voltage)
+  tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, "Tracker-"+str(id))
   message = json.dumps(tracker.get_device())
   bytes_to_send = str.encode(message)
   sock.sendto(bytes_to_send,SERVER_ADDR_PORT)
@@ -45,4 +47,4 @@ def start_test(n_messages=1, n_trackers=1, verbose=False):
 
 if __name__ == "__main__":
   v = eval(sys.argv[1])
-  start_test(verbose=False)
+  start_test(verbose=v)
