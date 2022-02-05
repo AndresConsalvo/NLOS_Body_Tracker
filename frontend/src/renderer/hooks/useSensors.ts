@@ -7,12 +7,14 @@ type ServerEvent<T = unknown> = {
 
 export type Sensor = {
   ip: string;
-  position: number[];
+  //position: number[];
+  accel: number[];
+  gyro: number[];
   battery: string;
-  battery_V: number;
-  MAC_ADRESS: number;
-  IMU_accuracy: string;
-  role: string;
+  // battery_V: number;
+  id: string;
+  // IMU_accuracy: string;
+  body_part: string;
 };
 
 export type SensorMap = {

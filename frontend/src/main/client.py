@@ -22,7 +22,7 @@ for i in range(30):
       "position":values,
       "battery": '15%',
       "battery_V": 4.18,
-      "MAC_ADRESS": '2345678_name1',
+      "MTracker": 'name1',
       "IMU_accuracy": "High",
       # "role": 'Right Ankle'
     }

@@ -22,9 +22,9 @@ export default (props: Props) => {
           </tr>
           {Object.values(devices).map((device) => (
             <tr key={device.ip}>
-              <th>{device.role}</th>
-              {device.position.map((position, i) => (
-                <th key={i}>{position}</th>
+              <th>{device.body_part}</th>
+              {[...device.accel, ...device.gyro].map((position) => (
+                <th key={position}>{position}</th>
               ))}
             </tr>
           ))}

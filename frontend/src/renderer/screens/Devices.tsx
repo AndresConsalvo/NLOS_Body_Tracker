@@ -13,21 +13,21 @@ export default (props: Props) => {
 
         <table>
           <tr>
-            <th>MAC Address</th>
+            <th>ID</th>
             <th>IP Address</th>
             <th>Battery (%)</th>
-            <th>Battery (V)</th>
-            <th>IMU Accuracy</th>
-            <th>Tracker</th>
+            {/* <th>Battery (V)</th> */}
+            {/* <th>IMU Accuracy</th> */}
+            <th>Body Part</th>
           </tr>
           {Object.values(devices).map((device) => (
             <tr key={device.ip}>
-              <td>{device.MAC_ADRESS}</td>
+              <td>{device.id}</td>
               <td>{device.ip}</td>
               <td>{device.battery}</td>
-              <td>{device.battery_V}</td>
-              <td>{device.IMU_accuracy}</td>
-              <td>{device.role}</td>
+              {/* <td>{device.battery_V}</td> */}
+              {/* <td>{device.IMU_accuracy}</td> */}
+              <td>{device.body_part}</td>
             </tr>
           ))}
         </table>

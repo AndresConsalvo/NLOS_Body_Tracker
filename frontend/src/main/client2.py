@@ -21,7 +21,7 @@ for i in range(30):
       "position":values,
       "battery": '30%',
       "battery_V": 3.2,
-      "MAC_ADRESS": '2345678_name2',
+      "Tracker": 'name2',
       "IMU_accuracy": 'Low',
       # "role":'Left Ankle',
     }
