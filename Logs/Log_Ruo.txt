@@ -54,3 +54,13 @@ Ruo Log:
 
 2/2/2022
 - Added voltage test pads on board, changed designator label sizes
+
+2/3/2022
+- Starting creation of an OpenVR driver
+- Example OpenVR driver created, simulates a joystick that is always pushing forward
+- Driver configured to be a tracker instead
+
+2/4/2022
+- Tested tracker driver that simulates a stationary block floating in free space
+- Connected tracker to model in OpenVR, was able to get the waist to latch onto the simulated tracker.
+- Began work on transferring IMU data into model
