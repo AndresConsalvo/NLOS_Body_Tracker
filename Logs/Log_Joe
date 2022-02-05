@@ -3,10 +3,21 @@
 
 1/27/2022
   - Introduction meeting with Jaxson, Ruo, Andres, and Fariha
+  - Added to repository 
+  - Learned overview and current state of project
   
  1/29/2022
   - Investigated repository and hardware schematics
   
  2/2/2022
-  - Task meeting with Jaxson. Determined I will be focusing on programming the ESP chip to complete required tasks 
+  - Task meeting with Jaxson
+  - Determined I will be focusing on programming the ESP chip to transmit the required data values to the server via UDP packets over WiFi
+  
+  2/3/2022
+  - Researched how to utilize ESP microprocessor WiFi capabilities
+  - Created Joe-Branch-Hardware-Programming branch and uploaded WiFi connection establishing code and LED signalling code
+  
+  2/4/2022
+  - Investigated UDP packet transmission via ESP microprocessor
+  - Wrote End User Instructions section of submitted Beta Build document 
   
