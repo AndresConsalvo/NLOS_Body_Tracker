@@ -26,6 +26,14 @@
 2/01/2022
   - Working on bettering GUI options and display
   
- 2/03/2022
- 2/04/2022
+2/03/2022
+  - Removed some settings that we did not need
+   
+2/04/2022
+  - Added steps to README
+  - Worked on Beta Build and Beta Test Plan
+  - Altered the names of the columns and removed battery V of each tracker
+      - Separated data values that are being received into 2 arrays, one for gyro and another for accelerometer
+      - Changed MAC Address to ID and tracker to display specific body part tracker is on instead
+      - Changed name dislayed when application opens up
   
