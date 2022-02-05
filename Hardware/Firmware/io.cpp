@@ -24,7 +24,7 @@ void signalSOS(){
     }
     delay = 150;
     for(int x = 0; x < 3; x ++){
-        #S
+        #O
         setLedHigh();
         delay(delay);
         setLedLo();
