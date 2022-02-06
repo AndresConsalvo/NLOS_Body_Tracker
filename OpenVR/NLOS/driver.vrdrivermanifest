@@ -1,0 +1,6 @@
+{
+	"alwaysActivate": true,
+	"name" : "NLOS",
+	"directory" : "",
+	"resourceOnly" : false
+}
