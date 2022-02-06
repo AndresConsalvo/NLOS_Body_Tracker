@@ -1,5 +1,9 @@
 #include <TrackerDriver.h>
 
+unsigned int test = 0;
+
+double test_data[] = { 1.0, 2.00, 0.00 };
+
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	objID = unObjectId;
 
@@ -13,7 +17,7 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	// This describes the path to get to the inputprofile which is ABSOLUTELY NECESSARY.
 	// Testing from earlier showed that even if it shouldn't be running the driver is still detected. Maybe when it runs it, reinstall the profile each time?
 	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_InputProfilePath_String, "{NLOS}/input/tracker_profile.json");
-
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_RenderModelName_String, "{NLOS}/rendermodels/frame");
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDisplayComponent_Bool, false);
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasCameraComponent_Bool, false);
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDriverDirectModeComponent_Bool, false);
@@ -76,9 +80,15 @@ DriverPose_t TrackerDriver::GetPose() {
 	pose.qWorldFromDriverRotation = quat;
 	pose.qDriverFromHeadRotation = quat;
 
+	if (test > 2) {
+		test = 0;
+	}
+
+
 	pose.vecPosition[0] = 0;
-	pose.vecPosition[1] = 1;
+	pose.vecPosition[1] = test_data[test++];
 	pose.vecPosition[2] = 0;
+	VRDriverLog()->Log("I should be updating my position!");
 
 	pose.qRotation.x = 0;
 	pose.qRotation.y = 0;
