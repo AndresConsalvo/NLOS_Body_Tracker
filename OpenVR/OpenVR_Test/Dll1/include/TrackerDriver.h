@@ -1,9 +1,20 @@
 #pragma once
 
+
+#define _USE_MATH_DEFINES
+
+#include <chrono>
+#include <cmath>
 #include <openvr_driver.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
+
+
+
+
+#define deg_to_rad(x) (x * (M_PI)/180.0)
+
 
 
 using namespace vr;
@@ -50,7 +61,7 @@ public:
 private:
 	int32_t TrackerIndex = 0;
 
-	std::string model = "Test_Tracker";
+	std::string model = "Waist_Tracker";
 	std::string version = "0.0.1"; // How do version numbers work?
 	TrackedDeviceIndex_t objID = k_unTrackedDeviceIndexInvalid;
 	PropertyContainerHandle_t ulPropertyContainer = k_ulInvalidPropertyContainer;

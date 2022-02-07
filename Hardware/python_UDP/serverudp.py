@@ -1,8 +1,7 @@
 import socket
-import time
 from struct import unpack
 
-localIP     = "192.168.56.1"
+localIP     = "192.168.1.59"
 localPort   = 20001
 bufferSize  = 1024
 
@@ -23,14 +22,14 @@ while(True):
     message = bytesAddressPair[0]
     address = bytesAddressPair[1]
 
-    clientMsg = "Message from Client:{}".format(message)
+    #clientMsg = "Message from Client:{}".format(message)
     clientIP  = "Client IP Address:{}".format(address)
 
-    #tuple_of_shorts = unpack('<' + 'h'*(len(message)//2),message)
-    #print(tuple_of_shorts)
+    tuple_of_shorts = unpack('<' + 'h'*(len(message)//2),message)
+    print(tuple_of_shorts)
     
-    print(clientMsg)
+    #print(clientMsg)
     print(clientIP)
 
     # Sending a reply to client
-    UDPServerSocket.sendto(bytesToSend, address)
+    # UDPServerSocket.sendto(bytesToSend, address)
