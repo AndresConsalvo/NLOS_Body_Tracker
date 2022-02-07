@@ -1,8 +1,8 @@
+# This script functions as a relay between the ESP32 and Unity, because for some reason the script I wrote for Unity decided it doesn't want to work.
+
 # Import libraries
 import os
 import socket
-import time
-import timeit
 
 # Set send IP adress and port
 UDP_IP = "172.20.10.10"

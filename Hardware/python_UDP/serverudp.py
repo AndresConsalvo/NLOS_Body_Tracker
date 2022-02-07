@@ -2,7 +2,7 @@ import socket
 import time
 from struct import unpack
 
-localIP     = "127.0.0.1"
+localIP     = "192.168.56.1"
 localPort   = 20001
 bufferSize  = 1024
 

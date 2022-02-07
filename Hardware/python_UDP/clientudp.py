@@ -6,7 +6,7 @@ msgFromClient       = "Hello UDP Server"
 
 bytesToSend         = str.encode(msgFromClient)
 
-serverAddressPort   = ("172.20.10.10", 20000)
+serverAddressPort   = ("192.168.56.1", 20000)
 
 bufferSize          = 1024
 
@@ -27,10 +27,10 @@ while 1:
         i = 0
     
 
-msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+    msgFromServer = UDPClientSocket.recvfrom(bufferSize)
 
 
 
-msg = "Message from Server {}".format(msgFromServer[0])
+    msg = "Message from Server {}".format(msgFromServer[0])
 
-print(msg)
+    print(msg)

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <openvr_driver.h>
-#include <Windows.h>
+#include <WinSock2.h>
+#include <Ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+
 
 using namespace vr;
 
@@ -40,6 +43,9 @@ public:
 	DriverPose_t GetPose();
 
 	void RunFrame();
+
+	// Self-made methods
+	void UDP_init();
 
 private:
 	int32_t TrackerIndex = 0;

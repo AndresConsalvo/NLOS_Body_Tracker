@@ -1,9 +1,9 @@
 #pragma once
 
 #include <openvr_driver.h>
-#include <Windows.h>
-#include <ControllerDriver.h>
 #include <TrackerDriver.h>
+
+
 
 using namespace vr;
 
