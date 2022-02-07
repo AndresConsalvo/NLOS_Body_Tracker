@@ -7,8 +7,8 @@
 const char * networkName = "uam8nsw9dt9q";
 const char * networkPswd = "K-jRAw9YC5-U";
 
-const char * udpAddress = "172.20.10.10";
-const int udpPort = 20001;
+const char * udpAddress = "192.168.1.59";
+const int udpPort = 20000;
 
 boolean connected = false;
 
@@ -28,6 +28,7 @@ void setup() {
   Wire.begin(); // join I2C bus (no address = master)
   write_to_imu(0x7E, (0x15));
   write_to_imu(0x69, (0x04));
+  write_to_imu(0x43, (0b00000011));
 
   Wire.setClock(100000);
   Serial.begin(115200);
@@ -62,7 +63,7 @@ void loop() {
   }
   delay(100);
 
-//print_from_imu();
+ print_from_imu();
 }
 
 short read_from_imu(byte reg_addr) {
@@ -89,17 +90,17 @@ void write_to_imu(byte reg_addr, byte command) {
 }
 
 void print_from_imu() {
-  Serial.print((short) short_data[0], HEX);
+  Serial.print((short) short_data[0], DEC);
   Serial.print(",");
-  Serial.print((short) short_data[1], HEX);
+  Serial.print((short) short_data[1], DEC);
   Serial.print(",");
-  Serial.print((short) short_data[2], HEX);
+  Serial.print((short) short_data[2], DEC);
   Serial.print(",");
-  Serial.print((short) short_data[3], HEX);
+  Serial.print((short) short_data[3], DEC);
   Serial.print(",");
-  Serial.print((short) short_data[4], HEX);
+  Serial.print((short) short_data[4], DEC);
   Serial.print(",");
-  Serial.println((short) short_data[5], HEX);
+  Serial.println((short) short_data[5], DEC);
 }
 
 void connectToWiFi(const char * ssid, const char * pwd) {
