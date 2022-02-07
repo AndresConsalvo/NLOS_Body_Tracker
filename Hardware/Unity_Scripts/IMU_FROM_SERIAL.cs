@@ -32,9 +32,8 @@ public class IMU_FROM_SERIAL : MonoBehaviour {
     void Update() {
         if (Input.GetKeyDown("space")) {
             print("space key was pressed");
-            x = 0;
-            y = 0;
-            z = 0;
+
+            transform.localEulerAngles = new Vector3(0, 0, 0);
 
             transform.localPosition = new Vector3(0, 0, 0);
         }
@@ -61,16 +60,27 @@ public class IMU_FROM_SERIAL : MonoBehaviour {
         //print(Ay);
         //print(Az);
 
-        x += -Gy / 750;
-        y += Gz / 750;
-        z += -Gx / 750;
+        x = Gy / 675;
+        y  = Gz / 675;
+        z = Gx / 675;
 
-        print(x);
+        //print(x);
+        float radius = 50;
+        transform.Rotate(new Vector3(x, y, z));
 
-        transform.localEulerAngles = new Vector3(x, y, z);
-        //Debug.Log(transform.localEulerAngles);
+        //Vector3 forwardVector = transform.rotation * -Vector3.forward;
+        //Vector3 newpos = new Vector3(-radius * forwardVector.x, -radius * forwardVector.y, -radius * forwardVector.z);
 
-        float t = Time.deltaTime;
+        //transform.position = newpos;
+
+        /*        float half = (float) 0.5;
+        transform.position = new Vector3(new_pos_x, new_pos_y, new_pos_z);*/
+        /*
+                float t = Time.deltaTime;
+                Vector3 curr_pos = transform.position;
+                float new_pos_x = curr_pos.x + vel_x * t + half * Ay * t * t;
+                float new_pos_y = curr_pos.z + vel_z * t + half * (-Az) * t * t;
+                float new_pos_z = curr_pos.x + vel_x * t + half * Ax * t * t;*/
 
         //vel_x += (Ay * Time.deltaTime);
         //vel_y += (-Az * Time.deltaTime);
@@ -78,10 +88,10 @@ public class IMU_FROM_SERIAL : MonoBehaviour {
         //print(pos_x);
         //print(pos_y);
         //print(pos_z);
-        Vector3 curr_pos = transform.localPosition;
-        //transform.localPosition = new Vector3(curr_pos.x + vel_x * t + (1 / 2) * Ax * t * t, curr_pos.y + vel_y * t + (1 / 2) * Ay * t * t, curr_pos.z + vel_z * t + (1 / 2) * Az * t * t);
 
-        //Debug.Log(transform.localPosition);
+
+
+        //Debug.Log(transform.position);
 
         // Perform normalization, add to previous frame
         // Apply to gameobject
@@ -96,10 +106,6 @@ public class IMU_FROM_SERIAL : MonoBehaviour {
     public void OnApplicationQuit() {
         print("Port 5 is closed!");
         serial.Close();
-    }
-
-    private void StartUDPServer() {
-
     }
 }
 
