@@ -9,7 +9,7 @@ double test_data[] = { 1.0, 2.00, 0.00 };
 
 // for testing UDP stuff
 
-const char* srcIP = "192.168.159.1";
+const char* srcIP = "192.168.1.59";
 SOCKET sock;
 sockaddr_in local;
 WSADATA wsaData;

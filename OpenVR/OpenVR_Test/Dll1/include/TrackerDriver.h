@@ -50,7 +50,7 @@ public:
 private:
 	int32_t TrackerIndex = 0;
 
-	std::string model = "Test_Tracker";
+	std::string model = "Waist_Tracker";
 	std::string version = "0.0.1"; // How do version numbers work?
 	TrackedDeviceIndex_t objID = k_unTrackedDeviceIndexInvalid;
 	PropertyContainerHandle_t ulPropertyContainer = k_ulInvalidPropertyContainer;
