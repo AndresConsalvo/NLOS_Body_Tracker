@@ -1,14 +1,8 @@
 #include <TrackerDriver.h>
 
 #define PORT 20000
-// I'm not sure why, but the bottom line is important for winsock to work.
-
-// Test values (to make sure that the model is actually moving)
-unsigned int test_counter = 0;
-double test_data[] = { 1.0, 2.00, 0.00 };
 
 // for testing UDP stuff
-
 const char* srcIP = "192.168.1.59";
 SOCKET sock;
 sockaddr_in local;
@@ -16,6 +10,8 @@ WSADATA wsaData;
 
 u_long iMode = 1;
 
+short Gx, Gy, Gz, Ax, Ay, Az = 0;
+double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
 
 
 
@@ -77,6 +73,8 @@ DriverPose_t TrackerDriver::GetPose() {
 	DriverPose_t pose = { 0 };
 	bool SocketActivated = 1;
 
+	char log_str[100];
+
 	// Let's try tracking the waist. Gotta start somewhere, right?
 	// If I can track one thing I can track others.
 	// First check if device is connected...
@@ -96,38 +94,74 @@ DriverPose_t TrackerDriver::GetPose() {
 	}
 
 	int rec_err = 0;
-	int BufLen = 1024;
+	int BufLen = 12;
 	int localAddrSize = sizeof(local);
-	char RecvBuf[1024];
+	char RecvBuf[12];
+
+	std::chrono::time_point<std::chrono::system_clock> start, end;
 
 	rec_err = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)& local, &localAddrSize);
-	if (rec_err > 0) {
-		VRDriverLog()->Log("Some message received!");
-		VRDriverLog()->Log(RecvBuf);
-	}
+
+	start = std::chrono::system_clock::now();
 	
+	Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
+	Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
+	Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
+
+	end = std::chrono::system_clock::now();
+
+	std::chrono::duration<double> elapsed_ms = (end - start);
+
+	printf("%d, %d, %d\n", Gx, Gy, Gz);
+	printf("Converted to degrees: \n");
+
+	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\nElapsed Time: %f", Gx, Gy, Gz, elapsed_ms.count());
+	VRDriverLog()->Log(log_str);
+
+	/*
+	ang_x += deg_to_rad((double)Gx / 131.2) * elapsed_ms.count();
+	ang_y += deg_to_rad((double)Gy / 131.2) * elapsed_ms.count();
+	ang_z += deg_to_rad((double)Gz / 131.2) * elapsed_ms.count();
+
+	ang_x += ((double)Gx / 131.2) * elapsed_ms.count();
+	ang_y += ((double)Gy / 131.2) * elapsed_ms.count();
+	ang_z += ((double)Gz / 131.2) * elapsed_ms.count();
+	*/
+
+
+	ang_x += deg_to_rad((double)Gx / 131.2) * 0.1;
+	ang_y += deg_to_rad((double)Gy / 131.2) * 0.1;
+	ang_z += deg_to_rad((double)Gz / 131.2) * 0.1;
 
 	VRDriverLog()->Log("Updating position!");
+
 	HmdQuaternion_t quat;
+
 	quat.x, quat.y, quat.z = 0;
 	quat.w = 1;
 
 	pose.qWorldFromDriverRotation = quat;
 	pose.qDriverFromHeadRotation = quat;
 
-	if (test_counter > 2) {
-		test_counter = 0;
-	}
 
+	// Source: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+	double cy = cos(ang_x * 0.5);
+	double sy = sin(ang_x * 0.5);
+	double cp = cos(ang_y * 0.5);
+	double sp = sin(ang_y * 0.5);
+	double cr = cos(ang_z * 0.5);
+	double sr = sin(ang_z * 0.5);
 
 	pose.vecPosition[0] = 0;
-	pose.vecPosition[1] = test_data[test_counter++];
+	pose.vecPosition[1] = 1;
 	pose.vecPosition[2] = 0;
 
-	pose.qRotation.x = 0;
-	pose.qRotation.y = 0;
-	pose.qRotation.z = 0;
-	pose.qRotation.w = 1;
+	pose.qRotation.w = cr * cp * cy + sr * sp * sy;
+	pose.qRotation.x = sr * cp * cy - cr * sp * sy;
+	pose.qRotation.y = cr * sp * cy + sr * cp * sy;
+	pose.qRotation.z = cr * cp * sy - sr * sp * cy;
+	
 
 	return pose;
 }

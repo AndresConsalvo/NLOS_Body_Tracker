@@ -1,9 +1,20 @@
 #pragma once
 
+
+#define _USE_MATH_DEFINES
+
+#include <chrono>
+#include <cmath>
 #include <openvr_driver.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
+
+
+
+
+#define deg_to_rad(x) (x * (M_PI)/180.0)
+
 
 
 using namespace vr;

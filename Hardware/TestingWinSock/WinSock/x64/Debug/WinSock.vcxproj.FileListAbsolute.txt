@@ -1,1 +1,2 @@
 C:\Users\chenr\Desktop\TestingWinSock\WinSock\x64\Debug\WinSock.exe
+C:\Users\chenr\Desktop\NLOS\NLOS_Body_Tracker\Hardware\TestingWinSock\WinSock\x64\Debug\WinSock.exe
