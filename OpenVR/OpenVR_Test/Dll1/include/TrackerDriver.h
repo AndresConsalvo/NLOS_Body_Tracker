@@ -5,9 +5,11 @@
 
 #include <chrono>
 #include <cmath>
+#include <iostream>
 #include <openvr_driver.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
+#include <thread>
 #pragma comment(lib, "ws2_32.lib")
 
 
@@ -24,7 +26,7 @@ public:
 	// ------------------------------------
 	// Management Methods
 	// ------------------------------------
-	/** This is called before an HMD is returned to the application. It will always be
+	/* This is called before an HMD is returned to the application. It will always be
 	* called before any display or tracking methods. Memory and processor use by the
 	* ITrackedDeviceServerDriver object should be kept to a minimum until it is activated.
 	* The pose listener is guaranteed to be valid until Deactivate is called, but
@@ -58,6 +60,8 @@ public:
 	// Self-made methods
 	void UDP_init();
 
+	
+
 private:
 	int32_t TrackerIndex = 0;
 
@@ -65,4 +69,5 @@ private:
 	std::string version = "0.0.1"; // How do version numbers work?
 	TrackedDeviceIndex_t objID = k_unTrackedDeviceIndexInvalid;
 	PropertyContainerHandle_t ulPropertyContainer = k_ulInvalidPropertyContainer;
+
 };

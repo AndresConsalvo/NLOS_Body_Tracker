@@ -13,8 +13,6 @@ u_long iMode = 1;
 short Gx, Gy, Gz, Ax, Ay, Az = 0;
 double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
 
-
-
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	objID = unObjectId;
 
@@ -48,6 +46,7 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 
 void TrackerDriver::Deactivate() {
 	WSACleanup();
+	VRDriverLog()->Log("Shutting down tracker");
 	objID = vr::k_unTrackedDeviceIndexInvalid;
 }
 
@@ -98,40 +97,26 @@ DriverPose_t TrackerDriver::GetPose() {
 	int localAddrSize = sizeof(local);
 	char RecvBuf[12];
 
-	std::chrono::time_point<std::chrono::system_clock> start, end;
 
 	rec_err = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)& local, &localAddrSize);
 
-	start = std::chrono::system_clock::now();
+
 	
 	Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
 	Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
 	Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
 
-	end = std::chrono::system_clock::now();
 
-	std::chrono::duration<double> elapsed_ms = (end - start);
 
 	printf("%d, %d, %d\n", Gx, Gy, Gz);
 	printf("Converted to degrees: \n");
 
-	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\nElapsed Time: %f", Gx, Gy, Gz, elapsed_ms.count());
+	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\n", Gx, Gy, Gz);
 	VRDriverLog()->Log(log_str);
 
-	/*
-	ang_x += deg_to_rad((double)Gx / 131.2) * elapsed_ms.count();
-	ang_y += deg_to_rad((double)Gy / 131.2) * elapsed_ms.count();
-	ang_z += deg_to_rad((double)Gz / 131.2) * elapsed_ms.count();
-
-	ang_x += ((double)Gx / 131.2) * elapsed_ms.count();
-	ang_y += ((double)Gy / 131.2) * elapsed_ms.count();
-	ang_z += ((double)Gz / 131.2) * elapsed_ms.count();
-	*/
-
-
-	ang_x += deg_to_rad((double)Gx / 131.2) * 0.1;
-	ang_y += deg_to_rad((double)Gy / 131.2) * 0.1;
-	ang_z += deg_to_rad((double)Gz / 131.2) * 0.1;
+	ang_x += deg_to_rad((double)Gx / 131.2);
+	ang_y -= deg_to_rad((double)Gy / 131.2);
+	ang_z += deg_to_rad((double)Gz / 131.2);
 
 	VRDriverLog()->Log("Updating position!");
 
