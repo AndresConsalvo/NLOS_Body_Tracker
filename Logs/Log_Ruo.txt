@@ -64,3 +64,14 @@ Ruo Log:
 - Tested tracker driver that simulates a stationary block floating in free space
 - Connected tracker to model in OpenVR, was able to get the waist to latch onto the simulated tracker.
 - Began work on transferring IMU data into model
+
+2/6/2022
+- Updated model to represent a coordinate system
+- Tested OpenVR API by making model move up and down using preset values
+- Tested OpenVR API by changing quaternion values (caused it to stretch out due to the rotation causing scaling issues)
+
+2/7/2022
+- Imported UDP server into NLOS SteamVR driver which is able to read data from our prototype
+- Implemented quaternion calculations provided by https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+- IMU data is registered by steamVR and the tracker is moving its representation, albeit very choppy and not calibrated.
+
