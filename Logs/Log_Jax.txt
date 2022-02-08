@@ -1,3 +1,20 @@
+2/7/22
+  - 3D modeling, attempting to print all case parts for a set fit
+    Todo: embed an easy snap fit or slide together
+  - Worked on presentation slides and had team read over
+2/6/22
+  - Began printing 3D models to test for structural integrity, battery fit, and hook and loop strap fit
+    - needed to make strap slot larger
+    - needed smaller battery compartment, batteries were smaller on all sides, but correct thickness
+    - adjusted battery wire holes and allowed more space for USB-C and switch
+    - Added sight blockers to conform around open ports of case covers
+2/5/22
+  - Working on 3d case models
+    - adjusted spacing of ports and size of trackers
+    - added more parts to PCB model
+2/4/22
+  - Worked on Beta Build doc
+  - 3D modeled PCB and gathered parts for mounting and ensuring space for PCB
 2/3/22
   - Working on Beta Build docs. Set new expectations for tests based on Alpha Build testing.
   - Found backup plan for hardware in the event PCBs do not come in. Use SMD to DIP proto boards to test parts on breadboard and program MCU.
