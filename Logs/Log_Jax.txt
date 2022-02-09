@@ -1,3 +1,8 @@
+2/8/22
+  - Testing 3D design with loop strap fit and adjustable strap buckle (cinch)
+    - hook and loop straps not giving enough when thigh muscles contract, making some pisitions difficult
+      - may need a method to stetch a small amount. Possibly hide a rubber band to stretch apart two pieces. 
+  - Got group together to do a dry run of the presentation. First take went bad, so we adjusted and tried again, practicing through Zoom.
 2/7/22
   - 3D modeling, attempting to print all case parts for a set fit
     Todo: embed an easy snap fit or slide together
