@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.py": "python",
+        "global_includes.h": "c"
+    }
+}
