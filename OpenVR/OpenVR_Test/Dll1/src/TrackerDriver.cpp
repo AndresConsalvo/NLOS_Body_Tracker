@@ -13,6 +13,10 @@ u_long iMode = 1;
 short Gx, Gy, Gz, Ax, Ay, Az = 0;
 double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
 
+double cy, sy, cp, sp, cr, sr = 0;
+
+DriverPose_t last_pose = { 0 };
+
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	objID = unObjectId;
 
@@ -97,58 +101,71 @@ DriverPose_t TrackerDriver::GetPose() {
 	int localAddrSize = sizeof(local);
 	char RecvBuf[12];
 
-
 	rec_err = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)& local, &localAddrSize);
 
+	if (rec_err != 12) {
+		VRDriverLog()->Log("No rotation detected; skip!");
+		
+		ang_x += deg_to_rad((double)Gx / 1310.2);
+		ang_y -= deg_to_rad((double)Gy / 1310.2);
+		ang_z += deg_to_rad((double)Gz / 1310.2);
 
-	
-	Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
-	Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
-	Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
+		cy = cos(ang_x * 0.5);
+		sy = sin(ang_x * 0.5);
+		cp = cos(ang_y * 0.5);
+		sp = sin(ang_y * 0.5);
+		cr = cos(ang_z * 0.5);
+		sr = sin(ang_z * 0.5);
 
+		last_pose.qRotation.w = cr * cp * cy + sr * sp * sy;
+		last_pose.qRotation.x = sr * cp * cy - cr * sp * sy;
+		last_pose.qRotation.y = cr * sp * cy + sr * cp * sy;
+		last_pose.qRotation.z = cr * cp * sy - sr * sp * cy;
 
+		return last_pose;
+	} else {
+		VRDriverLog()->Log("Updating position!");
 
-	printf("%d, %d, %d\n", Gx, Gy, Gz);
-	printf("Converted to degrees: \n");
+		Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
+		Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
+		Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
 
-	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\n", Gx, Gy, Gz);
-	VRDriverLog()->Log(log_str);
+		snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d, recverr: %d\n", Gx, Gy, Gz, rec_err);
+		VRDriverLog()->Log(log_str);
 
-	ang_x += deg_to_rad((double)Gx / 131.2);
-	ang_y -= deg_to_rad((double)Gy / 131.2);
-	ang_z += deg_to_rad((double)Gz / 131.2);
+		HmdQuaternion_t quat;
 
-	VRDriverLog()->Log("Updating position!");
+		quat.x, quat.y, quat.z = 0;
+		quat.w = 1;
 
-	HmdQuaternion_t quat;
+		pose.qWorldFromDriverRotation = quat;
+		pose.qDriverFromHeadRotation = quat;
 
-	quat.x, quat.y, quat.z = 0;
-	quat.w = 1;
+		ang_x += deg_to_rad((double)Gx / 131.2);
+		ang_y -= deg_to_rad((double)Gy / 131.2);
+		ang_z += deg_to_rad((double)Gz / 131.2);
 
-	pose.qWorldFromDriverRotation = quat;
-	pose.qDriverFromHeadRotation = quat;
+		// Source: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
+		cy = cos(ang_x * 0.5);
+		sy = sin(ang_x * 0.5);
+		cp = cos(ang_y * 0.5);
+		sp = sin(ang_y * 0.5);
+		cr = cos(ang_z * 0.5);
+		sr = sin(ang_z * 0.5);
 
-	// Source: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+		pose.vecPosition[0] = 0;
+		pose.vecPosition[1] = 1;
+		pose.vecPosition[2] = 0;
 
-	double cy = cos(ang_x * 0.5);
-	double sy = sin(ang_x * 0.5);
-	double cp = cos(ang_y * 0.5);
-	double sp = sin(ang_y * 0.5);
-	double cr = cos(ang_z * 0.5);
-	double sr = sin(ang_z * 0.5);
-
-	pose.vecPosition[0] = 0;
-	pose.vecPosition[1] = 1;
-	pose.vecPosition[2] = 0;
-
-	pose.qRotation.w = cr * cp * cy + sr * sp * sy;
-	pose.qRotation.x = sr * cp * cy - cr * sp * sy;
-	pose.qRotation.y = cr * sp * cy + sr * cp * sy;
-	pose.qRotation.z = cr * cp * sy - sr * sp * cy;
-	
-
-	return pose;
+		pose.qRotation.w = cr * cp * cy + sr * sp * sy;
+		pose.qRotation.x = sr * cp * cy - cr * sp * sy;
+		pose.qRotation.y = cr * sp * cy + sr * cp * sy;
+		pose.qRotation.z = cr * cp * sy - sr * sp * cy;
+		
+		last_pose = pose;
+		return pose;
+	}
 }
 
 void TrackerDriver::RunFrame() {

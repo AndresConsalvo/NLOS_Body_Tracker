@@ -83,10 +83,12 @@ int main() {
 			Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
 			Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
 
+			printf("%d, %d, %d\n", Gx, Gy, Gz);
+
 			ang_x = deg_to_rad((double)Gx) * 0.01;
 			ang_y = deg_to_rad((double)Gy) * 0.01;
 			ang_z = deg_to_rad((double)Gz) * 0.01;
-			printf("%f, %f, %f\n", ang_x, ang_y, ang_z);
+			//printf("%f, %f, %f\n", ang_x, ang_y, ang_z);
 		}
 	}
 	return 0;
