@@ -24,7 +24,7 @@ export const useSensors = () => {
   const handleMessage = (message: Sensor) => {
     setDevices((currentDevices) => ({
       ...currentDevices,
-      [message.ip]: message,
+      [message.id]: message,
     }));
   };
 

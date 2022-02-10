@@ -103,12 +103,9 @@ def start(verbose:bool = False):
 
           new_tracker.battery = payload["data"]["battery"]
 
-          # if verbose:
-          #   print("[CLIENT] Data from tracker received.")
-          #   pprint.pprint(new_tracker.get_device())
-
           if not (payload["data"]["id"] in trackers):
             store_new_tracker(trackers, new_tracker)
+            pprint.pprint(new_tracker.get_device())
 
           else:
             update_tracker_info(trackers, new_tracker)
