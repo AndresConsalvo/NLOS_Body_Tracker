@@ -1,3 +1,9 @@
+2/9/22
+  - Received final set of breakout boards to find that they were the wrong size. This delays Joe's progress in programming
+    - Resolution: just wait for PCBs to come in as the items would get there on the Saturday at the earliest. 
+  - Met with Evan and team to discuss check-in things
+  - Practiced slides with group
+  - Started working on new strap design, involving a slide fit attachment.
 2/8/22
   - Testing 3D design with loop strap fit and adjustable strap buckle (cinch)
     - hook and loop straps not giving enough when thigh muscles contract, making some pisitions difficult
