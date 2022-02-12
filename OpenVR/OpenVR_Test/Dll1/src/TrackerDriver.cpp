@@ -106,6 +106,7 @@ DriverPose_t TrackerDriver::GetPose() {
 	if (rec_err != 12) {
 		VRDriverLog()->Log("No rotation detected; skip!");
 		
+		/*
 		ang_x += deg_to_rad((double)Gx / 1310.2);
 		ang_y -= deg_to_rad((double)Gy / 1310.2);
 		ang_z += deg_to_rad((double)Gz / 1310.2);
@@ -121,6 +122,8 @@ DriverPose_t TrackerDriver::GetPose() {
 		last_pose.qRotation.x = sr * cp * cy - cr * sp * sy;
 		last_pose.qRotation.y = cr * sp * cy + sr * cp * sy;
 		last_pose.qRotation.z = cr * cp * sy - sr * sp * cy;
+		*/
+
 
 		return last_pose;
 	} else {
@@ -141,9 +144,9 @@ DriverPose_t TrackerDriver::GetPose() {
 		pose.qWorldFromDriverRotation = quat;
 		pose.qDriverFromHeadRotation = quat;
 
-		ang_x += deg_to_rad((double)Gx / 131.2);
-		ang_y -= deg_to_rad((double)Gy / 131.2);
-		ang_z += deg_to_rad((double)Gz / 131.2);
+		ang_x += deg_to_rad((double)Gx / 520.0);
+		ang_y -= deg_to_rad((double)Gy / 520.0);
+		ang_z += deg_to_rad((double)Gz / 520.0);
 
 		// Source: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
@@ -196,8 +199,9 @@ void TrackerDriver::UDP_init() {
 		local.sin_port = htons(PORT);
 		local.sin_addr.s_addr = htonl(INADDR_ANY);
 
-		
+		//int recvbuf_size = 12;
 		iResult = ioctlsocket(sock, FIONBIO, &iMode);
+		//iResult = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char*)&recvbuf_size, sizeof(recvbuf_size));
 		iResult = bind(sock, (SOCKADDR*)&local, sizeof(local));
 
 		if (iResult != 0) {

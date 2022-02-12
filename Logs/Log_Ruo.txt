@@ -75,3 +75,8 @@ Ruo Log:
 - Implemented quaternion calculations provided by https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 - IMU data is registered by steamVR and the tracker is moving its representation, albeit very choppy and not calibrated.
 
+2/9/2022
+- Worked on fine-tuning the tracker so the movement within VR is not choppy
+
+2/10/2022
+- Began developing math library to help with quarternions calculations
