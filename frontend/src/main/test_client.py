@@ -3,6 +3,7 @@ import timeit
 import random
 import json
 import sys
+import time
 
 from tracker import Tracker
 
@@ -22,13 +23,12 @@ def generate_gyro():
 def generate_voltage():
   return random.random()+3
 
-def handle_client(id:int, verbose=False):
+def handle_client(sock, id:int, verbose=False):
   if verbose:
     print(f"[NEW CLIENT] Tracker-{id} connecting...")
 
-  sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM,)
   voltage = generate_voltage()
-  print(voltage)
+  # print(voltage)
   tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, "Tracker-"+str(id))
   message = json.dumps(tracker.get_device())
   bytes_to_send = str.encode(message)
@@ -36,9 +36,14 @@ def handle_client(id:int, verbose=False):
 
 def start_test(n_messages=1, n_trackers=1, verbose=False):
   start = timeit.timeit()
-  for m in range(0,n_messages):
-    for i in range(0,n_trackers):
-      handle_client(i+1,verbose)
+  sockets = []
+  for m in range(0,n_trackers):
+    sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM,)
+    sockets += [sock]
+    for i in range(0,n_messages):
+      handle_client(sockets[m], m+1, verbose)
+      time.sleep(1)
+
   end = timeit.timeit()
 
   if verbose:
@@ -47,4 +52,4 @@ def start_test(n_messages=1, n_trackers=1, verbose=False):
 
 if __name__ == "__main__":
   v = eval(sys.argv[1])
-  start_test(verbose=v)
+  start_test(n_messages=30 , verbose=v)
