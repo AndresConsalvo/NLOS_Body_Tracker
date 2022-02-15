@@ -28,7 +28,7 @@ void setup() {
   Wire.begin(); // join I2C bus (no address = master)
   write_to_imu(0x7E, (0x15));
   write_to_imu(0x69, (0x04));
-  write_to_imu(0x43, (0b00000011));
+  write_to_imu(0x43, (0b00000000));
 
   Wire.setClock(100000);
   Serial.begin(115200);
@@ -61,7 +61,7 @@ void loop() {
     digitalWrite(D2, HIGH);
     Serial.print("Not connected\n");
   }
-  delay(100);
+  delay(10);
 
  print_from_imu();
 }
