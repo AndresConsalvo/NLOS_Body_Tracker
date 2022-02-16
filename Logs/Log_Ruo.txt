@@ -80,3 +80,6 @@ Ruo Log:
 
 2/10/2022
 - Began developing math library to help with quarternions calculations
+
+2/15/2022
+- Bare minimum quaternion math implemented; gimbal lock issue fixed. Rotation is tracker is now accurately tracked.

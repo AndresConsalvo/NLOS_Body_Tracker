@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClCompile Include="src\DeviceFactory.cpp" />
     <ClCompile Include="src\DeviceProvider.cpp" />
+    <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\TrackerDriver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DeviceProvider.h" />
+    <ClInclude Include="include\Matrix.h" />
     <ClInclude Include="include\TrackerDriver.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

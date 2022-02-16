@@ -45,6 +45,16 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	VRDriverLog()->Log("Initializing UDP");
 	UDP_init();
 
+	last_pose.qRotation.w = 1.0;
+	last_pose.qRotation.x = 0.0;
+	last_pose.qRotation.y = 0.0;
+	last_pose.qRotation.z = 0.0;
+
+	last_pose.vecPosition[0] = 0;
+	last_pose.vecPosition[1] = 1.0;
+	last_pose.vecPosition[2] = 0;
+
+
 	return VRInitError_None;
 }
 
@@ -144,28 +154,62 @@ DriverPose_t TrackerDriver::GetPose() {
 		pose.qWorldFromDriverRotation = quat;
 		pose.qDriverFromHeadRotation = quat;
 
-		ang_x += deg_to_rad((double)Gx / 520.0);
-		ang_y -= deg_to_rad((double)Gy / 520.0);
-		ang_z += deg_to_rad((double)Gz / 520.0);
+		ang_x = deg_to_rad((double)Gx / 520.0);
+		ang_y = deg_to_rad((double)Gy / 520.0);
+		ang_z = deg_to_rad((double)Gz / 520.0);
 
 		// Source: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
-		cy = cos(ang_x * 0.5);
-		sy = sin(ang_x * 0.5);
-		cp = cos(ang_y * 0.5);
-		sp = sin(ang_y * 0.5);
-		cr = cos(ang_z * 0.5);
-		sr = sin(ang_z * 0.5);
+	https://ahrs.readthedocs.io/en/latest/filters/angular.html
+		ang_rate angle_vector(ang_x, ang_y, ang_z);
 
-		pose.vecPosition[0] = 0;
-		pose.vecPosition[1] = 1;
-		pose.vecPosition[2] = 0;
+		omega omega_op(angle_vector);
 
-		pose.qRotation.w = cr * cp * cy + sr * sp * sy;
-		pose.qRotation.x = sr * cp * cy - cr * sp * sy;
-		pose.qRotation.y = cr * sp * cy + sr * cp * sy;
-		pose.qRotation.z = cr * cp * sy - sr * sp * cy;
+		double mag = angle_vector.get_magnitude();
+		double scale_cos = cos(mag / 2.0);
+		double scale_sin = (1 / mag) * sin(mag / 2.0);
+
+		double iMatrixScaled[16] = { 0 };
+
+		double cos_scalar = cos(mag / 2);
+
+		double old_quat[4] = { last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z }; // w, x, y, z
+		double new_quat[4] = { 1.0, 0.0, 0.0, 0.0 }; // w, x, y, z
+
+		for (int i = 0; i < 16; i++) {
+			iMatrixScaled[i] = omega_op.iMatrix[i] * cos_scalar;
+			//printf("%f, %f\n", omega_op.iMatrix[i], iMatrixScaled[i]);
+		}
+
+		double sin_scalar = sin(mag / 2);
+		sin_scalar = sin_scalar * (1 / mag);
+
+		double omegaMatrixScaled[16] = { 0 };
+
+		for (int i = 0; i < 16; i++) {
+			omegaMatrixScaled[i] = omega_op.matrix[i] * sin_scalar;
+		}
+
+		double matrix_full[16] = { 0 };
+
+		for (int i = 0; i < 16; i++) {
+			matrix_full[i] = omegaMatrixScaled[i] + iMatrixScaled[i];
+		}
+
+		for (int i = 0; i < 4; i++) {
+			new_quat[i] = (matrix_full[i * 4 + 0] * old_quat[0]) + (matrix_full[i * 4 + 1] * old_quat[1]) + (matrix_full[i * 4 + 2] * old_quat[2]) + (matrix_full[i * 4 + 3] * old_quat[3]);
+		}
+
+		//printf("x: %f, y: %f, z: %f, w: %f\n", new_quat[0], new_quat[1], new_quat[2], new_quat[3]);
+		double newquatmag = sqrt(pow(new_quat[0], 2) + pow(new_quat[1], 2) + pow(new_quat[2], 2) + pow(new_quat[3], 2));
+		pose.qRotation.w = new_quat[0] / newquatmag;
+		pose.qRotation.x = new_quat[1] / newquatmag;
+		pose.qRotation.y = new_quat[2] / newquatmag;
+		pose.qRotation.z = new_quat[3] / newquatmag;
 		
+		snprintf(log_str, 100, "%f, %f, %f, %f\n", pose.qRotation.w, pose.qRotation.x, pose.qRotation.y, pose.qRotation.z);
+		VRDriverLog()->Log(log_str);
+
 		last_pose = pose;
 		return pose;
 	}
