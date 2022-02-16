@@ -1,7 +1,6 @@
 //foundational code for establihing wifi connection and begining data transfer 
 #include "wifi_connect.h"
-
-
+#include "global_includes.h"
 #define WIFI_NETWORK "my network name goes here"
 #define WIFI_PASSWORD "password here"
 
@@ -50,7 +49,9 @@ int WiFiEvent(WiFiEvent_t event){
           return 1;
       case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
           Serial.println("WiFi lost connection");
+
           return 0;
       default: break;
     }
 }
+
