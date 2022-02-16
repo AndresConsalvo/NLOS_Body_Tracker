@@ -1,7 +1,7 @@
 import socket
 from struct import unpack
 
-localIP     = "192.168.1.59"
+localIP     = "10.138.81.196"
 localPort   = 20001
 bufferSize  = 1024
 
