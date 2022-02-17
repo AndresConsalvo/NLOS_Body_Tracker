@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "io.h"
+#include "udp.h"
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include "wifi_connect.h"
@@ -10,6 +11,7 @@
 
 WiFiEventHandler wifiConnectedHandler;
 WiFiEventHandler wifiDisconnectedHandler;
+String local_ip;
 
 void wifiConnect() {
   io_init();
@@ -26,18 +28,17 @@ void wifiConnect() {
     delay(500);
     Serial.print(".");
     }
+//  local_ip = WiFi.localIP();
+  udp_init();
 }
 
 
 void onConnect(const WiFiEventStationModeConnected& event) {
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  signalConnected();
+//  Serial.println(local_ip);
 }
 
 void onDisconnect(const WiFiEventStationModeDisconnected& event){
   Serial.println("connection failed");
-  signalSOS();
-
 }

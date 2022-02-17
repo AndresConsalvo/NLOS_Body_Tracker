@@ -1,13 +1,9 @@
 #include <Arduino.h>
 #include "wifi_connect.h"
 #include "io.h"
+#include "udp.h"
 #define WIFI_NETWORK "BetterSideOfTheTraplex"
 #define WIFI_PASSWORD "Swamp9000"
-
-//void set
-//Serial.println("Beginning...")
-//
-//wifiConnect();
 
 void setup() {
   Serial.begin(115200);
@@ -18,37 +14,5 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 //  Serial.println("LEts go");
+  test_send();
 }
-
-
-
-//WiFiEventHandler wifiConnectedHandler;
-//WiFiEventHandler wifiDisconnectedHandler;
-//
-//
-//void wifiConnect() {
-//  io_init();
-//  //disconnect
-//  WiFi.disconnect(true);
-//  wifiConnectedHandler = WiFi.onStationModeConnected(&onConnect);
-//  wifiDisconnectedHandler = WiFi.onStationModeDisconnected(&onDisconnect);
-//  //pick station mode to connect to existing network
-//  //idk if we need this
-//  //WiFi.mode(WIFI_STA);
-//  //event handler
-//  //begin wifi wifi connection
-//  WiFi.mode(WIFI_STA);
-//  const char* ssid     = WIFI_NETWORK;
-//  const char* password = WIFI_PASSWORD;
-//  WiFi.begin(ssid, password);
-//  Serial.println("Beginning connection");
-//}
-//
-//
-//void onConnect(const WiFiEventStationModeConnected& event) {
-//  Serial.println("We connected bby");
-//}
-//
-//void onDisconnect(const WiFiEventStationModeDisconnected& event){
-//  Serial.println("We not connected bby");
-//}
