@@ -39,5 +39,6 @@
  - Met with Jaxson and Ruo in lab to recieve ESP8266 board and begin programming
  
 2/16/2022
- - Began formatting code to be programmable onto the board via arduino. Wifi connectivity was not achieved
+ - Began formatting code to be programmable onto the board via arduino
+ - Wifi connectivity was achieved
  
