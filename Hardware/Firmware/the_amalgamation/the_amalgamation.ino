@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "wifi_connect.h"
 #include "io.h"
-#define WIFI_NETWORK "Jone"
-#define WIFI_PASSWORD "freefolk"
+#define WIFI_NETWORK "BetterSideOfTheTraplex"
+#define WIFI_PASSWORD "Swamp9000"
 
 //void set
 //Serial.println("Beginning...")
@@ -18,7 +18,6 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 //  Serial.println("LEts go");
-  signalSOS();
 }
 
 

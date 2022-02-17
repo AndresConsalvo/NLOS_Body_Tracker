@@ -45,3 +45,15 @@ void signalSOS(){
         delay(delay_ms);
     }
 }
+
+void signalConnected(){
+    int delay_ms = 500;
+    delay(delay_ms);
+    for(int x = 0; x < 10; x ++){
+        //S
+        setLedHigh();
+        delay(delay_ms);
+        setLedLo();
+        delay(delay_ms);
+    }
+}
