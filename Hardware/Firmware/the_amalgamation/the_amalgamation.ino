@@ -1,8 +1,6 @@
 #include <Arduino.h>
-#include "io.h"
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
 #include "wifi_connect.h"
+#include "io.h"
 #define WIFI_NETWORK "Jone"
 #define WIFI_PASSWORD "freefolk"
 
