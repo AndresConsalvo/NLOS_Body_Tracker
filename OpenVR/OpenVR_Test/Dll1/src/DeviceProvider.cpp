@@ -9,15 +9,28 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 
 	VRDriverLog()->Log("Initializing test tracker...");
 
-	NLOS_Tracker = new TrackerDriver();
-	VRServerDriverHost()->TrackedDeviceAdded("NLOS_Tracker", TrackedDeviceClass_GenericTracker, NLOS_Tracker);
+	waist_tracker = new TrackerDriver();
+	waist_tracker->setIndex(WAIST);
+	VRServerDriverHost()->TrackedDeviceAdded("NLOS Waist Tracker", TrackedDeviceClass_GenericTracker, waist_tracker);
 
 	return VRInitError_None;
 }
 
 void DeviceProvider::Cleanup() {
-	delete NLOS_Tracker;
-	NLOS_Tracker = NULL;
+	delete waist_tracker;
+	waist_tracker = NULL;
+
+	delete lfoot_tracker;
+	lfoot_tracker = NULL;
+
+	delete rfoot_tracker;
+	rfoot_tracker = NULL;
+
+	delete lthigh_tracker;
+	lthigh_tracker = NULL;
+
+	delete rthigh_tracker;
+	rthigh_tracker = NULL;
 }
 
 const char* const* DeviceProvider::GetInterfaceVersions() {
@@ -25,7 +38,25 @@ const char* const* DeviceProvider::GetInterfaceVersions() {
 }
 
 void DeviceProvider::RunFrame() {
-	NLOS_Tracker->RunFrame();
+	if (waist_tracker) {
+		waist_tracker->RunFrame();
+	}
+
+	if (lfoot_tracker) {
+		lfoot_tracker->RunFrame();
+	}
+
+	if (rfoot_tracker) {
+		rfoot_tracker->RunFrame();
+	}
+
+	if (lthigh_tracker) {
+		lthigh_tracker->RunFrame();
+	}
+
+	if (rthigh_tracker) {
+		rthigh_tracker->RunFrame();
+	}
 }
 
 bool DeviceProvider::ShouldBlockStandbyMode() {

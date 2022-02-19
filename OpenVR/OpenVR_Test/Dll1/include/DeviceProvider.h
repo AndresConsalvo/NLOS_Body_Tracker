@@ -25,5 +25,15 @@ public:
 	void LeaveStandby();
 
 private:
-	TrackerDriver* NLOS_Tracker;
+	bool waist_en = false;
+	bool lfoot_en = false;
+	bool rfoot_en = false;
+	bool lthigh_en = false;
+	bool rthigh_en = false;
+
+	TrackerDriver* waist_tracker = nullptr;
+	TrackerDriver* lfoot_tracker = nullptr;
+	TrackerDriver* rfoot_tracker = nullptr;
+	TrackerDriver* lthigh_tracker = nullptr;
+	TrackerDriver* rthigh_tracker = nullptr;
 };

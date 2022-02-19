@@ -24,7 +24,7 @@
     <ClCompile Include="src\TrackerDriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Matrix.cpp">
+    <ClCompile Include="src\math_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +35,10 @@
     <ClInclude Include="include\TrackerDriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrix.h">
+    <ClInclude Include="include\math_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TrackerDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

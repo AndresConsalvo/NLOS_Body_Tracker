@@ -3,7 +3,8 @@
 
 #define _USE_MATH_DEFINES
 
-#include <Matrix.h>
+#include <TrackerDefines.h>
+#include <math_helpers.h>
 #include <chrono>
 #include <cmath>
 #include <iostream>
@@ -12,8 +13,6 @@
 #include <Ws2tcpip.h>
 #include <thread>
 #pragma comment(lib, "ws2_32.lib")
-
-
 
 
 #define deg_to_rad(x) (x * (M_PI)/180.0)
@@ -60,6 +59,8 @@ public:
 
 	// Self-made methods
 	void UDP_init();
+	
+	void setIndex(int limbIndex);
 
 	
 
