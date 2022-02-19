@@ -41,5 +41,8 @@
     <ClInclude Include="include\TrackerDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

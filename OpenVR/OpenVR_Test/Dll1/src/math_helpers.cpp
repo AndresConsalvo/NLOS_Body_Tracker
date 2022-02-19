@@ -19,25 +19,25 @@ double ang_rate::get_magnitude() {
 	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
-omega::omega(ang_rate measured_angle) {
+omega::omega(ang_rate angular_rate) {
 	matrix[0] = 0;
-	matrix[1] = -measured_angle.x;
-	matrix[2] = -measured_angle.y;
-	matrix[3] = -measured_angle.z;
+	matrix[1] = -angular_rate.x;
+	matrix[2] = -angular_rate.y;
+	matrix[3] = -angular_rate.z;
 
-	matrix[4] = measured_angle.x;
+	matrix[4] = angular_rate.x;
 	matrix[5] = 0;
-	matrix[6] = measured_angle.z;
-	matrix[7] = -measured_angle.y;
+	matrix[6] = angular_rate.z;
+	matrix[7] = -angular_rate.y;
 
-	matrix[8] = measured_angle.y;
-	matrix[9] = -measured_angle.z;
+	matrix[8] = angular_rate.y;
+	matrix[9] = -angular_rate.z;
 	matrix[10] = 0;
-	matrix[11] = measured_angle.x;
+	matrix[11] = angular_rate.x;
 
-	matrix[12] = measured_angle.z;
-	matrix[13] = measured_angle.y;
-	matrix[14] = -measured_angle.x;
+	matrix[12] = angular_rate.z;
+	matrix[13] = angular_rate.y;
+	matrix[14] = -angular_rate.x;
 	matrix[15] = 0;
 }
 

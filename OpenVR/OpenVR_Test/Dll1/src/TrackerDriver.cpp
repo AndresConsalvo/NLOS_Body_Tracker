@@ -16,10 +16,11 @@ double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
 DriverPose_t last_pose = { 0 };
 
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
+	// OpenVR automatically assigns this a unique object ID.
 	objID = unObjectId;
 
 	// Props. Like JavaScript?
-	ulPropertyContainer = VRProperties()->TrackedDeviceToPropertyContainer(unObjectId);
+	ulPropertyContainer = VRProperties()->TrackedDeviceToPropertyContainer(objID);
 
 	// Tracked device is opting out of left/right hand selection -- According to API documentation
 	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut);
@@ -32,6 +33,8 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	// Placeholder frame; credit to https://github.com/m9cd0n9ld/IMU-VR-Full-Body-Tracker
 	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_RenderModelName_String, "{NLOS}/rendermodels/frame");
 
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_ManufacturerName_String, "NLOS");
+
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDisplayComponent_Bool, false);
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasCameraComponent_Bool, false);
 	VRProperties()->SetBoolProperty(ulPropertyContainer, Prop_HasDriverDirectModeComponent_Bool, false);
@@ -40,6 +43,8 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	// Ignored as hand assignment
 	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_ControllerHandSelectionPriority_Int32, -1);
 
+	// Going to have to move this outside of the UDP.
+	// In the meantime, does using different ports work?
 	VRDriverLog()->Log("Initializing UDP");
 	UDP_init();
 

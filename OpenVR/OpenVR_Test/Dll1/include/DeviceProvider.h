@@ -2,6 +2,7 @@
 
 #include <openvr_driver.h>
 #include <TrackerDriver.h>
+#include <Globals.h>
 
 
 
@@ -25,11 +26,6 @@ public:
 	void LeaveStandby();
 
 private:
-	bool waist_en = false;
-	bool lfoot_en = false;
-	bool rfoot_en = false;
-	bool lthigh_en = false;
-	bool rthigh_en = false;
 
 	TrackerDriver* waist_tracker = nullptr;
 	TrackerDriver* lfoot_tracker = nullptr;

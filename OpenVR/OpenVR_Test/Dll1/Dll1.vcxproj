@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DeviceProvider.h" />
+    <ClInclude Include="include\Globals.h" />
     <ClInclude Include="include\math_helpers.h" />
     <ClInclude Include="include\TrackerDefines.h" />
     <ClInclude Include="include\TrackerDriver.h" />

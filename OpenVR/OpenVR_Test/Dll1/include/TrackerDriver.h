@@ -12,6 +12,7 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #include <thread>
+#include <Globals.h>
 #pragma comment(lib, "ws2_32.lib")
 
 
