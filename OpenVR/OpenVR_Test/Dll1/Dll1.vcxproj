@@ -31,6 +31,9 @@
     <ClInclude Include="include\TrackerDefines.h" />
     <ClInclude Include="include\TrackerDriver.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="NLOS\resources\input\waist_tracker_profile.json" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

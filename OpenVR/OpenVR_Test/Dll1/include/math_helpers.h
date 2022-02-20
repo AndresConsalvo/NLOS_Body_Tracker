@@ -4,6 +4,7 @@
 
 #include <openvr_driver.h>
 #include <cmath>
+#include <Globals.h>
 #pragma comment(lib, "ws2_32.lib")
 
 using namespace vr;

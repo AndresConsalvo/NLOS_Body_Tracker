@@ -1,5 +1,11 @@
 #include <DeviceProvider.h>
 
+bool waist_en = true;
+bool lfoot_en = false;
+bool rfoot_en = false;
+bool lthigh_en = false;
+bool rthigh_en = false;
+
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);
 
@@ -7,12 +13,13 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		return initError;
 	}
 
-	VRDriverLog()->Log("Initializing test tracker...");
+	
 
 	if (waist_en) {
+		VRDriverLog()->Log("Initializing waist tracker...");
 		waist_tracker = new TrackerDriver();
 		waist_tracker->setIndex(WAIST);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS Waist Tracker", TrackedDeviceClass_GenericTracker, waist_tracker);
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_Waist_Tracker", TrackedDeviceClass_GenericTracker, waist_tracker);
 	}
 
 	if (lfoot_en) {
@@ -38,6 +45,7 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		rthigh_tracker->setIndex(RTHIGH);
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS Right Foot Tracker", TrackedDeviceClass_GenericTracker, rthigh_tracker);
 	}
+
 
 	return VRInitError_None;
 }

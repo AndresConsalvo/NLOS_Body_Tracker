@@ -45,4 +45,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="NLOS\resources\input\waist_tracker_profile.json" />
+  </ItemGroup>
 </Project>

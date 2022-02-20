@@ -2,11 +2,11 @@
 
 
 // Enables
-extern bool waist_en = false;
-extern bool lfoot_en = false;
-extern bool rfoot_en = false;
-extern bool lthigh_en = false;
-extern bool rthigh_en = false;
+extern bool waist_en;
+extern bool lfoot_en;
+extern bool rfoot_en;
+extern bool lthigh_en;
+extern bool rthigh_en;
 
 // Waist
 extern float Px_waist;

@@ -13,6 +13,14 @@ u_long iMode = 1;
 short Gx, Gy, Gz, Ax, Ay, Az = 0;
 double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
 
+float Px_waist = 0;
+float Py_waist = 0;
+float Pz_waist = 0;
+float Qx_waist = 0;
+float Qy_waist = 0;
+float Qz_waist = 0;
+float Qw_waist = 1.0;
+
 DriverPose_t last_pose = { 0 };
 
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {

@@ -49,7 +49,15 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector) {
 
 	DriverPose_t pose = { 0 };
 
-	https://ahrs.readthedocs.io/en/latest/filters/angular.html
+	HmdQuaternion_t quat;
+
+	quat.x, quat.y, quat.z = 0;
+	quat.w = 1;
+
+	pose.qWorldFromDriverRotation = quat;
+	pose.qDriverFromHeadRotation = quat;
+
+	// https://ahrs.readthedocs.io/en/latest/filters/angular.html
 	omega omega_op(angle_vector);
 
 	double mag = angle_vector.get_magnitude();
@@ -94,9 +102,18 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector) {
 	pose.qRotation.y = new_quat[2] / newquatmag;
 	pose.qRotation.z = new_quat[3] / newquatmag;
 
-	pose.vecPosition[0] = 0;
+	Qx_waist = 0;
+	Qy_waist = 0;
+	Qz_waist = 0;
+	float Qw_waist = 1.0;
+
+	pose.vecPosition[0] = 1.0;
 	pose.vecPosition[1] = 1.0;
 	pose.vecPosition[2] = 0;
+
+	pose.poseIsValid = true;
+	pose.result = TrackingResult_Running_OK;
+	pose.deviceIsConnected = true;
 
 	return pose;
 }

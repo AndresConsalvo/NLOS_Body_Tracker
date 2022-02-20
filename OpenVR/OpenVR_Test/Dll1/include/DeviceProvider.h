@@ -4,8 +4,6 @@
 #include <TrackerDriver.h>
 #include <Globals.h>
 
-
-
 using namespace vr;
 
 class DeviceProvider : public vr::IServerTrackedDeviceProvider {
