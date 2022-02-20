@@ -8,7 +8,6 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
-#include <openvr_driver.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #include <thread>
@@ -16,7 +15,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 
-#define deg_to_rad(x) (x * (M_PI)/180.0)
+
 
 
 
@@ -59,7 +58,7 @@ public:
 	void RunFrame();
 
 	// Self-made methods
-	void UDP_init();
+	//void UDP_init();
 	
 	void setIndex(int limbIndex);
 

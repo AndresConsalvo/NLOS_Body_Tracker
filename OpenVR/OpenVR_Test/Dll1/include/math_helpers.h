@@ -7,6 +7,9 @@
 #include <Globals.h>
 #pragma comment(lib, "ws2_32.lib")
 
+#define deg_to_rad(x) (x * (M_PI)/180.0)
+
+
 using namespace vr;
 // 4x4 Matrix:
 // 0 1 2 3
@@ -38,4 +41,4 @@ struct omega {
 	double* getMatrix();
 };
 
-DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector);
+DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double elapsed_time_ms);

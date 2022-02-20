@@ -6,6 +6,10 @@ bool rfoot_en = false;
 bool lthigh_en = false;
 bool rthigh_en = false;
 
+bool SocketActivated = false;
+
+DriverPose_t waist_pose = { 0 };
+
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);
 
@@ -13,10 +17,17 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		return initError;
 	}
 
+	udpThread = new UDP();
+	udpThread->init();
+
 	
 
 	if (waist_en) {
 		VRDriverLog()->Log("Initializing waist tracker...");
+		waist_pose.qRotation.w = 1.0;
+		waist_pose.qRotation.x = 0.0;
+		waist_pose.qRotation.y = 0.0;
+		waist_pose.qRotation.z = 0.0;
 		waist_tracker = new TrackerDriver();
 		waist_tracker->setIndex(WAIST);
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_Waist_Tracker", TrackedDeviceClass_GenericTracker, waist_tracker);

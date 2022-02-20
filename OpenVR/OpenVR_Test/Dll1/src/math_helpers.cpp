@@ -45,8 +45,8 @@ double* omega::getMatrix() {
 	return matrix;
 }
 
-DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector) {
-
+DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double elapsed_time_s) {
+	char log_str[100];
 	DriverPose_t pose = { 0 };
 
 	HmdQuaternion_t quat;
@@ -61,18 +61,21 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector) {
 	omega omega_op(angle_vector);
 
 	double mag = angle_vector.get_magnitude();
-	double scale_cos = cos(mag / 2.0);
-	double scale_sin = (1 / mag) * sin(mag / 2.0);
+	double scale_cos = cos((mag * elapsed_time_s) / 2.0);
+	double scale_sin = (1 / mag) * sin((mag * elapsed_time_s) / 2.0);
 
 	double iMatrixScaled[16] = { 0 };
 
-	double cos_scalar = cos(mag / 2);
-
 	double old_quat[4] = { last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z }; // w, x, y, z
 	double new_quat[4] = { 1.0, 0.0, 0.0, 0.0 }; // w, x, y, z
+	snprintf(log_str, 100, "Elapsed time in : %f (ms)", elapsed_time_s);
+	VRDriverLog()->Log(log_str);
+
+	snprintf(log_str, 100, "Last pose: %f, %f, %f, %f\n", last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z);
+	VRDriverLog()->Log(log_str);
 
 	for (int i = 0; i < 16; i++) {
-		iMatrixScaled[i] = omega_op.iMatrix[i] * cos_scalar;
+		iMatrixScaled[i] = omega_op.iMatrix[i] * scale_cos;
 		//printf("%f, %f\n", omega_op.iMatrix[i], iMatrixScaled[i]);
 	}
 
@@ -101,11 +104,9 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector) {
 	pose.qRotation.x = new_quat[1] / newquatmag;
 	pose.qRotation.y = new_quat[2] / newquatmag;
 	pose.qRotation.z = new_quat[3] / newquatmag;
-
-	Qx_waist = 0;
-	Qy_waist = 0;
-	Qz_waist = 0;
-	float Qw_waist = 1.0;
+	
+	snprintf(log_str, 100, "%f, %f, %f, %f\n", pose.qRotation.w, pose.qRotation.x, pose.qRotation.y, pose.qRotation.z);
+	VRDriverLog()->Log(log_str);
 
 	pose.vecPosition[0] = 1.0;
 	pose.vecPosition[1] = 1.0;
