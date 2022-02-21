@@ -26,6 +26,8 @@ private:
 
 	// Keeping track of time
 	std::chrono::high_resolution_clock::time_point t_waist_last = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t_lfoot_last = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t_rfoot_last = std::chrono::high_resolution_clock::now();
 
 	std::chrono::high_resolution_clock::time_point t_recv_end = std::chrono::high_resolution_clock::now();
 

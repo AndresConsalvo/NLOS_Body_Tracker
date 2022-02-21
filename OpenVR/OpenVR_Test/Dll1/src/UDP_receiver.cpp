@@ -64,13 +64,13 @@ void UDP::deinit() {
 
 void UDP::start() {
 
-	char RecvBuf[12];
+	char RecvBuf[13];
 	int localAddrSize = sizeof(local);
 	while (SocketActivated) {
 		vr::VRDriverLog()->Log("Receiving data!");
-		bytes_read = recvfrom(sock, RecvBuf, 12, 0, (sockaddr*)&local, &localAddrSize);
+		bytes_read = recvfrom(sock, RecvBuf, 13, 0, (sockaddr*)&local, &localAddrSize);
 		vr::VRDriverLog()->Log("Data received!");
-		if (bytes_read == 12) {
+		if (bytes_read == 13) {
 			setValue((char*)RecvBuf);
 		} else {
 			vr::VRDriverLog()->Log("No data received!");
@@ -83,7 +83,9 @@ void UDP::setValue(char* RecvBuf) {
 	// Need to move the gyroscope receive and calculate somewhere else.
 
 	// short tracker_ID = (short)(RecvBuf[6]);
-	short tracker_ID = WAIST;
+	short tracker_ID = RecvBuf[12];
+	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
+	VRDriverLog()->Log(log_str);
 
 	// TODO: Add if statement to check device ID before updating position
 	short Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
@@ -109,6 +111,26 @@ void UDP::setValue(char* RecvBuf) {
 		waist_pose.poseIsValid = true;
 		waist_pose.result = TrackingResult_Running_OK;
 		waist_pose.deviceIsConnected = true;
+		break;
+	case LFOOT:
+		t_lfoot_last = std::chrono::high_resolution_clock::now();
+		elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
+		lfoot_pose = getNewPose(lfoot_pose, angle_vector, elapsed_time_s);
+		lfoot_pose.vecPosition[0] = 0.5;
+		lfoot_pose.poseIsValid = true;
+		lfoot_pose.result = TrackingResult_Running_OK;
+		lfoot_pose.deviceIsConnected = true;
+		break;
+	case RFOOT:
+		t_rfoot_last = std::chrono::high_resolution_clock::now();
+		elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
+		rfoot_pose = getNewPose(rfoot_pose, angle_vector, elapsed_time_s);
+		rfoot_pose.vecPosition[0] = 0.5;
+		rfoot_pose.vecPosition[2] = 0.5;
+		rfoot_pose.poseIsValid = true;
+		rfoot_pose.result = TrackingResult_Running_OK;
+		rfoot_pose.deviceIsConnected = true;
+		
 	default:
 		break;
 	}

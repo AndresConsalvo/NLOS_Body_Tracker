@@ -31,6 +31,12 @@ EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	// Props. Like JavaScript?
 	ulPropertyContainer = VRProperties()->TrackedDeviceToPropertyContainer(objID);
 
+	// Set metadata
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_ModelNumber_String, model.c_str());
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_SerialNumber_String, model.c_str());
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_TrackingFirmwareVersion_String, version.c_str());
+	VRProperties()->SetStringProperty(ulPropertyContainer, Prop_HardwareRevision_String, version.c_str());
+
 	// Tracked device is opting out of left/right hand selection -- According to API documentation
 	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_ControllerRoleHint_Int32, ETrackedControllerRole::TrackedControllerRole_OptOut);
 	VRProperties()->SetInt32Property(ulPropertyContainer, Prop_DeviceClass_Int32, TrackedDeviceClass_GenericTracker);
@@ -88,7 +94,20 @@ DriverPose_t TrackerDriver::GetPose() {
 
 	// If everything works here my waist should bug out.
 	// This is a good thing, as that means that it's connected with OpenVR.
-	return waist_pose;
+	switch (TrackerIndex) {
+	case (WAIST):
+		return waist_pose;
+		break;
+	case (LFOOT):
+		return lfoot_pose;
+		break;
+	case (RFOOT):
+		return rfoot_pose;
+		break;
+	default:
+		break;
+	}
+	
 	
 }
 
@@ -98,42 +117,14 @@ void TrackerDriver::RunFrame() {
 	}
 }
 
-/*
-void TrackerDriver::UDP_init() {
-
-	char log_str[100];
-
-	int iResult;
-	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	VRDriverLog()->Log("Performing WSAStartup...");
-	if (iResult != 0) {
-		snprintf(log_str, 100, "WSAStartup failed: %d\n", iResult);
-		VRDriverLog()->Log(log_str);
-	}
-	else {
-
-		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-		if (sock == INVALID_SOCKET) {
-			VRDriverLog()->Log("Socket binding failed at step 1!");
-		}
-
-		local.sin_family = AF_INET;
-		local.sin_port = htons(PORT);
-		local.sin_addr.s_addr = htonl(INADDR_ANY);
-
-		iResult = ioctlsocket(sock, FIONBIO, &iMode);
-		iResult = bind(sock, (SOCKADDR*)&local, sizeof(local));
-
-		if (iResult != 0) {
-			VRDriverLog()->Log("Socket binding failed at step 2!");
-		}
-	}
-}
-
-*/
-// Keep here for now (may need it later)
-
-
 void TrackerDriver::setIndex(int limbIndex) {
 	this->TrackerIndex = limbIndex;
+}
+
+void TrackerDriver::SetModel(std::string model) {
+	this->model = model;
+}
+
+void TrackerDriver::SetVersion(std::string version) {
+	this->version = version;
 }

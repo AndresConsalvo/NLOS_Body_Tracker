@@ -44,7 +44,8 @@ omega::omega(ang_rate angular_rate) {
 double* omega::getMatrix() {
 	return matrix;
 }
-
+// https://ahrs.readthedocs.io/en/latest/filters/angular.html
+// change to using pointers
 DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double elapsed_time_s) {
 	char log_str[100];
 	DriverPose_t pose = { 0 };
@@ -57,7 +58,7 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double el
 	pose.qWorldFromDriverRotation = quat;
 	pose.qDriverFromHeadRotation = quat;
 
-	// https://ahrs.readthedocs.io/en/latest/filters/angular.html
+	
 	omega omega_op(angle_vector);
 
 	double mag = angle_vector.get_magnitude();
@@ -68,7 +69,7 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double el
 
 	double old_quat[4] = { last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z }; // w, x, y, z
 	double new_quat[4] = { 1.0, 0.0, 0.0, 0.0 }; // w, x, y, z
-	snprintf(log_str, 100, "Elapsed time in : %f (ms)", elapsed_time_s);
+	snprintf(log_str, 100, "Elapsed time in : %f (s)", elapsed_time_s);
 	VRDriverLog()->Log(log_str);
 
 	snprintf(log_str, 100, "Last pose: %f, %f, %f, %f\n", last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z);
@@ -76,7 +77,6 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double el
 
 	for (int i = 0; i < 16; i++) {
 		iMatrixScaled[i] = omega_op.iMatrix[i] * scale_cos;
-		//printf("%f, %f\n", omega_op.iMatrix[i], iMatrixScaled[i]);
 	}
 
 	double sin_scalar = sin(mag / 2);

@@ -1,14 +1,16 @@
 #include <DeviceProvider.h>
 
 bool waist_en = true;
-bool lfoot_en = false;
-bool rfoot_en = false;
+bool lfoot_en = true;
+bool rfoot_en = true;
 bool lthigh_en = false;
 bool rthigh_en = false;
 
 bool SocketActivated = false;
 
 DriverPose_t waist_pose = { 0 };
+DriverPose_t lfoot_pose = { 0 };
+DriverPose_t rfoot_pose = { 0 };
 
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);
@@ -28,33 +30,58 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		waist_pose.qRotation.x = 0.0;
 		waist_pose.qRotation.y = 0.0;
 		waist_pose.qRotation.z = 0.0;
+
 		waist_tracker = new TrackerDriver();
 		waist_tracker->setIndex(WAIST);
+
+		waist_tracker->SetModel("Waist_Tracker");
+		waist_tracker->SetVersion("0.0.1");
+
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_Waist_Tracker", TrackedDeviceClass_GenericTracker, waist_tracker);
 	}
 
 	if (lfoot_en) {
+		VRDriverLog()->Log("Initializing left foot tracker...");
+		lfoot_pose.qRotation.w = 1.0;
+		lfoot_pose.qRotation.x = 0.0;
+		lfoot_pose.qRotation.y = 0.0;
+		lfoot_pose.qRotation.z = 0.0;
+
 		lfoot_tracker = new TrackerDriver();
 		lfoot_tracker->setIndex(LFOOT);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS Left Foot Tracker", TrackedDeviceClass_GenericTracker, lfoot_tracker);
+
+		waist_tracker->SetModel("LFoot_Tracker");
+		waist_tracker->SetVersion("0.0.1");
+
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LFoot_Tracker", TrackedDeviceClass_GenericTracker, lfoot_tracker);
 	}
 
 	if (rfoot_en) {
+		VRDriverLog()->Log("Initializing right foot tracker...");
+		rfoot_pose.qRotation.w = 1.0;
+		rfoot_pose.qRotation.x = 0.0;
+		rfoot_pose.qRotation.y = 0.0;
+		rfoot_pose.qRotation.z = 0.0;
+
 		rfoot_tracker = new TrackerDriver();
 		rfoot_tracker->setIndex(RFOOT);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS Right Foot Tracker", TrackedDeviceClass_GenericTracker, rfoot_tracker);
+
+		rfoot_tracker->SetModel("RFoot_Tracker");
+		rfoot_tracker->SetVersion("0.0.1");
+
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RFoot_Tracker", TrackedDeviceClass_GenericTracker, rfoot_tracker);
 	}
 
 	if (lthigh_en) {
 		lthigh_tracker = new TrackerDriver();
 		lthigh_tracker->setIndex(LTHIGH);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS Right Foot Tracker", TrackedDeviceClass_GenericTracker, lthigh_tracker);
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LThigh_Tracker", TrackedDeviceClass_GenericTracker, lthigh_tracker);
 	}
 
 	if (rthigh_en) {
 		rthigh_tracker = new TrackerDriver();
 		rthigh_tracker->setIndex(RTHIGH);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS Right Foot Tracker", TrackedDeviceClass_GenericTracker, rthigh_tracker);
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RThigh_Tracker", TrackedDeviceClass_GenericTracker, rthigh_tracker);
 	}
 
 

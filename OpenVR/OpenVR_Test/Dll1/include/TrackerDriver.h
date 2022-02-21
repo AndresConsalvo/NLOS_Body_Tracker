@@ -62,13 +62,17 @@ public:
 	
 	void setIndex(int limbIndex);
 
+	void SetModel(std::string model);
+	void SetVersion(std::string version);
+
 	
 
 private:
-	int32_t TrackerIndex = 0;
+	int TrackerIndex = 0;
 
-	std::string model = "Waist_Tracker";
-	std::string version = "0.0.1"; // How do version numbers work?
+	std::string model = "";
+	std::string version = ""; // How do version numbers work?
+
 	TrackedDeviceIndex_t objID = k_unTrackedDeviceIndexInvalid;
 	PropertyContainerHandle_t ulPropertyContainer = k_ulInvalidPropertyContainer;
 
