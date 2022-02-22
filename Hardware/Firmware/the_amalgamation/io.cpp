@@ -2,12 +2,12 @@
 #include "io.h"
 
 
-int STATUS_LED_PIN = 14;
+int STATUS_LED_PIN = 5;
 
 
 
 void io_init(){
-    pinMode(14, OUTPUT);
+    pinMode(STATUS_LED_PIN, OUTPUT);
 }
 
 void setLedHigh(){

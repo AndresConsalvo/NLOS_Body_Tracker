@@ -26,7 +26,10 @@ void print_from_imu(void);
 
 void setup() {
   Wire.begin(); // join I2C bus (no address = master)
+  //set PMU mode of gyroscope to normal
   write_to_imu(0x7E, (0x15));
+  //write 0b0100 to register 0x69
+  //enables fast offset compensation for all three axis of gyro
   write_to_imu(0x69, (0x04));
 
   Wire.setClock(100000);
