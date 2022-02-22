@@ -1,13 +1,25 @@
 #include <Arduino.h>
 #include "io.h"
+#include "ESP8266TimerInterrupt.h"
+
+#define TIMER_INTERVAL_MS       1000
 
 
 int STATUS_LED_PIN = 5;
 
+ESP8266Timer ITimer;
+volatile byte state = LOW;
 
+void IRAM_ATTR TimerHandler(){
+  state = !state;
+  Serial.print("Interrupt called - ");
+  Serial.println(state);  
+    digitalWrite(STATUS_LED_PIN, state);
+}
 
 void io_init(){
     pinMode(STATUS_LED_PIN, OUTPUT);
+    ITimer.attachInterruptInterval(TIMER_INTERVAL_MS * 1000, TimerHandler);
 }
 
 void setLedHigh(){
