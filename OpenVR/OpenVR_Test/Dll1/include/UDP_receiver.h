@@ -2,7 +2,6 @@
 
 #include <Globals.h>
 #include <math_helpers.h>
-#include <openvr_driver.h>
 #include <thread>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>

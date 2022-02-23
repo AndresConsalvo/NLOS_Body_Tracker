@@ -1,26 +1,5 @@
 #include <TrackerDriver.h>
 
-/*
-// for testing UDP stuff
-const char* srcIP = "192.168.1.59";
-SOCKET sock;
-sockaddr_in local;
-WSADATA wsaData;
-
-u_long iMode = 1;
-*/
-
-
-//short Gx, Gy, Gz, Ax, Ay, Az = 0;
-//double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
-
-//float Px_waist = 0;
-//float Py_waist = 1.0;
-//float Pz_waist = 0;
-//float Qx_waist = 0;
-//float Qy_waist = 0;
-//float Qz_waist = 0;
-//float Qw_waist = 1.0;
 
 DriverPose_t last_pose = { 0 };
 
@@ -88,12 +67,25 @@ void TrackerDriver::DebugRequest(const char* pchRequest, char* pchResponseBuffer
 
 DriverPose_t TrackerDriver::GetPose() {
 
-	// Let's try tracking the waist. Gotta start somewhere, right?
-	// If I can track one thing I can track others.
-	// First check if device is connected...
+	// Get head mounted display position
+	/*
+	TrackedDevicePose_t trackedDevicePose;
+	IVRSystem* test;
+	HmdMatrix34_t poseMatrix;
+	HmdVector3_t position;
+	HmdQuaternion_t quaternion;
 
-	// If everything works here my waist should bug out.
-	// This is a good thing, as that means that it's connected with OpenVR.
+	if (trackedDeviceClass == ETrackedDeviceClass::TrackedDeviceClass_HMD) {
+		VRSystem()->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0, &trackedDevicePose, 1);
+		HmdMatrix34_t matrix = trackedDevicePose.mDeviceToAbsoluteTracking;
+		
+		hmd_pose.vecPosition[0] = matrix.m[0][3];
+		hmd_pose.vecPosition[1] = matrix.m[1][3];
+		hmd_pose.vecPosition[2] = matrix.m[2][3];
+		
+	}
+	*/
+
 	switch (TrackerIndex) {
 	case (WAIST):
 		return waist_pose;

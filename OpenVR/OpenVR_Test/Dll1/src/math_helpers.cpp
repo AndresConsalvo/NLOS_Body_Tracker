@@ -7,6 +7,8 @@
 // 12 13 14 15
 
 // from https://ahrs.readthedocs.io/en/latest/filters/angular.html
+// 
+// for error logging
 
 
 ang_rate::ang_rate(double ang_x, double ang_y, double ang_z) {
@@ -46,19 +48,30 @@ double* omega::getMatrix() {
 }
 // https://ahrs.readthedocs.io/en/latest/filters/angular.html
 // change to using pointers
-DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double elapsed_time_s) {
+void getNewPose(int limb, ang_rate angle_vector, double elapsed_time_s) {
 	char log_str[100];
-	DriverPose_t pose = { 0 };
+	DriverPose_t* last_pose;
+	last_pose = &waist_pose;
+	switch (limb) {
+		case WAIST:
+			last_pose = &waist_pose;
+			break;
+		case LFOOT:
+			last_pose = &lfoot_pose;
+			break;
+		case RFOOT:
+			last_pose = &rfoot_pose;
+			break;
+	}
 
 	HmdQuaternion_t quat;
 
 	quat.x, quat.y, quat.z = 0;
 	quat.w = 1;
 
-	pose.qWorldFromDriverRotation = quat;
-	pose.qDriverFromHeadRotation = quat;
+	last_pose->qWorldFromDriverRotation = quat;
+	last_pose->qDriverFromHeadRotation = quat;
 
-	
 	omega omega_op(angle_vector);
 
 	double mag = angle_vector.get_magnitude();
@@ -67,12 +80,13 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double el
 
 	double iMatrixScaled[16] = { 0 };
 
-	double old_quat[4] = { last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z }; // w, x, y, z
+	double old_quat[4] = { last_pose->qRotation.w, last_pose->qRotation.x, last_pose->qRotation.y, last_pose->qRotation.z }; // w, x, y, z
 	double new_quat[4] = { 1.0, 0.0, 0.0, 0.0 }; // w, x, y, z
+
 	snprintf(log_str, 100, "Elapsed time in : %f (s)", elapsed_time_s);
 	VRDriverLog()->Log(log_str);
 
-	snprintf(log_str, 100, "Last pose: %f, %f, %f, %f\n", last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z);
+	snprintf(log_str, 100, "Last pose: %f, %f, %f, %f\n", last_pose->qRotation.w, last_pose->qRotation.x, last_pose->qRotation.y, last_pose->qRotation.z);
 	VRDriverLog()->Log(log_str);
 
 	for (int i = 0; i < 16; i++) {
@@ -98,23 +112,35 @@ DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double el
 		new_quat[i] = (matrix_full[i * 4 + 0] * old_quat[0]) + (matrix_full[i * 4 + 1] * old_quat[1]) + (matrix_full[i * 4 + 2] * old_quat[2]) + (matrix_full[i * 4 + 3] * old_quat[3]);
 	}
 
-	//printf("x: %f, y: %f, z: %f, w: %f\n", new_quat[0], new_quat[1], new_quat[2], new_quat[3]);
 	double newquatmag = sqrt(pow(new_quat[0], 2) + pow(new_quat[1], 2) + pow(new_quat[2], 2) + pow(new_quat[3], 2));
-	pose.qRotation.w = new_quat[0] / newquatmag;
-	pose.qRotation.x = new_quat[1] / newquatmag;
-	pose.qRotation.y = new_quat[2] / newquatmag;
-	pose.qRotation.z = new_quat[3] / newquatmag;
+	last_pose->qRotation.w = new_quat[0] / newquatmag;
+	last_pose->qRotation.x = new_quat[1] / newquatmag;
+	last_pose->qRotation.y = new_quat[2] / newquatmag;
+	last_pose->qRotation.z = new_quat[3] / newquatmag;
 	
-	snprintf(log_str, 100, "%f, %f, %f, %f\n", pose.qRotation.w, pose.qRotation.x, pose.qRotation.y, pose.qRotation.z);
+	snprintf(log_str, 100, "%f, %f, %f, %f\n", last_pose->qRotation.w, last_pose->qRotation.x, last_pose->qRotation.y, last_pose->qRotation.z);
 	VRDriverLog()->Log(log_str);
 
-	pose.vecPosition[0] = 1.0;
-	pose.vecPosition[1] = 1.0;
-	pose.vecPosition[2] = 0;
+	snprintf(log_str, 100, "Driver pos: x: %f, y: %f, z: %f\n", hmd_pose.vecPosition[0], hmd_pose.vecPosition[1], hmd_pose.vecPosition[2]);
 
-	pose.poseIsValid = true;
-	pose.result = TrackingResult_Running_OK;
-	pose.deviceIsConnected = true;
+	switch (limb) {
+	case WAIST:
+		last_pose->vecPosition[0] = 0;
+		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m;
+		last_pose->vecPosition[2] = 0;
+		break;
+	case LFOOT:
+		last_pose->vecPosition[0] = 0;
+		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m - Waist_to_Foot_len_m;
+		last_pose->vecPosition[2] = 0.1;
+		break;
+	case RFOOT:
+		last_pose->vecPosition[0] = 0;
+		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m - Waist_to_Foot_len_m;
+		last_pose->vecPosition[2] = -0.1;
+		break;
+	}
 
-	return pose;
+
+	return;
 }

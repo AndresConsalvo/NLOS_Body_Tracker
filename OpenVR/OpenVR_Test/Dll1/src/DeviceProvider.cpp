@@ -8,9 +8,14 @@ bool rthigh_en = false;
 
 bool SocketActivated = false;
 
+DriverPose_t hmd_pose = { 0 };
 DriverPose_t waist_pose = { 0 };
 DriverPose_t lfoot_pose = { 0 };
 DriverPose_t rfoot_pose = { 0 };
+
+const double Head_to_Floor_len_m = 1.7;
+const double Head_to_Waist_len_m = 0.8;
+const double Waist_to_Foot_len_m = 0.9;
 
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);
@@ -21,8 +26,6 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 
 	udpThread = new UDP();
 	udpThread->init();
-
-	
 
 	if (waist_en) {
 		VRDriverLog()->Log("Initializing waist tracker...");

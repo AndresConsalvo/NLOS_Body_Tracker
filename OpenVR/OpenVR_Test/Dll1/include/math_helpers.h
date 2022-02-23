@@ -41,4 +41,4 @@ struct omega {
 	double* getMatrix();
 };
 
-DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector, double elapsed_time_ms);
+void getNewPose(int limb, ang_rate angle_vector, double elapsed_time_ms);

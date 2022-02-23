@@ -107,7 +107,8 @@ void UDP::setValue(char* RecvBuf) {
 	case WAIST:
 		t_waist_last = std::chrono::high_resolution_clock::now();
 		elapsed_time_s = std::chrono::duration<double, std::milli>(t_waist_last - t_recv_end).count() / 1000.0;
-		waist_pose = getNewPose(waist_pose, angle_vector, elapsed_time_s);
+		getNewPose(WAIST, angle_vector, elapsed_time_s);
+
 		waist_pose.poseIsValid = true;
 		waist_pose.result = TrackingResult_Running_OK;
 		waist_pose.deviceIsConnected = true;
@@ -115,8 +116,8 @@ void UDP::setValue(char* RecvBuf) {
 	case LFOOT:
 		t_lfoot_last = std::chrono::high_resolution_clock::now();
 		elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
-		lfoot_pose = getNewPose(lfoot_pose, angle_vector, elapsed_time_s);
-		lfoot_pose.vecPosition[0] = 0.5;
+		getNewPose(LFOOT, angle_vector, elapsed_time_s);
+
 		lfoot_pose.poseIsValid = true;
 		lfoot_pose.result = TrackingResult_Running_OK;
 		lfoot_pose.deviceIsConnected = true;
@@ -124,9 +125,8 @@ void UDP::setValue(char* RecvBuf) {
 	case RFOOT:
 		t_rfoot_last = std::chrono::high_resolution_clock::now();
 		elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
-		rfoot_pose = getNewPose(rfoot_pose, angle_vector, elapsed_time_s);
-		rfoot_pose.vecPosition[0] = 0.5;
-		rfoot_pose.vecPosition[2] = 0.5;
+		getNewPose(RFOOT, angle_vector, elapsed_time_s);
+
 		rfoot_pose.poseIsValid = true;
 		rfoot_pose.result = TrackingResult_Running_OK;
 		rfoot_pose.deviceIsConnected = true;
