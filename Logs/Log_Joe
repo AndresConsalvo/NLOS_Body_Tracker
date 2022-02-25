@@ -42,3 +42,16 @@
  - Began formatting code to be programmable onto the board via arduino
  - Wifi connectivity was achieved
  
+2/21/2022
+ - Attempted to work SPI on DevKitC board, was unsuccessful
+ 
+2/22/2022
+ - Met with Jaxson and Ruo in lab, were unable to get SPI or I2C functioning on DevKitC board
+ - Created timer interrupt code to blink LED for WiFi connectivity signalling
+ 
+2/24/2022
+ - Recieved new DevKitV1 and was successful in running SPI test code
+ 
+
+ 
+ 
