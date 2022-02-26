@@ -5,8 +5,8 @@
 #include "udp.h"
 #include "imu.h"
 
-const unsigned int udpPort = atoi(UDP_PORT);      // local port to listen on
-char * udpAddress = UDP_ADDRESS;
+const unsigned int udpPort = atoi(UDP_PORT);      
+const char * udpAddress = UDP_ADDRESS;
 WiFiUDP Udp;
 
 void udp_init(){
@@ -22,8 +22,7 @@ void test_send(){
   Serial.println("Packet sent");
 }
 
-void data_send(){
-  /*
+/*
    *{
    *"type" : "POSITION",
    *"data" : {
@@ -31,6 +30,8 @@ void data_send(){
    *"gyro" : [x,y,z]
    *}
    */
+int packet_count = 100;
+void data_send(){  
   sensor_data s = getMpuValues();
   char ReplyBuffer[100];
   char ReplyBuffer2[100];
@@ -44,6 +45,10 @@ void data_send(){
   Udp.beginPacket(udpAddress, udpPort);
   Udp.printf(ReplyBuffer);
   Udp.endPacket();
-  Serial.println("Packet sent");
-  Serial.println(ReplyBuffer);
+  if(packet_count == 200){
+    Serial.println(" 200 Packets sent");
+    Serial.println(ReplyBuffer);
+    packet_count = 0;
+  }
+  packet_count += 1;
 }

@@ -24,8 +24,6 @@ sensor_data getMpuValues(){
   s.accel_x = a.acceleration.x;
   s.accel_y = a.acceleration.y;
   s.accel_z = a.acceleration.z;
-  Serial.print("Z: ");
-  Serial.println(a.acceleration.z);
   s.gyro_x = g.gyro.x;
   s.gyro_y = g.gyro.y;
   s.gyro_z = g.gyro.z;
