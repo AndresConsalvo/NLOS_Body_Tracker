@@ -11,24 +11,19 @@
 uint8_t _ss_pin = 15;
 
 void spi_write(byte reg_addr, byte command) {
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
   _ss_pin = 15;
   digitalWrite(_ss_pin, LOW);
   //set to write
   SPI.transfer(reg_addr);
   SPI.transfer(command);
   digitalWrite(_ss_pin, HIGH);
-  SPI.endTransaction();
 }
 
 void spi_read(byte reg_addr) {
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
-  _ss_pin = 15;
   digitalWrite(_ss_pin, LOW);
   //set to write
   SPI.transfer(128 && reg_addr);
   digitalWrite(_ss_pin, HIGH);
-  SPI.endTransaction();
 }
 
 void spi_init(){

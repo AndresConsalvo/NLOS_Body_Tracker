@@ -1,9 +1,9 @@
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <WiFiUdp.h>
 #include "udp.h"
 
 unsigned int udpPort = 20001;      // local port to listen on
-const char * udpAddress = "192.168.0.150";
+const char * udpAddress = "192.168.0.144";
 WiFiUDP Udp;
 
 void udp_init(){
@@ -14,7 +14,7 @@ void test_send(){
   // send a reply, to the IP address and port that sent us the packet we received
   char  ReplyBuffer[] = "This is a test of your ESP8266 services\r\n";       // a string to send back
   Udp.beginPacket(udpAddress, udpPort);
-  Udp.write(ReplyBuffer);
+  Udp.printf(ReplyBuffer);
   Udp.endPacket();
   Serial.println("Packet sent");
   delay(5000);
