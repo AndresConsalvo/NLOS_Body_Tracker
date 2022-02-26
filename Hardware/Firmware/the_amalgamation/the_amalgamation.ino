@@ -3,8 +3,6 @@
 #include "io.h"
 #include "udp.h"
 //#include "spi.h"
-#define WIFI_NETWORK "BetterSideOfTheTraplex"
-#define WIFI_PASSWORD "Swamp9000"
 
 void setup() {
   Serial.begin(115200);
@@ -19,6 +17,6 @@ void loop() {
   test_send();
   //signalSOS();
 //  spi_read(0x40);
-  delay(1000);
+  delay(100);
 
 }

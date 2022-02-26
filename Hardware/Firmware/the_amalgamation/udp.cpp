@@ -3,7 +3,7 @@
 #include "udp.h"
 
 unsigned int udpPort = 20001;      // local port to listen on
-const char * udpAddress = "192.168.0.144";
+const char * udpAddress = "192.168.0.150";
 WiFiUDP Udp;
 
 void udp_init(){
@@ -17,5 +17,4 @@ void test_send(){
   Udp.printf(ReplyBuffer);
   Udp.endPacket();
   Serial.println("Packet sent");
-  delay(5000);
 }

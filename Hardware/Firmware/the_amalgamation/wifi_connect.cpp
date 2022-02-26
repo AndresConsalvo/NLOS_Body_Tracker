@@ -1,5 +1,3 @@
-//foundational code for establihing wifi connection and begining data transfer
-
 #include <Arduino.h>
 #include "io.h"
 #include "udp.h"
@@ -19,16 +17,20 @@ void wifiConnect() {
   const char* password = WIFI_PASSWORD;
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  WiFi.onEvent(onConnect, SYSTEM_EVENT_STA_CONNECTED);
-  WiFi.onEvent(onDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
+//  WiFi.onEvent(onConnect, SYSTEM_EVENT_STA_CONNECTED);
+//  WiFi.onEvent(onDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
   Serial.print("Connecting to ");
-  Serial.print(WIFI_NETWORK);
-   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(500);
-  }
+  Serial.println(WIFI_NETWORK);
+//   while (WiFi.status() != WL_CONNECTED) {
+//    Serial.print('.');
+//    delay(500);
+//  }
 //  local_ip = WiFi.localIP();
   udp_init();
+}
+
+bool getWifiStatus(){
+  return (WiFi.status() == WL_CONNECTED) ? 1 : 0;
 }
 
 
