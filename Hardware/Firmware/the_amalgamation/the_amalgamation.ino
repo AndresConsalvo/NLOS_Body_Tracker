@@ -10,7 +10,6 @@ void setup() {
   io_init();
   wifiConnect();
   imu_init();
-//  spi_init();
 }
 
 void loop() {

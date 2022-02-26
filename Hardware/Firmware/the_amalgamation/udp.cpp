@@ -1,11 +1,12 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <stdio.h>
-
+#include "defines.h"
 #include "udp.h"
 #include "imu.h"
-unsigned int udpPort = 20001;      // local port to listen on
-const char * udpAddress = "192.168.0.150";
+
+const unsigned int udpPort = atoi(UDP_PORT);      // local port to listen on
+char * udpAddress = UDP_ADDRESS;
 WiFiUDP Udp;
 
 void udp_init(){

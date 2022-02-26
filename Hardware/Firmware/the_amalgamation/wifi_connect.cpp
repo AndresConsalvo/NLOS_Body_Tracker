@@ -1,11 +1,11 @@
 #include <Arduino.h>
+#include "defines.h"
 #include "io.h"
 #include "udp.h"
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include "wifi_connect.h"
-#define WIFI_NETWORK "BetterSideOfTheTraplex"
-#define WIFI_PASSWORD "Swamp9000"
+
 
 //WiFiEventHandler wifiConnectedHandler;
 //WiFiEventHandler wifiDisconnectedHandler;
