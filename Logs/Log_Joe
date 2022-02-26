@@ -52,10 +52,7 @@
 2/24/2022
  - Recieved new DevKitV1 and was successful in running SPI test code
  
-2/25/2022
- - Began working on connecting MPU-6065 to ESP32 board
- 
-2/26/2022
+2/25/2022 - 26/2022
  - Refactored code from ESP8266 libraries to ESP32
  - Got WiFi connectivity and UDP packet sending functional
  - LED blinking was improved
