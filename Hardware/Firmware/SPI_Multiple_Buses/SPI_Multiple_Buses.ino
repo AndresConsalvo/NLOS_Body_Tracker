@@ -43,7 +43,6 @@ void setup() {
 void loop() {
   //use the SPI buses
   hspiCommand();
-  delay(200);
 
 }
 

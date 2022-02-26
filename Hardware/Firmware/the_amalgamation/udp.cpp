@@ -1,7 +1,9 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
-#include "udp.h"
+#include <stdio.h>
 
+#include "udp.h"
+#include "imu.h"
 unsigned int udpPort = 20001;      // local port to listen on
 const char * udpAddress = "192.168.0.150";
 WiFiUDP Udp;
@@ -17,4 +19,30 @@ void test_send(){
   Udp.printf(ReplyBuffer);
   Udp.endPacket();
   Serial.println("Packet sent");
+}
+
+void data_send(){
+  /*
+   *{
+   *"type" : "POSITION",
+   *"data" : {
+   *"accel" : [x,y,z],
+   *"gyro" : [x,y,z]
+   *}
+   */
+  sensor_data s = getMpuValues();
+  char ReplyBuffer[100];
+  char ReplyBuffer2[100];
+  char ReplyBuffer3[100];
+  
+  char  textBuffer[] = "\"type\" : \"POSITION\",\n\"data\" : {\n\"accel\" : [";
+  char commaBuffer[] = ",";
+  sprintf(ReplyBuffer, "%s%.2f%s%.2f%s%.2f%s %.2f%s%.2f%s%.2f%s", textBuffer, s.accel_x, ",", s.accel_y, ",", s.accel_z, "],\n\"gyro\" : [", s.gyro_x, ",", s.gyro_y, ",", s.gyro_z, "]\n}");
+
+  
+  Udp.beginPacket(udpAddress, udpPort);
+  Udp.printf(ReplyBuffer);
+  Udp.endPacket();
+  Serial.println("Packet sent");
+  Serial.println(ReplyBuffer);
 }
