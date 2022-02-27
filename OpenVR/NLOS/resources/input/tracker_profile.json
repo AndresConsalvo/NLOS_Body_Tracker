@@ -1,6 +1,6 @@
 {
   "jsonid": "input_profile",
-  "controller_type": "vive_tracker_waist",
+  "controller_type": "NLOS",
   "device_class": "TrackedDeviceClass_GenericTracker",
   "resource_root": "NLOS",
   "driver_name": "NLOS",
@@ -15,7 +15,12 @@
   "input_bindingui_right": {
     "image": "{NLOS}/icons/game_controller.svg"
   },
-
+  "tracker_types" : {
+    "TrackerRole_LeftFoot":"{NLOS}/input/nlos_profile_leftfoot.json",
+    "TrackerRole_RightFoot":"{NLOS}/input/nlos_profile_rightfoot.json",
+    "TrackerRole_Waist":"{NLOS}/input/nlos_profile_waist.json"
+    
+  },
   "input_source": {
     "/pose/raw": {
       "type": "pose",

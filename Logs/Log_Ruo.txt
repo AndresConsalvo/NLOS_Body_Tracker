@@ -88,3 +88,14 @@ Ruo Log:
 - OpenVR driver configured to handle multiplt drivers. UDP thread working in driver; all tracker data is now received. Tracking stutters less.
 - Prototype tracker configured to represent multiple trackers to test new version of the driver.
 - Working on getting position data from rotation in order to move limbs correctly.
+
+2/25/2022
+- Ordered dev boards to replace PCBs because we weren't sure if we could get it working in time
+
+2/26/2022
+- Attempted to get position of trackers (limbs) via conversion of quaternions back to euler angles.
+	- Inefficient, inaccurate.
+- Expanded math library to include quaternion multiplication.
+- https://personal.utdallas.edu/~sxb027100/dock/quaternion.html
+- https://ahrs.readthedocs.io/en/latest/filters/angular.html
+- https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles

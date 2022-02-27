@@ -1,0 +1,28 @@
+{
+    "jsonid" : "input_profile",
+    "controller_type": "NLOS_rfoot",
+    "device_class" : "TrackedDeviceClass_GenericTracker",
+    "resource_root" : "NLOS",
+    "driver_name" : "NLOS",
+    "legacy_binding" :  "{NLOS}/input/legacy_bindings_NLOS.json",
+    "legacy_profile" :  "none",
+    "input_bindingui_mode" : "single_device",
+    "should_show_binding_errors": true,
+    "input_bindingui_left": 
+    {
+      "transform": "scale(-1,1)",
+      "image": "{NLOS}/icons/tracker.svg"
+    },
+    "input_bindingui_right": 
+    {
+      "image": "{NLOS}/icons/tracker.svg"
+    },
+    "priority" : 6,
+    "input_source" :
+    {
+      "/pose/raw" : {
+          "type" : "pose",
+          "binding_image_point" : [ 0, 0 ]
+      }
+    }
+  }

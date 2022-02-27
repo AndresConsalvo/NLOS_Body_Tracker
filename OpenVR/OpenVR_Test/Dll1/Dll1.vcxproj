@@ -22,6 +22,7 @@
     <ClCompile Include="src\DeviceFactory.cpp" />
     <ClCompile Include="src\DeviceProvider.cpp" />
     <ClCompile Include="src\math_helpers.cpp" />
+    <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\TrackerDriver.cpp" />
     <ClCompile Include="src\UDP_receiver.cpp" />
   </ItemGroup>
@@ -29,6 +30,7 @@
     <ClInclude Include="include\DeviceProvider.h" />
     <ClInclude Include="include\Globals.h" />
     <ClInclude Include="include\math_helpers.h" />
+    <ClInclude Include="include\Matrix.h" />
     <ClInclude Include="include\TrackerDefines.h" />
     <ClInclude Include="include\TrackerDriver.h" />
     <ClInclude Include="include\UDP_receiver.h" />
