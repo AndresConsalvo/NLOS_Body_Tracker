@@ -16,7 +16,7 @@ WiFiUDP udp;
 
 // (Gx, Gy, Gz, Ax, Ay, Az)
 short short_data[6];
-byte data[12];
+byte data[13];
 
 short read_from_imu(byte reg_addr, byte num_bytes);
 
@@ -40,6 +40,8 @@ void setup() {
   pinMode(D2, OUTPUT);
 }
 
+unsigned short count;
+unsigned short resetting = 0;
 byte comm;
 void loop() {
   for (byte i = 0; i < 6; i++) {
@@ -47,14 +49,20 @@ void loop() {
     data[2 * i] = (short_data[i] >> 8) & 0xFF;
     data[2 * i + 1] = (short_data[i]) & 0xFF;
   }
+
+  data[12] = count++ % 4;
   
   if (connected) {
+    if (resetting < 500) {
+      resetting++;
+      data[12] = 4;
+    }
     digitalWrite(D0, HIGH);
     digitalWrite(D2, LOW);
     //Send a packet
     Serial.print("Still connected! \n");
     udp.beginPacket(udpAddress, udpPort);
-    udp.write(data, 12);
+    udp.write(data, 13);
     udp.endPacket();
   } else {
     digitalWrite(D0, LOW);
@@ -100,7 +108,9 @@ void print_from_imu() {
   Serial.print(",");
   Serial.print((short) short_data[4], DEC);
   Serial.print(",");
-  Serial.println((short) short_data[5], DEC);
+  Serial.print((short) short_data[5], DEC);
+  Serial.print(",");
+  Serial.println((short) data[12], DEC);
 }
 
 void connectToWiFi(const char * ssid, const char * pwd) {
