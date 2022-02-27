@@ -101,7 +101,7 @@ void UDP::setValue(char* RecvBuf) {
 	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
 	VRDriverLog()->Log(log_str);
 
-	ang_rate angle_vector(ang_x, ang_y, ang_z);
+	Vector3_d angle_vector(ang_x, ang_y, ang_z);
 
 	switch (tracker_ID) {
 	case WAIST:

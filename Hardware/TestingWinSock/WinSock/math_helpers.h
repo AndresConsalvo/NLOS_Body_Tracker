@@ -4,6 +4,7 @@
 
 #include <cmath>
 #pragma comment(lib, "ws2_32.lib")
+#include "Matrix.h"
 
 #define deg_to_rad(x) (x * (M_PI)/180.0)
 #define rad_to_deg(x) (x * 180.0 / M_PI);
@@ -16,26 +17,5 @@
 
 // This is an identity matrix.
 
-struct ang_rate {
-	double x, y, z;
-
-	ang_rate(double ang_x, double ang_y, double ang_z);
-
-	double get_magnitude();
-};
-
-
-struct omega {
-	double* matrix = new double[16];
-
-	double iMatrix[16] = { 1, 0, 0, 0,
-							0, 1, 0, 0,
-							0, 0, 1, 0,
-							0, 0, 0, 1 };
-
-	omega(ang_rate measured_angle);
-
-	double* getMatrix();
-};
 
 //void getNewPose(int limb, ang_rate angle_vector, double elapsed_time_ms);

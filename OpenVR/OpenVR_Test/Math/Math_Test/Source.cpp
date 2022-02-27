@@ -64,8 +64,6 @@ int main() {
 	double scale_Omega = (1.0 / ang_mag) * sin(ang_mag / 2);
 	identity_Matrix.scale_Matrix(scale_Ident);
 	test_Omega.scale_Matrix(scale_Omega);
-	printf("scale_Ident: %f\n", scale_Ident);
-	printf("scale_Omega: %f\n", sin_scalar);
 	Matrix44_d result = test_Omega + identity_Matrix;
 
 	Quaternion new_Quat = result.getNewQuat(old_Quat);
