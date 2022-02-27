@@ -16,6 +16,7 @@ public:
 private:
 	void start();
 	void setValue(char* RecvBuf);
+	void reset_trackers();
 
 	SOCKET sock;
 	sockaddr_in local;

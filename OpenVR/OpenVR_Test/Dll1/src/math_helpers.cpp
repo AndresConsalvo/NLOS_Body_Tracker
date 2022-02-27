@@ -40,7 +40,11 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 	identity_Matrix.set_as_Identity();
 	double ang_mag = angle_vector.getMag();
 
-
+	// Can't be dividing by zero now, can we?
+	if (checkIfZero(ang_mag, 0.00001)) {
+		ang_mag = 0.00001;
+	}
+	
 	double scale_Ident = cos(ang_mag / 2.0);
 	double scale_Omega = (1.0 / ang_mag) * sin(ang_mag / 2);
 	identity_Matrix.scale_Matrix(scale_Ident);
@@ -66,12 +70,17 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 	switch (limb) {
 	case WAIST:
 
-		posVec = Quaternion(0, 0, -0.8, 0);
+		posVec = Quaternion(0, 0, -Head_to_Waist_len_m, 0);
 		newPos = q_t1 * posVec * q_t1.GetInverse();
 
+		
 		pose->vecPosition[0] = hmd_pose.vecPosition[0] + newPos.x;
 		pose->vecPosition[1] = hmd_pose.vecPosition[1] + newPos.y;
 		pose->vecPosition[2] = hmd_pose.vecPosition[2] + newPos.z;
+		
+
+		snprintf(log_str, 100, "%f, %f, %f, %f\n", newPos.w, newPos.x, newPos.y, newPos.z);
+		VRDriverLog()->Log(log_str);
 
 		break;
 	case LFOOT:
@@ -83,16 +92,25 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 		pose->vecPosition[2] = -0.1;
 		break;
 	case RFOOT:
+		pose->qRotation.w = 1.0;
+		pose->qRotation.x = 0.0;
+		pose->qRotation.y = 0.0;
+		pose->qRotation.z = 0.0;
+
 		pose->vecPosition[0] = 0;
-		pose->vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
+		pose->vecPosition[1] = 0;
 		if (pose->vecPosition[1] < 0) {
 			pose->vecPosition[1] = 0;
 		}
-		pose->vecPosition[2] = 0.1;
+		pose->vecPosition[2] = -1.0;
 		break;
 	}
 
 
 
 	return;
+}
+
+bool checkIfZero(double& val, double threshold) {
+	return (val >= threshold && val <= threshold);
 }

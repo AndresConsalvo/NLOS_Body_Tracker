@@ -99,19 +99,6 @@ DriverPose_t TrackerDriver::GetPose() {
 	y = space_matrix.m[1][3];
 	z = space_matrix.m[2][3];
 
-	/*
-	q.w = sqrt(fmax(0, 1 + matrix.m[0][0] + matrix.m[1][1] + matrix.m[2][2])) / 2;
-	q.x = sqrt(fmax(0, 1 + matrix.m[0][0] - matrix.m[1][1] - matrix.m[2][2])) / 2;
-	q.y = sqrt(fmax(0, 1 - matrix.m[0][0] + matrix.m[1][1] - matrix.m[2][2])) / 2;
-	q.z = sqrt(fmax(0, 1 - matrix.m[0][0] - matrix.m[1][1] + matrix.m[2][2])) / 2;
-	q.x = copysign(q.x, matrix.m[2][1] - matrix.m[1][2]);
-	q.y = copysign(q.y, matrix.m[0][2] - matrix.m[2][0]);
-	q.z = copysign(q.z, matrix.m[1][0] - matrix.m[0][1]);
-	*/
-
-	snprintf(log_str, 100, "Pos of HMD: pos_x: %f, pos_y: %f, pos_z: %f\n", x, y, z);
-	VRDriverLog()->Log(log_str);
-
 	hmd_pose.vecPosition[0] = x;
 	hmd_pose.vecPosition[1] = y;
 	hmd_pose.vecPosition[2] = z;
@@ -119,8 +106,6 @@ DriverPose_t TrackerDriver::GetPose() {
 
 	switch (TrackerIndex) {
 	case (WAIST):
-		snprintf(log_str, 100, "Getting waist pose\n");
-		VRDriverLog()->Log(log_str);
 		return waist_pose;
 		break;
 	case (LFOOT):
