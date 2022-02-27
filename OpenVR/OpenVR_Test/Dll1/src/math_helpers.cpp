@@ -123,23 +123,61 @@ void getNewPose(int limb, ang_rate angle_vector, double elapsed_time_s) {
 
 	snprintf(log_str, 100, "Driver pos: x: %f, y: %f, z: %f\n", hmd_pose.vecPosition[0], hmd_pose.vecPosition[1], hmd_pose.vecPosition[2]);
 
+	// from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
+
+	double w = last_pose->qRotation.w;
+	double x = last_pose->qRotation.x;
+	double y = last_pose->qRotation.y;
+	double z = last_pose->qRotation.z;
+	double roll, pitch, yaw;
+	double t0, t1, t2, t3, t4;
+
+	t0 = 2.0 * (w * x + y * z);
+	t1 = 1.0 - (2.0 * (x * x + y * y));
+	t2 = 2.0 * (w * y - z * x);
+	if (t2 > 1.0) {
+		t2 = 1.0;
+	} else if (t2 < -1.0) {
+		t2 = -1.0;
+	}
+
+	t3 = 2.0 * (w * z + x * y);
+	t4 = 1.0 - 2.0 * (y * y + z * z);
+
+	roll = atan2(t0, t1);
+	pitch = -asin(t2);
+	yaw = atan2(t3, t4);
+
+	snprintf(log_str, 100, "Pos of HMD: pos_x: %f, pos_y: %f, pos_z: %f\n", hmd_pose.vecPosition[0], hmd_pose.vecPosition[1], hmd_pose.vecPosition[2]);
+	VRDriverLog()->Log(log_str);
+
 	switch (limb) {
 	case WAIST:
-		last_pose->vecPosition[0] = 0;
-		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m;
-		last_pose->vecPosition[2] = 0;
+		snprintf(log_str, 100, "Roll: %f, Pitch: %f, Yaw %f\n", roll, pitch, yaw);
+		VRDriverLog()->Log(log_str);
+		last_pose->vecPosition[0] = hmd_pose.vecPosition[0] - Head_to_Waist_len_m * sin(pitch);
+		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m * cos(pitch);
+		last_pose->vecPosition[2] = hmd_pose.vecPosition[2] - Head_to_Waist_len_m * sin(roll);
+
 		break;
 	case LFOOT:
-		last_pose->vecPosition[0] = 0;
-		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m - Waist_to_Foot_len_m;
-		last_pose->vecPosition[2] = 0.1;
+		last_pose->vecPosition[0] = waist_pose.vecPosition[0];
+		last_pose->vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
+		if (last_pose->vecPosition[1] < 0) {
+			last_pose->vecPosition[1] = 0;
+		}
+		last_pose->vecPosition[2] = waist_pose.vecPosition[2] + 0.1;
 		break;
 	case RFOOT:
-		last_pose->vecPosition[0] = 0;
-		last_pose->vecPosition[1] = hmd_pose.vecPosition[1] - Head_to_Waist_len_m - Waist_to_Foot_len_m;
-		last_pose->vecPosition[2] = -0.1;
+		last_pose->vecPosition[0] = waist_pose.vecPosition[0];
+		last_pose->vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
+		if (last_pose->vecPosition[1] < 0) {
+			last_pose->vecPosition[1] = 0;
+		}
+		last_pose->vecPosition[2] = waist_pose.vecPosition[2] - 0.1;
 		break;
 	}
+
 
 
 	return;

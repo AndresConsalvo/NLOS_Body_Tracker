@@ -87,17 +87,17 @@ void UDP::setValue(char* RecvBuf) {
 	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
 	VRDriverLog()->Log(log_str);
 
-	// TODO: Add if statement to check device ID before updating position
-	short Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
+	// Because of how IMU is positioned, data received does not correspond with axis.
+	short Gz = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
 	short Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
-	short Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
+	short Gx = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
 
 	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\n", Gx, Gy, Gz);
 	VRDriverLog()->Log(log_str);
 
-	double ang_x = deg_to_rad((double)Gx / 524.8);
-	double ang_y = deg_to_rad((double)Gy / 524.8);
-	double ang_z = deg_to_rad((double)Gz / 524.8);
+	double ang_x = -deg_to_rad((double)Gx / 524.8);
+	double ang_y = -deg_to_rad((double)Gy / 524.8);
+	double ang_z = -deg_to_rad((double)Gz / 524.8);
 	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
 	VRDriverLog()->Log(log_str);
 
