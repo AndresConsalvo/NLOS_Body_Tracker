@@ -154,10 +154,31 @@ void UDP::reset_trackers() {
 	snprintf(log_str, 100, "Resetting tracker pos!\n");
 	VRDriverLog()->Log(log_str);
 
+	neck_pose.vecPosition[0] = 0.0;
+	neck_pose.vecPosition[1] = 1.6;
+	neck_pose.vecPosition[2] = -Head_to_Neck;
+
+	waist_pose.vecPosition[0] = 0.0;
+	waist_pose.vecPosition[1] = neck_pose.vecPosition[1] - Neck_to_Waist;
+	waist_pose.vecPosition[2] = neck_pose.vecPosition[2];
+
+	lfoot_pose.vecPosition[0] = -0.1;
+	lfoot_pose.vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
+	lfoot_pose.vecPosition[2] = neck_pose.vecPosition[2];
+
+	rfoot_pose.vecPosition[0] = 1.0;
+	rfoot_pose.vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
+	rfoot_pose.vecPosition[2] = neck_pose.vecPosition[2];
+
+	lfoot_pose.qRotation.w = 1.0;
+	lfoot_pose.qRotation.x = 0;
+	lfoot_pose.qRotation.y = 0;
+	lfoot_pose.qRotation.z = 0;
+
 
 	waist_pose.qRotation.w = 1.0;
 	waist_pose.qRotation.x = 0;
-	waist_pose.qRotation.y = 0;
+	waist_pose.qRotation.y = 
 	waist_pose.qRotation.z = 0;
 
 	lfoot_pose.qRotation.w = 1.0;

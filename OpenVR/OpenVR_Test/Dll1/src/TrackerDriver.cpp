@@ -1,8 +1,5 @@
 #include <TrackerDriver.h>
 
-
-DriverPose_t last_pose = { 0 };
-
 EVRInitError TrackerDriver::Activate(uint32_t unObjectId) {
 	char log_str[100];
 	// OpenVR automatically assigns this a unique object ID.
@@ -102,6 +99,23 @@ DriverPose_t TrackerDriver::GetPose() {
 	hmd_pose.vecPosition[0] = x;
 	hmd_pose.vecPosition[1] = y;
 	hmd_pose.vecPosition[2] = z;
+
+	Quaternion hmd_quat = getQuaternionFromHMD(space_matrix);
+
+	hmd_pose.qRotation.w = hmd_quat.w;
+	hmd_pose.qRotation.x = hmd_quat.x;
+	hmd_pose.qRotation.y = hmd_quat.y;
+	hmd_pose.qRotation.z = hmd_quat.z;
+
+	Quaternion neckPos(0, 0, -Head_to_Neck, HMD_to_Head);
+	Quaternion newPos = hmd_quat * neckPos * hmd_quat.GetInverse();
+
+	neck_pose.vecPosition[0] = hmd_pose.vecPosition[0] + newPos.x;
+	neck_pose.vecPosition[1] = hmd_pose.vecPosition[1] + newPos.y;
+	neck_pose.vecPosition[2] = hmd_pose.vecPosition[2] + newPos.z;
+
+	snprintf(log_str, 100, "Neck: x:%f, y:%f, z:%f\n", neck_pose.vecPosition[0], neck_pose.vecPosition[1], neck_pose.vecPosition[2]);
+	VRDriverLog()->Log(log_str);
 	
 
 	switch (TrackerIndex) {

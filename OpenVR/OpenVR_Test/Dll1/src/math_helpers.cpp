@@ -32,7 +32,6 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 	pose->qWorldFromDriverRotation = quat;
 	pose->qDriverFromHeadRotation = quat;
 
-
 	Quaternion q_t0(pose->qRotation.w, pose->qRotation.x, pose->qRotation.y, pose->qRotation.z);
 	Matrix44_d omega_Matrix;
 	Matrix44_d identity_Matrix;
@@ -69,48 +68,56 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 
 	switch (limb) {
 	case WAIST:
-
-		posVec = Quaternion(0, 0, -Head_to_Waist_len_m, 0);
+		posVec = Quaternion(0, 0, -Neck_to_Waist, 0);
 		newPos = q_t1 * posVec * q_t1.GetInverse();
 
-		
-		pose->vecPosition[0] = hmd_pose.vecPosition[0] + newPos.x;
-		pose->vecPosition[1] = hmd_pose.vecPosition[1] + newPos.y;
-		pose->vecPosition[2] = hmd_pose.vecPosition[2] + newPos.z;
-		
-
-		snprintf(log_str, 100, "%f, %f, %f, %f\n", newPos.w, newPos.x, newPos.y, newPos.z);
-		VRDriverLog()->Log(log_str);
+		pose->vecPosition[0] = neck_pose.vecPosition[0] + newPos.x;
+		pose->vecPosition[1] = neck_pose.vecPosition[1] + newPos.y;
+		pose->vecPosition[2] = neck_pose.vecPosition[2] + newPos.z;
 
 		break;
 	case LFOOT:
-		pose->vecPosition[0] = 0;
-		pose->vecPosition[1] = 0.8;
+		posVec = Quaternion(0, -0.1, -Waist_to_Foot_len_m, 0);
+		newPos = q_t1 * posVec * q_t1.GetInverse();
+
+		pose->vecPosition[0] = waist_pose.vecPosition[0] + newPos.x;
+		pose->vecPosition[1] = waist_pose.vecPosition[1] + newPos.y;
 		if (pose->vecPosition[1] < 0) {
 			pose->vecPosition[1] = 0;
 		}
-		pose->vecPosition[2] = -0.1;
+		pose->vecPosition[2] = waist_pose.vecPosition[2] + newPos.z;
 		break;
 	case RFOOT:
-		pose->qRotation.w = 1.0;
-		pose->qRotation.x = 0.0;
-		pose->qRotation.y = 0.0;
-		pose->qRotation.z = 0.0;
+		posVec = Quaternion(0, 0.1, -Waist_to_Foot_len_m, 0);
+		newPos = q_t1 * posVec * q_t1.GetInverse();
 
-		pose->vecPosition[0] = 0;
-		pose->vecPosition[1] = 0;
+		pose->vecPosition[0] = waist_pose.vecPosition[0] + newPos.x;
+		pose->vecPosition[1] = waist_pose.vecPosition[1] + newPos.y;
 		if (pose->vecPosition[1] < 0) {
 			pose->vecPosition[1] = 0;
 		}
-		pose->vecPosition[2] = -1.0;
+		pose->vecPosition[2] = waist_pose.vecPosition[2] + newPos.z;
 		break;
 	}
-
-
 
 	return;
 }
 
 bool checkIfZero(double& val, double threshold) {
 	return (val >= threshold && val <= threshold);
+}
+
+// https://github.com/osudrl/OpenVR-Tracking-Example/blob/e17119b5129a3d77e4054f0fa30401a13daaf1dd/HTC%20Lighthouse%20Tracking%20Example/LighthouseTracking.cpp#L166-L177
+Quaternion getQuaternionFromHMD(HmdMatrix34_t& matrix) {
+	Quaternion newQuat;
+
+	newQuat.w = sqrt(fmax(0, 1 + matrix.m[0][0] + matrix.m[1][1] + matrix.m[2][2])) / 2;
+	newQuat.x = sqrt(fmax(0, 1 + matrix.m[0][0] - matrix.m[1][1] - matrix.m[2][2])) / 2;
+	newQuat.y = sqrt(fmax(0, 1 - matrix.m[0][0] + matrix.m[1][1] - matrix.m[2][2])) / 2;
+	newQuat.z = sqrt(fmax(0, 1 - matrix.m[0][0] - matrix.m[1][1] + matrix.m[2][2])) / 2;
+	newQuat.x = copysign(newQuat.x, matrix.m[2][1] - matrix.m[1][2]);
+	newQuat.y = copysign(newQuat.y, matrix.m[0][2] - matrix.m[2][0]);
+	newQuat.z = copysign(newQuat.z, matrix.m[1][0] - matrix.m[0][1]);
+
+	return newQuat;
 }

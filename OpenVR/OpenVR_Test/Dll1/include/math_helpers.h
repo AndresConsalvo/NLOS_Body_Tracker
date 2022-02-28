@@ -16,3 +16,5 @@ using namespace vr;
 void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_ms);
 
 bool checkIfZero(double& val, double threshold);
+
+Quaternion getQuaternionFromHMD(HmdMatrix34_t& matrix);
