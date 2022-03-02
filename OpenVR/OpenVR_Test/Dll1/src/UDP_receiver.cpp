@@ -98,6 +98,7 @@ void UDP::setValue(char* RecvBuf) {
 	double ang_x = -deg_to_rad((double)Gx / 524.8);
 	double ang_y = -deg_to_rad((double)Gy / 524.8);
 	double ang_z = deg_to_rad((double)Gz / 524.8);
+
 	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
 	VRDriverLog()->Log(log_str);
 
@@ -108,8 +109,7 @@ void UDP::setValue(char* RecvBuf) {
 	} else {
 		switch (tracker_ID) {
 		case WAIST:
-			snprintf(log_str, 100, "Posing waist\n");
-			VRDriverLog()->Log(log_str);
+			VRDriverLog()->Log("Posing waist\n");
 
 			t_waist_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_waist_last - t_recv_end).count() / 1000.0;
@@ -120,8 +120,7 @@ void UDP::setValue(char* RecvBuf) {
 			waist_pose.deviceIsConnected = true;
 			break;
 		case LFOOT:
-			snprintf(log_str, 100, "Posing left foot\n");
-			VRDriverLog()->Log(log_str);
+			VRDriverLog()->Log("Posing left foot\n");
 			t_lfoot_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
 			getNewPose(LFOOT, angle_vector, elapsed_time_s);
@@ -131,8 +130,7 @@ void UDP::setValue(char* RecvBuf) {
 			lfoot_pose.deviceIsConnected = true;
 			break;
 		case RFOOT:
-			snprintf(log_str, 100, "Posing right foot\n");
-			VRDriverLog()->Log(log_str);
+			VRDriverLog()->Log("Posing right foot\n");
 
 			t_rfoot_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
@@ -141,7 +139,7 @@ void UDP::setValue(char* RecvBuf) {
 			rfoot_pose.poseIsValid = true;
 			rfoot_pose.result = TrackingResult_Running_OK;
 			rfoot_pose.deviceIsConnected = true;
-
+	
 		default:
 			break;
 		}
@@ -150,9 +148,7 @@ void UDP::setValue(char* RecvBuf) {
 }
 
 void UDP::reset_trackers() {
-
-	snprintf(log_str, 100, "Resetting tracker pos!\n");
-	VRDriverLog()->Log(log_str);
+	VRDriverLog()->Log("Resetting tracker pos!\n");
 
 	neck_pose.vecPosition[0] = 0.0;
 	neck_pose.vecPosition[1] = 1.6;
