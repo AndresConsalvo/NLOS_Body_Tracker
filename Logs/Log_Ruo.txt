@@ -110,3 +110,4 @@ Ruo Log:
 3/3/2022
 - Worked with Andres to integrate client, backend server, and OpenVR drivers in order to send tracker data to where it needs to go
 - Converted OpenVR UDP server to client that receives data from the server.
+- Updated Joe's program to output a JSON file correctly.
