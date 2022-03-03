@@ -18,7 +18,7 @@ DriverPose_t tailbone_pose = { 0 };
 DriverPose_t lhip_pose = { 0 };
 DriverPose_t rhip_pose = { 0 };
 
-const double HMD_to_Head = 0.17;
+const double HMD_to_Head = 0.0;
 const double Head_to_Neck = 0.18;
 const double Neck_to_Waist = 0.62;
 const double Waist_to_Hip = 0.1;

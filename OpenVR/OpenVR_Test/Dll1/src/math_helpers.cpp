@@ -62,12 +62,14 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 	VRDriverLog()->Log(log_str);
 
 	snprintf(log_str, 100, "Driver pos: x: %f, y: %f, z: %f\n", hmd_pose.vecPosition[0], hmd_pose.vecPosition[1], hmd_pose.vecPosition[2]);
+	VRDriverLog()->Log(log_str);
 
 	// from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
 	Quaternion posVec, newPos;
 
 	switch (limb) {
 	case WAIST:
+		VRDriverLog()->Log("Waist pos updated!");
 		posVec = Quaternion(0, 0, -Neck_to_Waist, 0);
 		newPos = q_t1 * posVec * q_t1.GetInverse();
 

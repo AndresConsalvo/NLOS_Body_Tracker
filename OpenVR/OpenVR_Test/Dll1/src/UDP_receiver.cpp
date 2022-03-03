@@ -3,17 +3,15 @@
 
 
 #define PORT 20000
-const char* srcIP = "192.168.1.59";
+const char* srcIP = "192.168.1.51";
 
 char log_str[100];
 char RecvBuf[25];
 
-float* acc_x = (float*)RecvBuf;
-float* acc_y = (float*)(RecvBuf + 4);
-float* acc_z = (float*)(RecvBuf + 8);
-float* gyr_x = (float*)(RecvBuf + 12);
-float* gyr_y = (float*)(RecvBuf + 16);
-float* gyr_z = (float*)(RecvBuf + 20);
+float* gyr_x = (float*)(RecvBuf + 0);
+float* gyr_y = (float*)(RecvBuf + 4);
+float* gyr_z = (float*)(RecvBuf + 8);
+float* tracker_id = (float*)(RecvBuf + 12);
 
 
 void UDP::init() {
@@ -31,29 +29,22 @@ void UDP::init() {
 		
 		local.sin_family = AF_INET;
 		local.sin_port = htons(PORT);
-		local.sin_addr.s_addr = htonl(INADDR_ANY);
+		local.sin_addr.s_addr = inet_addr(srcIP);
 
 		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-		if (sock != INVALID_SOCKET) {
-			iResult = bind(sock, (SOCKADDR*)&local, sizeof(local));
-			
-
-			if (iResult != SOCKET_ERROR) {
-				SocketActivated = true;
-				receiveThread = new std::thread(&UDP::start, this);
-			}
-			else {
-				SocketActivated = false;
-				WSACleanup();
-				vr::VRDriverLog()->Log("Socket binding failed!");
-			}
-		} else {
+		SocketActivated = true;
+		if (sock == INVALID_SOCKET) {
 			WSACleanup();
 			SocketActivated = false;
 			vr::VRDriverLog()->Log("Socket startup failed!");
 		}
+
+		receiveThread = new std::thread(&UDP::start, this);
 	}
+
+	char message[] = "Hello";
+	int ret = sendto(sock, message, sizeof(message), 0, (struct sockaddr*)&local, sizeof(local));
+	VRDriverLog()->Log("Sent message!");
 }
 
 void UDP::deinit() {
@@ -78,7 +69,7 @@ void UDP::start() {
 		bytes_read = recvfrom(sock, RecvBuf, 25, 0, (sockaddr*)&local, &localAddrSize);
 		snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
 		VRDriverLog()->Log(log_str);
-		if (bytes_read == 25) {
+		if (bytes_read == 16) {
 			VRDriverLog()->Log("Setting value!");
 			setValue((char*)RecvBuf);
 		} else {
@@ -92,7 +83,7 @@ void UDP::setValue(char* RecvBuf) {
 	// Need to move the gyroscope receive and calculate somewhere else.
 
 	// short tracker_ID = (short)(RecvBuf[6]);
-	short tracker_ID = RecvBuf[25];
+	short tracker_ID = *tracker_id;
 	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
 	VRDriverLog()->Log(log_str);
 
@@ -113,8 +104,10 @@ void UDP::setValue(char* RecvBuf) {
 
 	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
 	VRDriverLog()->Log(log_str);
-
-	Vector3_d angle_vector(ang_x, -ang_y, -ang_z);
+	// red = x
+	// green = y
+	// blue = z ( -z is forwards)
+	
 
 	if (tracker_ID == 4) {
 		reset_trackers();
@@ -125,7 +118,7 @@ void UDP::setValue(char* RecvBuf) {
 
 			t_waist_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_waist_last - t_recv_end).count() / 1000.0;
-			getNewPose(WAIST, angle_vector, elapsed_time_s);
+			getNewPose(WAIST, Vector3_d(-ang_x, -ang_y, -ang_z), elapsed_time_s);
 
 			waist_pose.poseIsValid = true;
 			waist_pose.result = TrackingResult_Running_OK;
@@ -135,7 +128,7 @@ void UDP::setValue(char* RecvBuf) {
 			VRDriverLog()->Log("Posing left foot\n");
 			t_lfoot_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(LFOOT, angle_vector, elapsed_time_s);
+			getNewPose(LFOOT, Vector3_d(ang_x, ang_y, ang_z), elapsed_time_s);
 
 			lfoot_pose.poseIsValid = true;
 			lfoot_pose.result = TrackingResult_Running_OK;
@@ -146,7 +139,7 @@ void UDP::setValue(char* RecvBuf) {
 
 			t_rfoot_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(RFOOT, angle_vector, elapsed_time_s);
+			getNewPose(RFOOT, Vector3_d(ang_x, ang_y, ang_z), elapsed_time_s);
 
 			rfoot_pose.poseIsValid = true;
 			rfoot_pose.result = TrackingResult_Running_OK;
