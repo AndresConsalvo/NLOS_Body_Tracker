@@ -1,8 +1,8 @@
 #include <DeviceProvider.h>
 
 bool waist_en = true;
-bool lfoot_en = true;
-bool rfoot_en = true;
+bool lfoot_en = false;
+bool rfoot_en = false;
 bool lthigh_en = false;
 bool rthigh_en = false;
 
@@ -14,15 +14,18 @@ DriverPose_t lfoot_pose = { 0 };
 DriverPose_t rfoot_pose = { 0 };
 
 DriverPose_t neck_pose = { 0 };
+DriverPose_t tailbone_pose = { 0 };
+DriverPose_t lhip_pose = { 0 };
+DriverPose_t rhip_pose = { 0 };
 
 const double HMD_to_Head = 0.17;
 const double Head_to_Neck = 0.18;
-
 const double Neck_to_Waist = 0.62;
-
+const double Waist_to_Hip = 0.1;
+const double hip_width = 0.3;
 const double Head_to_Floor_len_m = 1.7;
 const double Head_to_Waist_len_m = 0.8;
-const double Waist_to_Foot_len_m = 0.9;
+const double Hip_to_Foot_len_m = 0.9;
 
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);

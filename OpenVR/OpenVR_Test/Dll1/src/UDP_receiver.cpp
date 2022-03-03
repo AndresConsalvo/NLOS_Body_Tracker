@@ -6,7 +6,14 @@
 const char* srcIP = "192.168.1.59";
 
 char log_str[100];
+char RecvBuf[25];
 
+float* acc_x = (float*)RecvBuf;
+float* acc_y = (float*)(RecvBuf + 4);
+float* acc_z = (float*)(RecvBuf + 8);
+float* gyr_x = (float*)(RecvBuf + 12);
+float* gyr_y = (float*)(RecvBuf + 16);
+float* gyr_z = (float*)(RecvBuf + 20);
 
 
 void UDP::init() {
@@ -64,13 +71,15 @@ void UDP::deinit() {
 
 void UDP::start() {
 
-	char RecvBuf[13];
+	
 	int localAddrSize = sizeof(local);
 	while (SocketActivated) {
 		vr::VRDriverLog()->Log("Receiving data!");
-		bytes_read = recvfrom(sock, RecvBuf, 13, 0, (sockaddr*)&local, &localAddrSize);
-		vr::VRDriverLog()->Log("Data received!");
-		if (bytes_read == 13) {
+		bytes_read = recvfrom(sock, RecvBuf, 25, 0, (sockaddr*)&local, &localAddrSize);
+		snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
+		VRDriverLog()->Log(log_str);
+		if (bytes_read == 25) {
+			VRDriverLog()->Log("Setting value!");
 			setValue((char*)RecvBuf);
 		} else {
 			vr::VRDriverLog()->Log("No data received!");
@@ -83,26 +92,29 @@ void UDP::setValue(char* RecvBuf) {
 	// Need to move the gyroscope receive and calculate somewhere else.
 
 	// short tracker_ID = (short)(RecvBuf[6]);
-	short tracker_ID = RecvBuf[12];
+	short tracker_ID = RecvBuf[25];
 	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
 	VRDriverLog()->Log(log_str);
 
-	// Because of how IMU is positioned, data received does not correspond with axis.
+	/*
 	short Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
 	short Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
 	short Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
 
 	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\n", Gx, Gy, Gz);
 	VRDriverLog()->Log(log_str);
+	*/
+	// Because of how IMU is positioned, data received does not correspond with axis.
 
-	double ang_x = -deg_to_rad((double)Gx / 524.8);
-	double ang_y = -deg_to_rad((double)Gy / 524.8);
-	double ang_z = deg_to_rad((double)Gz / 524.8);
+
+	double ang_x = *gyr_x;
+	double ang_y = *gyr_y;
+	double ang_z = *gyr_z;
 
 	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
 	VRDriverLog()->Log(log_str);
 
-	Vector3_d angle_vector(ang_x, ang_y, ang_z);
+	Vector3_d angle_vector(ang_x, -ang_y, -ang_z);
 
 	if (tracker_ID == 4) {
 		reset_trackers();
@@ -143,6 +155,8 @@ void UDP::setValue(char* RecvBuf) {
 		default:
 			break;
 		}
+
+		updateSkeleton();
 	}
 
 }
@@ -158,13 +172,13 @@ void UDP::reset_trackers() {
 	waist_pose.vecPosition[1] = neck_pose.vecPosition[1] - Neck_to_Waist;
 	waist_pose.vecPosition[2] = neck_pose.vecPosition[2];
 
-	lfoot_pose.vecPosition[0] = -0.1;
-	lfoot_pose.vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
-	lfoot_pose.vecPosition[2] = neck_pose.vecPosition[2];
+	lfoot_pose.vecPosition[0] = lhip_pose.vecPosition[0];
+	lfoot_pose.vecPosition[1] = lhip_pose.vecPosition[1] - Hip_to_Foot_len_m;
+	lfoot_pose.vecPosition[2] = lhip_pose.vecPosition[2];
 
-	rfoot_pose.vecPosition[0] = 1.0;
-	rfoot_pose.vecPosition[1] = waist_pose.vecPosition[1] - Waist_to_Foot_len_m;
-	rfoot_pose.vecPosition[2] = neck_pose.vecPosition[2];
+	rfoot_pose.vecPosition[0] = rhip_pose.vecPosition[0];
+	rfoot_pose.vecPosition[1] = rhip_pose.vecPosition[1] - Hip_to_Foot_len_m;
+	rfoot_pose.vecPosition[2] = rhip_pose.vecPosition[2];
 
 	lfoot_pose.qRotation.w = 1.0;
 	lfoot_pose.qRotation.x = 0;

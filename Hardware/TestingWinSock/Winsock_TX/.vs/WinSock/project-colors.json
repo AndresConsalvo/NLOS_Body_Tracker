@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "c80390e7-4752-4e61-a3f8-ae56a794ebfb": {
+      "ProjectGuid": "c80390e7-4752-4e61-a3f8-ae56a794ebfb",
+      "DisplayName": "WinSock",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}

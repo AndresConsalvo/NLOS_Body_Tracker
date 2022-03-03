@@ -7,6 +7,12 @@
 #include <Ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
+#define tracker_data 0
+#define set_config 1
+#define calibrate 2
+
+
+
 // adapted from https://github.com/m9cd0n9ld/IMU-VR-Full-Body-Tracker/blob/main/steamvr_openvr_driver/driver_imuFBT/headers/UDP.h
 class UDP {
 public:
