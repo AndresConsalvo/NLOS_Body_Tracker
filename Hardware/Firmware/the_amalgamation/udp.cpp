@@ -22,6 +22,8 @@ void test_send(){
   Serial.println("Packet sent");
 }
 
+int TrackerID = 5;
+
 /*
    *{
    *"type" : "POSITION",
@@ -33,13 +35,13 @@ void test_send(){
 int packet_count = 100;
 void data_send(){  
   sensor_data s = getMpuValues();
-  char ReplyBuffer[100];
+  char ReplyBuffer[200];
   char ReplyBuffer2[100];
   char ReplyBuffer3[100];
   
-  char  textBuffer[] = "\"type\" : \"POSITION\",\n\"data\" : {\n\"accel\" : [";
+  char  textBuffer[] = "{\"type\": \"POSITION\", \"data\": {\"accel\": [";
   char commaBuffer[] = ",";
-  sprintf(ReplyBuffer, "%s%.2f%s%.2f%s%.2f%s %.2f%s%.2f%s%.2f%s", textBuffer, s.accel_x, ",", s.accel_y, ",", s.accel_z, "],\n\"gyro\" : [", s.gyro_x, ",", s.gyro_y, ",", s.gyro_z, "]\n}");
+  sprintf(ReplyBuffer, "%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%s%s", textBuffer, s.accel_x, ",", s.accel_y, ",", s.accel_z, "], \"gyro\": [", s.gyro_x, ",", s.gyro_y, ",", s.gyro_z, "], \"id\": ", "5","}}");
 
   
   Udp.beginPacket(udpAddress, udpPort);
