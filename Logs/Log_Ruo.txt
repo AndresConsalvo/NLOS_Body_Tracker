@@ -99,3 +99,14 @@ Ruo Log:
 - https://personal.utdallas.edu/~sxb027100/dock/quaternion.html
 - https://ahrs.readthedocs.io/en/latest/filters/angular.html
 - https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+2/27/2022
+- Body kinematics implemented with Quaternions
+
+3/2/2022
+- Integrated Joe's code, readings are now much more accurate before (drift is still an issue)
+- Began work on filter
+
+3/3/2022
+- Worked with Andres to integrate client, backend server, and OpenVR drivers in order to send tracker data to where it needs to go
+- Converted OpenVR UDP server to client that receives data from the server.
