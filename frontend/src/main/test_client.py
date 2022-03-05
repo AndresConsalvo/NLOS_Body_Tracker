@@ -4,13 +4,14 @@ import random
 import json
 import sys
 import time
+import argparse
 
 from tracker import Tracker
 
 # from zmq import SERVER
 # Generate random seeded data
 
-SERVER_ADDR_PORT = ("127.0.0.1", 20001)
+SERVER_ADDR_PORT = ("192.168.1.51", 20000)
 BUFFER_SIZE      = 1024
 IP = socket.gethostbyname(socket.gethostname())
 
@@ -25,24 +26,35 @@ def generate_voltage():
 
 def handle_client(sock, id:int, verbose=False):
   if verbose:
-    print(f"[NEW CLIENT] Tracker-{id} connecting...")
+    print(f"[INFO] Tracker-{id} connecting...")
 
   voltage = generate_voltage()
-  # print(voltage)
   tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, "Tracker-"+str(id))
   message = json.dumps(tracker.get_device())
   bytes_to_send = str.encode(message)
   sock.sendto(bytes_to_send,SERVER_ADDR_PORT)
 
-def start_test(n_messages=1, n_trackers=1, verbose=False):
+def start_test(n_messages, n_trackers, verbose):
+  if n_messages is None or not isinstance(n_messages, int):
+    n_messages = 1
+
+  if n_trackers is None or not isinstance(n_trackers, int):
+    n_trackers = 1
+
+  if verbose is None or not isinstance(verbose, bool):
+    verbose = False
+
   start = timeit.timeit()
   sockets = []
-  for m in range(0,n_trackers):
+
+  for i in range(0, n_trackers):
     sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM,)
     sockets += [sock]
-    for i in range(0,n_messages):
-      handle_client(sockets[m], m+1, verbose)
-      time.sleep(1)
+
+  for m in range(0,n_messages):
+    for i in range(0,n_trackers):
+      handle_client(sockets[i], i+1, verbose)
+      # time.sleep(1)
 
   end = timeit.timeit()
 
@@ -51,5 +63,12 @@ def start_test(n_messages=1, n_trackers=1, verbose=False):
 
 
 if __name__ == "__main__":
-  v = eval(sys.argv[1])
-  start_test(n_messages=30 , verbose=v)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-v', type=bool)
+  parser.add_argument('-t', type=int)
+  parser.add_argument('-m', type=int)
+  args = parser.parse_args()
+
+
+
+  start_test(args.m, args.t, args.v)
