@@ -22,14 +22,21 @@
     <ClCompile Include="src\DeviceFactory.cpp" />
     <ClCompile Include="src\DeviceProvider.cpp" />
     <ClCompile Include="src\math_helpers.cpp" />
+    <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\TrackerDriver.cpp" />
+    <ClCompile Include="src\UDP_receiver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DeviceProvider.h" />
     <ClInclude Include="include\Globals.h" />
     <ClInclude Include="include\math_helpers.h" />
+    <ClInclude Include="include\Matrix.h" />
     <ClInclude Include="include\TrackerDefines.h" />
     <ClInclude Include="include\TrackerDriver.h" />
+    <ClInclude Include="include\UDP_receiver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NLOS\resources\input\waist_tracker_profile.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -167,6 +174,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y "C:\Users\chenr\Desktop\NLOS\NLOS_Body_Tracker\OpenVR\OpenVR_Test\Dll1\x64\Release\driver_NLOS.dll" "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\NLOS\bin\win64"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

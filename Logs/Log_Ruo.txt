@@ -82,4 +82,32 @@ Ruo Log:
 - Began developing math library to help with quarternions calculations
 
 2/15/2022
-- Bare minimum quaternion math implemented; gimbal lock issue fixed. Rotation is tracker is now accurately tracked.
+- Bare minimum quaternion math implemented; gimbal lock issue fixed. Rotation in tracker is now correctly tracked.
+
+2/20/2022
+- OpenVR driver configured to handle multiplt drivers. UDP thread working in driver; all tracker data is now received. Tracking stutters less.
+- Prototype tracker configured to represent multiple trackers to test new version of the driver.
+- Working on getting position data from rotation in order to move limbs correctly.
+
+2/25/2022
+- Ordered dev boards to replace PCBs because we weren't sure if we could get it working in time
+
+2/26/2022
+- Attempted to get position of trackers (limbs) via conversion of quaternions back to euler angles.
+	- Inefficient, inaccurate.
+- Expanded math library to include quaternion multiplication.
+- https://personal.utdallas.edu/~sxb027100/dock/quaternion.html
+- https://ahrs.readthedocs.io/en/latest/filters/angular.html
+- https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+2/27/2022
+- Body kinematics implemented with Quaternions
+
+3/2/2022
+- Integrated Joe's code, readings are now much more accurate before (drift is still an issue)
+- Began work on filter
+
+3/3/2022
+- Worked with Andres to integrate client, backend server, and OpenVR drivers in order to send tracker data to where it needs to go
+- Converted OpenVR UDP server to client that receives data from the server.
+- Updated Joe's program to output a JSON file correctly.

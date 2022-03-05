@@ -1,9 +1,8 @@
 #pragma once
 
-#include <openvr_driver.h>
-#include <TrackerDriver.h>
 #include <Globals.h>
-
+#include <UDP_receiver.h>
+#include <TrackerDriver.h>
 
 
 using namespace vr;
@@ -26,6 +25,8 @@ public:
 	void LeaveStandby();
 
 private:
+
+	UDP* udpThread = nullptr;
 
 	TrackerDriver* waist_tracker = nullptr;
 	TrackerDriver* lfoot_tracker = nullptr;

@@ -1,6 +1,6 @@
 {
   "jsonid": "input_profile",
-  "controller_type": "vive_tracker_left_foot",
+  "controller_type": "NLOS",
   "device_class": "TrackedDeviceClass_Controller",
   "resource_root": "NLOS",
   "driver_name": "NLOS",
@@ -16,6 +16,9 @@
     "image": "{NLOS}/icons/game_controller.svg"
   },
   "priority": 6,
+  "tracker_types": {
+    "TrackerRole_Waist": "{imuFBT/input/waist_tracker_profile.json}"
+  }
   "input_source": {
     "/pose/raw": {
       "type": "pose",

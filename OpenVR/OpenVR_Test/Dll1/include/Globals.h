@@ -1,55 +1,40 @@
 #pragma once
 
+#include <openvr_driver.h>
+#include <Matrix.h>
+#include <TrackerDefines.h>
+#include <chrono>
 
-// Enables
-extern bool waist_en = false;
-extern bool lfoot_en = false;
-extern bool rfoot_en = false;
-extern bool lthigh_en = false;
-extern bool rthigh_en = false;
+using namespace vr;
 
-// Waist
-extern float Px_waist;
-extern float Py_waist;
-extern float Pz_waist;
-extern float Qx_waist;
-extern float Qy_waist;
-extern float Qz_waist;
-extern float Qw_waist;
+// Network
+extern bool SocketActivated;
 
-// lfoot
-extern float Px_lfoot;
-extern float Py_lfoot;
-extern float Pz_lfoot;
-extern float Qx_lfoot;
-extern float Qy_lfoot;
-extern float Qz_lfoot;
-extern float Qw_waist;
+// Positioning of "left and right" is determined by the positioning of the limbs of a person facing away from you.
+// Tracked Poses
+extern DriverPose_t hmd_pose;
 
+extern DriverPose_t waist_pose;
+extern DriverPose_t lfoot_pose;
+extern DriverPose_t rfoot_pose;
+extern DriverPose_t lthigh_pose;
+extern DriverPose_t rthigh_pose;
 
-// rfoot
-extern float Px_rfoot;
-extern float Py_rfoot;
-extern float Pz_rfoot;
-extern float Qx_rfoot;
-extern float Qy_rfoot;
-extern float Qz_rfoot;
-extern float Qw_waist;
+// Skeleton
+extern DriverPose_t neck_pose;
+extern DriverPose_t tailbone_pose;
+extern DriverPose_t lhip_pose;
+extern DriverPose_t rhip_pose;
 
-// lthigh
-extern float Px_lthigh;
-extern float Py_lthigh;
-extern float Pz_lthigh;
-extern float Qx_lthigh;
-extern float Qy_lthigh;
-extern float Qz_lthigh;
-extern float Qw_waist;
+// Offsets
+extern const double HMD_to_Head;
+extern const double Head_to_Neck;
 
-// rthigh
-extern float Px_rthigh;
-extern float Py_rthigh;
-extern float Pz_rthigh;
-extern float Qx_rthigh;
-extern float Qy_rthigh;
-extern float Qz_rthigh;
-extern float Qw_waist;
+extern const double Neck_to_Waist;
+
+extern const double Waist_to_Hip;
+extern const double hip_width;
+
+extern const double Head_to_Floor_len_m;
+extern const double Head_to_Waist_len_m;
+extern const double Hip_to_Foot_len_m;

@@ -6,97 +6,179 @@
 // 8 9 10 11
 // 12 13 14 15
 
-// from https://ahrs.readthedocs.io/en/latest/filters/angular.html
 
-
-ang_rate::ang_rate(double ang_x, double ang_y, double ang_z) {
-	this->x = ang_x;
-	this->y = ang_y;
-	this->z = ang_z;
-}
-
-double ang_rate::get_magnitude() {
-	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-}
-
-omega::omega(ang_rate angular_rate) {
-	matrix[0] = 0;
-	matrix[1] = -angular_rate.x;
-	matrix[2] = -angular_rate.y;
-	matrix[3] = -angular_rate.z;
-
-	matrix[4] = angular_rate.x;
-	matrix[5] = 0;
-	matrix[6] = angular_rate.z;
-	matrix[7] = -angular_rate.y;
-
-	matrix[8] = angular_rate.y;
-	matrix[9] = -angular_rate.z;
-	matrix[10] = 0;
-	matrix[11] = angular_rate.x;
-
-	matrix[12] = angular_rate.z;
-	matrix[13] = angular_rate.y;
-	matrix[14] = -angular_rate.x;
-	matrix[15] = 0;
-}
-
-double* omega::getMatrix() {
-	return matrix;
-}
-
-DriverPose_t getNewPose(DriverPose_t last_pose, ang_rate angle_vector) {
-
-	DriverPose_t pose = { 0 };
-
-	https://ahrs.readthedocs.io/en/latest/filters/angular.html
-	omega omega_op(angle_vector);
-
-	double mag = angle_vector.get_magnitude();
-	double scale_cos = cos(mag / 2.0);
-	double scale_sin = (1 / mag) * sin(mag / 2.0);
-
-	double iMatrixScaled[16] = { 0 };
-
-	double cos_scalar = cos(mag / 2);
-
-	double old_quat[4] = { last_pose.qRotation.w, last_pose.qRotation.x, last_pose.qRotation.y, last_pose.qRotation.z }; // w, x, y, z
-	double new_quat[4] = { 1.0, 0.0, 0.0, 0.0 }; // w, x, y, z
-
-	for (int i = 0; i < 16; i++) {
-		iMatrixScaled[i] = omega_op.iMatrix[i] * cos_scalar;
-		//printf("%f, %f\n", omega_op.iMatrix[i], iMatrixScaled[i]);
+// https://ahrs.readthedocs.io/en/latest/filters/angular.html
+void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
+	char log_str[100];
+	DriverPose_t* pose;
+	pose = &waist_pose;
+	switch (limb) {
+		case WAIST:
+			pose = &waist_pose;
+			break;
+		case LFOOT:
+			pose = &lfoot_pose;
+			break;
+		case RFOOT:
+			pose = &rfoot_pose;
+			break;
 	}
 
-	double sin_scalar = sin(mag / 2);
-	sin_scalar = sin_scalar * (1 / mag);
+	HmdQuaternion_t quat;
 
-	double omegaMatrixScaled[16] = { 0 };
+	quat.x, quat.y, quat.z = 0;
+	quat.w = 1;
 
-	for (int i = 0; i < 16; i++) {
-		omegaMatrixScaled[i] = omega_op.matrix[i] * sin_scalar;
+	pose->qWorldFromDriverRotation = quat;
+	pose->qDriverFromHeadRotation = quat;
+
+	Quaternion q_t0(pose->qRotation.w, pose->qRotation.x, pose->qRotation.y, pose->qRotation.z);
+	Matrix44_d omega_Matrix;
+	Matrix44_d identity_Matrix;
+	omega_Matrix.set_as_Omega_Matrix(angle_vector);
+	identity_Matrix.set_as_Identity();
+	double ang_mag = angle_vector.getMag();
+
+	// Can't be dividing by zero now, can we?
+	if (checkIfZero(ang_mag, 0.00001)) {
+		ang_mag = 0.00001;
+	}
+	
+	double scale_Ident = cos(ang_mag * elapsed_time_s / 2.0);
+	double scale_Omega = (1.0 / ang_mag) * sin(ang_mag * elapsed_time_s / 2);
+	identity_Matrix.scale_Matrix(scale_Ident);
+	omega_Matrix.scale_Matrix(scale_Omega);
+	Matrix44_d result = omega_Matrix + identity_Matrix;
+
+	Quaternion q_t1 = result.getNewQuat(q_t0);
+	q_t1.normalize();
+
+	pose->qRotation.w = q_t1.w;
+	pose->qRotation.x = q_t1.x;
+	pose->qRotation.y = q_t1.y;
+	pose->qRotation.z = q_t1.z;
+	
+	snprintf(log_str, 100, "%f, %f, %f, %f\n", pose->qRotation.w, pose->qRotation.x, pose->qRotation.y, pose->qRotation.z);
+	VRDriverLog()->Log(log_str);
+
+	snprintf(log_str, 100, "Driver pos: x: %f, y: %f, z: %f\n", hmd_pose.vecPosition[0], hmd_pose.vecPosition[1], hmd_pose.vecPosition[2]);
+	VRDriverLog()->Log(log_str);
+
+	// from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
+	Quaternion posVec, newPos;
+
+	switch (limb) {
+	case WAIST:
+		VRDriverLog()->Log("Waist pos updated!");
+		posVec = Quaternion(0, 0, -Neck_to_Waist, 0);
+		newPos = q_t1 * posVec * q_t1.GetInverse();
+
+		pose->vecPosition[0] = neck_pose.vecPosition[0] + newPos.x;
+		pose->vecPosition[1] = neck_pose.vecPosition[1] + newPos.y;
+		pose->vecPosition[2] = neck_pose.vecPosition[2] + newPos.z;
+
+		break;
+	case LFOOT:
+		posVec = Quaternion(0, 0, -Hip_to_Foot_len_m, 0);
+		newPos = q_t1 * posVec * q_t1.GetInverse();
+
+		pose->vecPosition[0] = lhip_pose.vecPosition[0] + newPos.x;
+		pose->vecPosition[1] = lhip_pose.vecPosition[1] + newPos.y;
+		if (pose->vecPosition[1] < 0) {
+			pose->vecPosition[1] = 0;
+		}
+		pose->vecPosition[2] = lhip_pose.vecPosition[2] + newPos.z;
+		break;
+	case RFOOT:
+		posVec = Quaternion(0, 0, -Hip_to_Foot_len_m, 0);
+		newPos = q_t1 * posVec * q_t1.GetInverse();
+
+		pose->vecPosition[0] = rhip_pose.vecPosition[0] + newPos.x;
+		pose->vecPosition[1] = rhip_pose.vecPosition[1] + newPos.y;
+		if (pose->vecPosition[1] < 0) {
+			pose->vecPosition[1] = 0;
+		}
+		pose->vecPosition[2] = rhip_pose.vecPosition[2] + newPos.z;
+		break;
 	}
 
-	double matrix_full[16] = { 0 };
+	return;
+}
 
-	for (int i = 0; i < 16; i++) {
-		matrix_full[i] = omegaMatrixScaled[i] + iMatrixScaled[i];
-	}
+// Rattle me bones
+// Updates body parts that aren't explicitly tracked.
+// Explanation: Some parts of the body simply don't rotate, but serve as good guidelines to calculate the position of the rest of the body.
+// i.e. when the head rotates, the neck doesn't rotate but is instead in a fixed position. Since the offset from the headset to the head will always be fixed,
+// we can find the position of the neck however the head is rotated.
+void updateSkeleton() {
 
-	for (int i = 0; i < 4; i++) {
-		new_quat[i] = (matrix_full[i * 4 + 0] * old_quat[0]) + (matrix_full[i * 4 + 1] * old_quat[1]) + (matrix_full[i * 4 + 2] * old_quat[2]) + (matrix_full[i * 4 + 3] * old_quat[3]);
-	}
+	Quaternion newPos;
 
-	//printf("x: %f, y: %f, z: %f, w: %f\n", new_quat[0], new_quat[1], new_quat[2], new_quat[3]);
-	double newquatmag = sqrt(pow(new_quat[0], 2) + pow(new_quat[1], 2) + pow(new_quat[2], 2) + pow(new_quat[3], 2));
-	pose.qRotation.w = new_quat[0] / newquatmag;
-	pose.qRotation.x = new_quat[1] / newquatmag;
-	pose.qRotation.y = new_quat[2] / newquatmag;
-	pose.qRotation.z = new_quat[3] / newquatmag;
+	// Head position
+	TrackedDevicePose_t device_pose[10];
+	VRServerDriverHost()->GetRawTrackedDevicePoses(0, device_pose, 10);
 
-	pose.vecPosition[0] = 0;
-	pose.vecPosition[1] = 1.0;
-	pose.vecPosition[2] = 0;
+	HmdMatrix34_t space_matrix = device_pose[k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
 
-	return pose;
+	hmd_pose.vecPosition[0] = space_matrix.m[0][3];
+	hmd_pose.vecPosition[1] = space_matrix.m[1][3];
+	hmd_pose.vecPosition[2] = space_matrix.m[2][3];
+
+	Quaternion hmd_quat = getQuaternionFromHMD(space_matrix);
+
+	// I don't think it's actually necessary to keep the rotation of the hmd, just where it's at.
+	//hmd_pose.qRotation.w = hmd_quat.w;
+	//hmd_pose.qRotation.x = hmd_quat.x;
+	//hmd_pose.qRotation.y = hmd_quat.y;
+	//hmd_pose.qRotation.z = hmd_quat.z;
+
+	
+	// Set neck position relative to HMD
+	Quaternion neckPos(0, 0, -Head_to_Neck, HMD_to_Head);
+	newPos = hmd_quat * neckPos * hmd_quat.GetInverse();
+
+	neck_pose.vecPosition[0] = hmd_pose.vecPosition[0] + newPos.x;
+	neck_pose.vecPosition[1] = hmd_pose.vecPosition[1] + newPos.y;
+	neck_pose.vecPosition[2] = hmd_pose.vecPosition[2] + newPos.z;
+
+	// Set hip position relative to waist
+	Quaternion tailbonePos(0, 0, -Waist_to_Hip, 0);
+	Quaternion waistRotation(waist_pose.qRotation.w, waist_pose.qRotation.x, waist_pose.qRotation.y, waist_pose.qRotation.z);
+	newPos = waistRotation * tailbonePos * waistRotation;
+
+	tailbone_pose.vecPosition[0] = waist_pose.vecPosition[0] + newPos.x;
+	tailbone_pose.vecPosition[1] = waist_pose.vecPosition[1] + newPos.y;
+	tailbone_pose.vecPosition[2] = waist_pose.vecPosition[2] + newPos.z;
+
+	Quaternion lhipPos(0, -hip_width / 2.0, 0, 0);
+	newPos = waistRotation * lhipPos * waistRotation;
+	lhip_pose.vecPosition[0] = tailbone_pose.vecPosition[0] + newPos.x;
+	lhip_pose.vecPosition[1] = tailbone_pose.vecPosition[1] + newPos.y;
+	lhip_pose.vecPosition[2] = tailbone_pose.vecPosition[2] + newPos.z;
+
+	Quaternion rhipPos(0, hip_width / 2.0, 0, 0);
+	newPos = waistRotation * rhipPos * waistRotation;
+	rhip_pose.vecPosition[0] = tailbone_pose.vecPosition[0] + newPos.x;
+	rhip_pose.vecPosition[1] = tailbone_pose.vecPosition[1] + newPos.y;
+	rhip_pose.vecPosition[2] = tailbone_pose.vecPosition[2] + newPos.z;
+
+}
+
+bool checkIfZero(double& val, double threshold) {
+	return (val >= threshold && val <= threshold);
+}
+
+// https://github.com/osudrl/OpenVR-Tracking-Example/blob/e17119b5129a3d77e4054f0fa30401a13daaf1dd/HTC%20Lighthouse%20Tracking%20Example/LighthouseTracking.cpp#L166-L177
+Quaternion getQuaternionFromHMD(HmdMatrix34_t& matrix) {
+	Quaternion newQuat;
+
+	newQuat.w = sqrt(fmax(0, 1 + matrix.m[0][0] + matrix.m[1][1] + matrix.m[2][2])) / 2;
+	newQuat.x = sqrt(fmax(0, 1 + matrix.m[0][0] - matrix.m[1][1] - matrix.m[2][2])) / 2;
+	newQuat.y = sqrt(fmax(0, 1 - matrix.m[0][0] + matrix.m[1][1] - matrix.m[2][2])) / 2;
+	newQuat.z = sqrt(fmax(0, 1 - matrix.m[0][0] - matrix.m[1][1] + matrix.m[2][2])) / 2;
+	newQuat.x = copysign(newQuat.x, matrix.m[2][1] - matrix.m[1][2]);
+	newQuat.y = copysign(newQuat.y, matrix.m[0][2] - matrix.m[2][0]);
+	newQuat.z = copysign(newQuat.z, matrix.m[1][0] - matrix.m[0][1]);
+
+	return newQuat;
 }
