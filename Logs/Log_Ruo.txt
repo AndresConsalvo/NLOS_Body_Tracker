@@ -111,3 +111,7 @@ Ruo Log:
 - Worked with Andres to integrate client, backend server, and OpenVR drivers in order to send tracker data to where it needs to go
 - Converted OpenVR UDP server to client that receives data from the server.
 - Updated Joe's program to output a JSON file correctly.
+
+3/7/2022
+- Running some tests. Accidentally burnt out something on one of the ESP32 dev boards.
+- ESP32 proven to be able to be programmed using external CP2102 chip.
