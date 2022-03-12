@@ -111,3 +111,11 @@ Ruo Log:
 - Worked with Andres to integrate client, backend server, and OpenVR drivers in order to send tracker data to where it needs to go
 - Converted OpenVR UDP server to client that receives data from the server.
 - Updated Joe's program to output a JSON file correctly.
+
+3/9/2022
+- Wrote code to allow ESP32 to receive data from server
+
+3/10/2022
+- Considering offloading calculations to either the server or the ESP32s themselves to save on processing power (currently, transmitting tracker->server->driver is slower than
+  usual)
+- Wrote code for ESP32 to allow SSID and password to be configured over UART, so the user does not have to reprogram the ESP32 every time.
