@@ -25,7 +25,7 @@ Vector3_d::Vector3_d(double x, double y, double z) {
 }
 
 double Vector3_d::getMag() {
-	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+	return sqrt(x*x + y*y + z*z);
 }
 
 // Quaternions
@@ -60,7 +60,7 @@ Quaternion Quaternion::GetInverse() {
 }
 
 void Quaternion::normalize() {
-	double mag = sqrt(pow(w, 2) + pow(x, 2) + pow(y, 2) + pow(z, 2));
+	double mag = sqrt(w*w + x*x + y*y + z*z);
 	w /= mag;
 	x /= mag;
 	y /= mag;

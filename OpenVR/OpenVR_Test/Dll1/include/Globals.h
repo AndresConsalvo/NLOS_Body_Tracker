@@ -25,6 +25,7 @@ extern DriverPose_t neck_pose;
 extern DriverPose_t tailbone_pose;
 extern DriverPose_t lhip_pose;
 extern DriverPose_t rhip_pose;
+// = q (4 floats) 3d position (3 floats) x, y, z
 
 // Offsets
 extern const double HMD_to_Head;

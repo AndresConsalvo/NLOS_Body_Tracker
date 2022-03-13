@@ -115,3 +115,10 @@ Ruo Log:
 3/7/2022
 - Running some tests. Accidentally burnt out something on one of the ESP32 dev boards.
 - ESP32 proven to be able to be programmed using external CP2102 chip.
+3/9/2022
+- Wrote code to allow ESP32 to receive data from server
+
+3/10/2022
+- Considering offloading calculations to either the server or the ESP32s themselves to save on processing power (currently, transmitting tracker->server->driver is slower than
+  usual)
+- Wrote code for ESP32 to allow SSID and password to be configured over UART, so the user does not have to reprogram the ESP32 every time.
