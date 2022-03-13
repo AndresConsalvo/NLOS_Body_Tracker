@@ -6,7 +6,7 @@ MIN_VOLTAGE = 3.0
 
 class Tracker:
 
-  def __init__(self, ip:str, accel:list, gyro:list, battery:float, id=None, body_part=None) -> None:
+  def __init__(self, ip, accel:list, gyro:list, battery:float, id=None, body_part=None) -> None:
     self.id = id
     self.ip = ip
     self.accel = accel
