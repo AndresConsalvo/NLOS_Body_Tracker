@@ -16,8 +16,8 @@ from ctypes import *
 
 
 # LOCAL_IP = socket.gethostbyname(socket.gethostname())
-LOCAL_IP = "192.168.1.51"
-LOCAL_PORT = 20000
+LOCAL_IP = "127.0.0.1"
+LOCAL_PORT = 20001
 BUFFER_SIZE = 1024
 ADDR = (LOCAL_IP, LOCAL_PORT)
 DISCONNECT = "!DISCONNECT"
@@ -149,7 +149,7 @@ def start(verbose:bool):
             # pprint.pprint(trackers)
             message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
             bytes_to_send = str.encode(message_to_send)
-            UDP_server_socket.sendto(bytes_to_send, openvr_address)
+            UDP_server_socket.sendto(bytes_to_send, electron_address)
 
 
         elif payload["type"] == "DEVICE_STATS":
