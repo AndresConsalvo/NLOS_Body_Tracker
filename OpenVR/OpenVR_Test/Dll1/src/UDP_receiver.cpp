@@ -14,6 +14,13 @@ float* gyr_z = (float*)(RecvBuf + 8);
 float* tracker_id = (float*)(RecvBuf + 12);
 
 
+char* config_header = (char*)(RecvBuf + 0);
+float* ankleToGround = (float*)(RecvBuf + 1);
+float* headToNeck = (float*)(RecvBuf + 5);
+float* neckToWaist = (float*)(RecvBuf + 9);
+float* waistToAnkle = (float*)(RecvBuf + 13);
+
+
 void UDP::init() {
 	WSADATA wsaData;
 	int iResult;
@@ -72,6 +79,8 @@ void UDP::start() {
 		if (bytes_read == 16) {
 			VRDriverLog()->Log("Setting value!");
 			setValue((char*)RecvBuf);
+		} else if (bytes_read == 17) {
+			VRDriverLog()->Log("Setting body measurements!");
 		} else {
 			vr::VRDriverLog()->Log("No data received!");
 		}
@@ -81,22 +90,9 @@ void UDP::start() {
 
 void UDP::setValue(char* RecvBuf) {
 	// Need to move the gyroscope receive and calculate somewhere else.
-
-	// short tracker_ID = (short)(RecvBuf[6]);
 	short tracker_ID = *tracker_id;
 	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
 	VRDriverLog()->Log(log_str);
-
-	/*
-	short Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
-	short Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
-	short Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
-
-	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\n", Gx, Gy, Gz);
-	VRDriverLog()->Log(log_str);
-	*/
-	// Because of how IMU is positioned, data received does not correspond with axis.
-
 
 	double ang_x = *gyr_x;
 	double ang_y = *gyr_y;
@@ -151,6 +147,34 @@ void UDP::setValue(char* RecvBuf) {
 
 		updateSkeleton();
 	}
+
+}
+
+void UDP::configureMeasurements(char* RecvBuf) {
+	// Need to move the gyroscope receive and calculate somewhere else.
+
+	if (*config_header != 'a') {
+		return;
+	} else {
+		Head_to_Neck = *headToNeck;
+		Neck_to_Waist = *neckToWaist;
+		Hip_to_Foot_len_m = *waistToAnkle;
+		ankle_to_ground = *ankleToGround;
+		reset_trackers();
+	}
+
+
+	char* config_header = (char*)(RecvBuf + 0);
+	float* ankleToGround = (float*)(RecvBuf + 1);
+	float* headToNeck = (float*)(RecvBuf + 5);
+	float* neckToWaist = (float*)(RecvBuf + 9);
+	float* waistToAnkle = (float*)(RecvBuf + 13);
+
+
+	double ang_x = *gyr_x;
+	double ang_y = *gyr_y;
+	double ang_z = *gyr_z;
+
 
 }
 

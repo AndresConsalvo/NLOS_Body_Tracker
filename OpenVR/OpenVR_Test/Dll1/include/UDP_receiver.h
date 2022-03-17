@@ -23,6 +23,7 @@ public:
 private:
 	void start();
 	void setValue(char* RecvBuf);
+	void configureMeasurements(char* RecvBuf);
 	void reset_trackers();
 
 	SOCKET sock;

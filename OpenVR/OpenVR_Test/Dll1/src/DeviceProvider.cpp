@@ -19,13 +19,14 @@ DriverPose_t lhip_pose = { 0 };
 DriverPose_t rhip_pose = { 0 };
 
 const double HMD_to_Head = 0.0;
-const double Head_to_Neck = 0.18;
-const double Neck_to_Waist = 0.62;
+double Head_to_Neck = 0.18;
+double Neck_to_Waist = 0.62;
 const double Waist_to_Hip = 0.1;
 const double hip_width = 0.3;
 const double Head_to_Floor_len_m = 1.7;
 const double Head_to_Waist_len_m = 0.8;
-const double Hip_to_Foot_len_m = 0.5;
+double Hip_to_Foot_len_m = 0.5;
+double ankle_to_ground = 0.2;
 
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);

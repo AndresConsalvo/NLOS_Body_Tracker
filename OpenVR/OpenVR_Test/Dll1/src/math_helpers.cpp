@@ -97,8 +97,8 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 
 		pose->vecPosition[0] = lhip_pose.vecPosition[0] + newPos.x;
 		pose->vecPosition[1] = lhip_pose.vecPosition[1] + newPos.y;
-		if (pose->vecPosition[1] < 0) {
-			pose->vecPosition[1] = 0;
+		if (pose->vecPosition[1] < ankle_to_ground) {
+			pose->vecPosition[1] = ankle_to_ground;
 		}
 		pose->vecPosition[2] = lhip_pose.vecPosition[2] + newPos.z;
 		break;
@@ -108,8 +108,8 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 
 		pose->vecPosition[0] = rhip_pose.vecPosition[0] + newPos.x;
 		pose->vecPosition[1] = rhip_pose.vecPosition[1] + newPos.y;
-		if (pose->vecPosition[1] < 0) {
-			pose->vecPosition[1] = 0;
+		if (pose->vecPosition[1] < ankle_to_ground) {
+			pose->vecPosition[1] = ankle_to_ground;
 		}
 		pose->vecPosition[2] = rhip_pose.vecPosition[2] + newPos.z;
 		break;
