@@ -31,10 +31,10 @@ export const useSensors = () => {
   const changeRole = (sensor: Sensor, newRole: string) => {
     window.electron.ipcRenderer.sendToServer(
       JSON.stringify({
-        type: 'CHANGE_ROLL',
+        type: 'CHANGE_ROLE',
         data: {
-          ip: sensor.ip,
-          role: newRole,
+          id: sensor.id,
+          body_part: newRole,
         },
       })
     );
@@ -53,7 +53,7 @@ export const useSensors = () => {
 
   const init = () => {
     window.electron.ipcRenderer.on('ipc-python', (arg) => {
-      console.log('arg', arg)
+      console.log('arg', arg);
       const decoded = new TextDecoder().decode(arg);
       const payload: ServerEvent = JSON.parse(decoded);
       console.log('Starting python server...', payload);
@@ -75,3 +75,5 @@ export const useSensors = () => {
 
   return { devices, addDevice, changeRole };
 };
+
+export type SensorProps = ReturnType<typeof useSensors>;
