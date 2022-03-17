@@ -13,7 +13,11 @@
     "start:main": "cross-env NODE_ENV=development electron -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest",
+<<<<<<< HEAD
     "init:clients": "python ./src/main/test_client.py",
+=======
+    "init:clients": "python ./src/main/test_client.py -v True",
+>>>>>>> b6955024f02a368a60b036bc14df6342a46577ae
     "init:server": "python ./src/main/server.py"
   },
   "lint-staged": {
