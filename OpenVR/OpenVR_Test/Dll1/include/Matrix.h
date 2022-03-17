@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 
+
 #include <cmath>
 #pragma comment(lib, "ws2_32.lib")
 
@@ -50,7 +51,7 @@ struct Matrix44_d {
 
 	void scale_Matrix(double scale);
 
-	Quaternion getNewQuat(Quaternion& q_t0);
+	Quaternion getNewQuat(Quaternion* q_t0);
 
 	// Operators
 	Matrix44_d operator+(const Matrix44_d& r);

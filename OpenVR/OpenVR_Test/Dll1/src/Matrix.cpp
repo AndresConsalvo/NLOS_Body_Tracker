@@ -148,13 +148,13 @@ void Matrix44_d::scale_Matrix(double scale) {
 	}
 }
 
-Quaternion Matrix44_d::getNewQuat(Quaternion& q_t0) {
+Quaternion Matrix44_d::getNewQuat(Quaternion* q_t0) {
 	Quaternion q_t1;
 
-	q_t1.w = m[0] * q_t0.w + m[1] * q_t0.x + m[2] * q_t0.y + m[3] * q_t0.z;
-	q_t1.x = m[4] * q_t0.w + m[5] * q_t0.x + m[6] * q_t0.y + m[7] * q_t0.z;
-	q_t1.y = m[8] * q_t0.w + m[9] * q_t0.x + m[10] * q_t0.y + m[11] * q_t0.z;
-	q_t1.z = m[12] * q_t0.w + m[13] * q_t0.x + m[14] * q_t0.y + m[15] * q_t0.z;
+	q_t1.w = m[0] * q_t0->w + m[1] * q_t0->x + m[2] * q_t0->y + m[3] * q_t0->z;
+	q_t1.x = m[4] * q_t0->w + m[5] * q_t0->x + m[6] * q_t0->y + m[7] * q_t0->z;
+	q_t1.y = m[8] * q_t0->w + m[9] * q_t0->x + m[10] * q_t0->y + m[11] * q_t0->z;
+	q_t1.z = m[12] * q_t0->w + m[13] * q_t0->x + m[14] * q_t0->y + m[15] * q_t0->z;
 
 	return q_t1;
 }

@@ -33,6 +33,8 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 	pose->qDriverFromHeadRotation = quat;
 
 	Quaternion q_t0(pose->qRotation.w, pose->qRotation.x, pose->qRotation.y, pose->qRotation.z);
+	snprintf(log_str, 100, "q_t0: %f, %f, %f, %f\n", q_t0.w, q_t0.x, q_t0.y, q_t0.z);
+	VRDriverLog()->Log(log_str);
 	Matrix44_d omega_Matrix;
 	Matrix44_d identity_Matrix;
 	omega_Matrix.set_as_Omega_Matrix(angle_vector);
@@ -44,27 +46,33 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 		ang_mag = 0.00001;
 	}
 	
+	snprintf(log_str, 100, "Scale ident: %f\n", ang_mag);
+	VRDriverLog()->Log(log_str);
+
 	double scale_Ident = cos(ang_mag * elapsed_time_s / 2.0);
+	snprintf(log_str, 100, "Scale ident: %f\n", scale_Ident);
+	VRDriverLog()->Log(log_str);
 	double scale_Omega = (1.0 / ang_mag) * sin(ang_mag * elapsed_time_s / 2);
+
+	snprintf(log_str, 100, "Scale omega: %f\n", scale_Omega);
+	VRDriverLog()->Log(log_str);
+
 	identity_Matrix.scale_Matrix(scale_Ident);
 	omega_Matrix.scale_Matrix(scale_Omega);
 	Matrix44_d result = omega_Matrix + identity_Matrix;
 
-	Quaternion q_t1 = result.getNewQuat(q_t0);
+	Quaternion q_t1 = result.getNewQuat(&q_t0);
+
+
+
 	q_t1.normalize();
 
 	pose->qRotation.w = q_t1.w;
 	pose->qRotation.x = q_t1.x;
 	pose->qRotation.y = q_t1.y;
 	pose->qRotation.z = q_t1.z;
-	
-	snprintf(log_str, 100, "%f, %f, %f, %f\n", pose->qRotation.w, pose->qRotation.x, pose->qRotation.y, pose->qRotation.z);
-	VRDriverLog()->Log(log_str);
 
-	snprintf(log_str, 100, "Driver pos: x: %f, y: %f, z: %f\n", hmd_pose.vecPosition[0], hmd_pose.vecPosition[1], hmd_pose.vecPosition[2]);
-	VRDriverLog()->Log(log_str);
 
-	// from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
 	Quaternion posVec, newPos;
 
 	switch (limb) {
@@ -75,6 +83,11 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 
 		pose->vecPosition[0] = neck_pose.vecPosition[0] + newPos.x;
 		pose->vecPosition[1] = neck_pose.vecPosition[1] + newPos.y;
+
+		if (pose->vecPosition[1] < 0) {
+			pose->vecPosition[1] = 0;
+		}
+
 		pose->vecPosition[2] = neck_pose.vecPosition[2] + newPos.z;
 
 		break;
@@ -144,20 +157,20 @@ void updateSkeleton() {
 	// Set hip position relative to waist
 	Quaternion tailbonePos(0, 0, -Waist_to_Hip, 0);
 	Quaternion waistRotation(waist_pose.qRotation.w, waist_pose.qRotation.x, waist_pose.qRotation.y, waist_pose.qRotation.z);
-	newPos = waistRotation * tailbonePos * waistRotation;
+	newPos = waistRotation * tailbonePos * waistRotation.GetInverse();
 
 	tailbone_pose.vecPosition[0] = waist_pose.vecPosition[0] + newPos.x;
 	tailbone_pose.vecPosition[1] = waist_pose.vecPosition[1] + newPos.y;
 	tailbone_pose.vecPosition[2] = waist_pose.vecPosition[2] + newPos.z;
 
 	Quaternion lhipPos(0, -hip_width / 2.0, 0, 0);
-	newPos = waistRotation * lhipPos * waistRotation;
+	newPos = waistRotation * lhipPos * waistRotation.GetInverse();
 	lhip_pose.vecPosition[0] = tailbone_pose.vecPosition[0] + newPos.x;
 	lhip_pose.vecPosition[1] = tailbone_pose.vecPosition[1] + newPos.y;
 	lhip_pose.vecPosition[2] = tailbone_pose.vecPosition[2] + newPos.z;
 
 	Quaternion rhipPos(0, hip_width / 2.0, 0, 0);
-	newPos = waistRotation * rhipPos * waistRotation;
+	newPos = waistRotation * rhipPos * waistRotation.GetInverse();
 	rhip_pose.vecPosition[0] = tailbone_pose.vecPosition[0] + newPos.x;
 	rhip_pose.vecPosition[1] = tailbone_pose.vecPosition[1] + newPos.y;
 	rhip_pose.vecPosition[2] = tailbone_pose.vecPosition[2] + newPos.z;
@@ -165,7 +178,7 @@ void updateSkeleton() {
 }
 
 bool checkIfZero(double& val, double threshold) {
-	return (val >= threshold && val <= threshold);
+	return (abs(val) <= threshold);
 }
 
 // https://github.com/osudrl/OpenVR-Tracking-Example/blob/e17119b5129a3d77e4054f0fa30401a13daaf1dd/HTC%20Lighthouse%20Tracking%20Example/LighthouseTracking.cpp#L166-L177

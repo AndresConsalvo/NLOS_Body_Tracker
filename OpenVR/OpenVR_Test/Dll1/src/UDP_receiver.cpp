@@ -3,7 +3,7 @@
 
 
 #define PORT 20000
-const char* srcIP = "192.168.1.51";
+const char* srcIP = "192.168.1.59";
 
 char log_str[100];
 char RecvBuf[25];
@@ -118,7 +118,7 @@ void UDP::setValue(char* RecvBuf) {
 
 			t_waist_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_waist_last - t_recv_end).count() / 1000.0;
-			getNewPose(WAIST, Vector3_d(-ang_x, -ang_y, -ang_z), elapsed_time_s);
+			getNewPose(WAIST, Vector3_d(-ang_x, -ang_y, ang_z), elapsed_time_s);
 
 			waist_pose.poseIsValid = true;
 			waist_pose.result = TrackingResult_Running_OK;
@@ -128,7 +128,7 @@ void UDP::setValue(char* RecvBuf) {
 			VRDriverLog()->Log("Posing left foot\n");
 			t_lfoot_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(LFOOT, Vector3_d(ang_x, ang_y, ang_z), elapsed_time_s);
+			getNewPose(LFOOT, Vector3_d(-ang_z, -ang_y, -ang_x), elapsed_time_s);
 
 			lfoot_pose.poseIsValid = true;
 			lfoot_pose.result = TrackingResult_Running_OK;
@@ -139,7 +139,7 @@ void UDP::setValue(char* RecvBuf) {
 
 			t_rfoot_last = std::chrono::high_resolution_clock::now();
 			elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(RFOOT, Vector3_d(ang_x, ang_y, ang_z), elapsed_time_s);
+			getNewPose(RFOOT, Vector3_d(ang_z, -ang_y, ang_x), elapsed_time_s);
 
 			rfoot_pose.poseIsValid = true;
 			rfoot_pose.result = TrackingResult_Running_OK;
@@ -181,7 +181,7 @@ void UDP::reset_trackers() {
 
 	waist_pose.qRotation.w = 1.0;
 	waist_pose.qRotation.x = 0;
-	waist_pose.qRotation.y = 
+	waist_pose.qRotation.y = 0;
 	waist_pose.qRotation.z = 0;
 
 	lfoot_pose.qRotation.w = 1.0;

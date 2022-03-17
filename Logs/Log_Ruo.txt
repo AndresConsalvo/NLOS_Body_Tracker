@@ -119,3 +119,7 @@ Ruo Log:
 - Considering offloading calculations to either the server or the ESP32s themselves to save on processing power (currently, transmitting tracker->server->driver is slower than
   usual)
 - Wrote code for ESP32 to allow SSID and password to be configured over UART, so the user does not have to reprogram the ESP32 every time.
+
+3/15/2022
+- Utilized DMP on the MPU6050 to minimize the error from gyroscope drift
+- Rewrote driver code to account for calculations shifting to the server, rather than handling everything on the driver.

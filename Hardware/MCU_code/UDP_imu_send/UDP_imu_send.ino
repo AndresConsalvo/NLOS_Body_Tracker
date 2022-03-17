@@ -34,10 +34,7 @@ void setup() {
   Serial.begin(115200);
   connectToWiFi(networkName, networkPswd);
 
-  // Green
-  pinMode(D0, OUTPUT);
-  // Red
-  pinMode(D2, OUTPUT);
+
 }
 
 unsigned short count;
@@ -57,16 +54,14 @@ void loop() {
       resetting++;
       data[12] = 4;
     }
-    digitalWrite(D0, HIGH);
-    digitalWrite(D2, LOW);
+
     //Send a packet
     Serial.print("Still connected! \n");
     udp.beginPacket(udpAddress, udpPort);
     udp.write(data, 13);
     udp.endPacket();
   } else {
-    digitalWrite(D0, LOW);
-    digitalWrite(D2, HIGH);
+
     Serial.print("Not connected\n");
   }
   delay(10);

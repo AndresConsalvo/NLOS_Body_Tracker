@@ -22,9 +22,9 @@ WSADATA wsaData;
 u_long iMode = 0;
 
 int rec_err = 0;
-int BufLen = 25;
+int BufLen = 255;
 
-char RecvBuf[25];
+char RecvBuf[255];
 
 float Gx, Gy, Gz, Ax, Ay, Az = 0;
 double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
@@ -37,10 +37,10 @@ double pose[4] = { 1, 0, 0, 0 };
 void readUDP() {
 	while (1) {
 		int localAddrSize = sizeof(local);
-		//printf("Scanning for data\n");
+		printf("Scanning for data\n");
 		rec_err = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)&local, &localAddrSize);
 
-		//printf("Message received.\n");
+		printf("Message received.\n");
 		//printf("%d, %d, %d\n", Gx, Gy, Gz);
 		//printf("Converted to radians: \n");
 	}

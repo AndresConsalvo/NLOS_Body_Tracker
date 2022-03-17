@@ -1,8 +1,8 @@
 #include <DeviceProvider.h>
 
 bool waist_en = true;
-bool lfoot_en = false;
-bool rfoot_en = false;
+bool lfoot_en = true;
+bool rfoot_en = true;
 bool lthigh_en = false;
 bool rthigh_en = false;
 
@@ -25,7 +25,7 @@ const double Waist_to_Hip = 0.1;
 const double hip_width = 0.3;
 const double Head_to_Floor_len_m = 1.7;
 const double Head_to_Waist_len_m = 0.8;
-const double Hip_to_Foot_len_m = 0.9;
+const double Hip_to_Foot_len_m = 0.5;
 
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);
@@ -34,8 +34,7 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		return initError;
 	}
 
-	udpThread = new UDP();
-	udpThread->init();
+	
 
 	if (waist_en) {
 		VRDriverLog()->Log("Initializing waist tracker...");
@@ -97,6 +96,8 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RThigh_Tracker", TrackedDeviceClass_GenericTracker, rthigh_tracker);
 	}
 
+	udpThread = new UDP();
+	udpThread->init();
 
 	return VRInitError_None;
 }
