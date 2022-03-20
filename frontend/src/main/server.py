@@ -16,7 +16,7 @@ from ctypes import *
 
 
 # LOCAL_IP = socket.gethostbyname(socket.gethostname())
-LOCAL_IP = "192.168.1.51"
+LOCAL_IP = "192.168.1.59"
 LOCAL_PORT = 20000
 BUFFER_SIZE = 1024
 ADDR = (LOCAL_IP, LOCAL_PORT)

@@ -98,9 +98,9 @@ void UDP::setValue(char* RecvBuf) {
 	// Because of how IMU is positioned, data received does not correspond with axis.
 
 
-	double ang_x = *gyr_x;
-	double ang_y = *gyr_y;
-	double ang_z = *gyr_z;
+	double ang_x = *gyr_x * 2;
+	double ang_y = *gyr_y * 2;
+	double ang_z = *gyr_z * 2;
 
 	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
 	VRDriverLog()->Log(log_str);
