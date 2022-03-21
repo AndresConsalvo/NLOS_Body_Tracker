@@ -6,13 +6,12 @@ type ServerEvent<T = unknown> = {
 };
 
 export type Sensor = {
+  id: string;
   ip: string;
-  position: number[];
+  accel: number[];
+  gyro: number[];
   battery: string;
-  battery_V: number;
-  MAC_ADRESS: number;
-  IMU_accuracy: string;
-  role: string;
+  body_part: string;
 };
 
 export type SensorMap = {
@@ -25,7 +24,7 @@ export const useSensors = () => {
   const handleMessage = (message: Sensor) => {
     setDevices((currentDevices) => ({
       ...currentDevices,
-      [message.ip]: message,
+      [message.id]: message,
     }));
   };
 
@@ -54,10 +53,11 @@ export const useSensors = () => {
 
   const init = () => {
     window.electron.ipcRenderer.on('ipc-python', (arg) => {
+      console.log('arg', arg)
       const decoded = new TextDecoder().decode(arg);
       const payload: ServerEvent = JSON.parse(decoded);
-      console.log('AQUI', payload);
-      if (payload.type === 'DEVICE_STATS') {
+      console.log('Starting python server...', payload);
+      if (payload.type === 'DEVICE') {
         handleMessage(payload.data as ServerEvent<Sensor>['data']);
       }
     });

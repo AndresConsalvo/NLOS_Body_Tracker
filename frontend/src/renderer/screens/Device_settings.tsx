@@ -14,18 +14,18 @@ export default (props: Props) => {
   return (
     <div className="main">
       <div className="current">
-        <button onClick={handleClick}>ADD new role</button>
+        {/* <button onClick={handleClick}>ADD new role</button> */}
         <h1>Device Settings</h1>
       </div>
       <table>
         <tr>
-          <th>MAC Address</th>
+          <th>ID</th>
           <th>Connect</th>
           <th>Role</th>
         </tr>
         {Object.values(devices).map((device) => (
           <tr>
-            <td>{device.MAC_ADRESS}</td>
+            <td>{device.id}</td>
             <td>
               <label className="switch">
                 <input type="checkbox" />
