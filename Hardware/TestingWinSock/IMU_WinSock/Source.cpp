@@ -1,5 +1,6 @@
 
 #define _USE_MATH_DEFINES
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <chrono>
 #include <iostream>
@@ -14,10 +15,23 @@
 
 using namespace std;
 
-const char* srcIP = "192.168.1.59";
+
+
 SOCKET sock;
 sockaddr_in local;
+int localAddrSize = sizeof(local);
 WSADATA wsaData;
+
+SOCKET socketB;
+sockaddr_in localB;
+int locallenB = sizeof(localB);
+const uint16_t broadPort = 4242;
+bool toBroadcast = true;
+
+std::chrono::high_resolution_clock::time_point last_received;
+std::chrono::high_resolution_clock::time_point current_time;
+double elapsed_time_s;
+
 
 u_long iMode = 0;
 
@@ -34,26 +48,46 @@ double waist_to_head = 0.8;
 double old_quat[4] = { 1, 0, 0, 0 }; // w, x, y, z
 double pose[4] = { 1, 0, 0, 0 };
 
+int port = 0;
+
+
 void readUDP() {
 	while (1) {
-		int localAddrSize = sizeof(local);
-		printf("Scanning for data\n");
+		//printf("Scanning for data\n");
 		rec_err = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)&local, &localAddrSize);
-
-		printf("Message received.\n");
+		
+		if (rec_err >= 0) {
+			printf("%d\n", rec_err);
+			last_received = std::chrono::high_resolution_clock::now();
+		}
+		//printf("Message received.\n");
 		//printf("%d, %d, %d\n", Gx, Gy, Gz);
 		//printf("Converted to radians: \n");
 	}
 }
 
+void reconnectUDP() {
+	while (1) {
+		elapsed_time_s = std::chrono::duration<double, std::milli>(current_time - last_received).count() / 1000.0;
+		if (elapsed_time_s > 1.0) {
+			//printf("Hey, this isn't connected!\n");
+			char test[50];
+
+
+			sendto(socketB, (char*)&port, sizeof(port), 0, (sockaddr*)&localB, locallenB);
+		}
+		Sleep(1000);
+	}
+}
+
 int main() {
-	
+	current_time = std::chrono::high_resolution_clock::now();
+	last_received = std::chrono::high_resolution_clock::now();
 
 	printf("Starting program!\n");
 	int iResult;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-	std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
 
 	if (iResult != 0) {
 		printf("WSAStartup failed!\n");
@@ -61,95 +95,59 @@ int main() {
 	}
 	else {
 
+		localB.sin_family = AF_INET;
+		inet_pton(AF_INET, "255.255.255.255", &localB.sin_addr.s_addr);
+		localB.sin_port = htons(broadPort);
+		socketB = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		char broadcast = 1;
+		setsockopt(socketB, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
+
+
+		local.sin_family = AF_INET;
+		local.sin_port = htons(0);
+		local.sin_addr.s_addr = inet_addr("0.0.0.0");
+
 		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+		int enable = 1;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(enable));
+
+
+		iResult = bind(sock, (sockaddr*)&local, sizeof(local));
+
+		struct sockaddr_in sin;
+		socklen_t len = sizeof(sin);
+		getsockname(sock, (struct sockaddr*)&sin, &len);
+		port = ntohs(sin.sin_port);
+
 		if (sock == INVALID_SOCKET) {
 			printf("Socket binding failed at step 1!\n");
 			return 0;
 		}
-
-		local.sin_family = AF_INET;
-		local.sin_port = htons(PORT);
-		local.sin_addr.s_addr = htonl(INADDR_ANY);
-
-
-		iResult = ioctlsocket(sock, FIONBIO, &iMode);
-		iResult = bind(sock, (SOCKADDR*)&local, sizeof(local));
-
+		//iResult = bind(sock, (sockaddr*)&local, sizeof(local));
 		if (iResult != 0) {
 			printf("Socket binding failed at step 2!\n");
 			return 0;
 		}
+
+		printf("%u\n", port);
 	}
+
 	std::thread first(readUDP);
+	std::thread second(reconnectUDP);
 
 	while (1) {
+		current_time = std::chrono::high_resolution_clock::now();
+		
 		printf("Bytes read: %d\n", rec_err);
 		if (rec_err > 0) {
 			
-			float* acc_x = (float*)RecvBuf;
-			float* acc_y = (float*)(RecvBuf + 4);
-			float* acc_z = (float*)(RecvBuf + 8);
-			float* gyr_x = (float*)(RecvBuf + 12);
-			float* gyr_y = (float*)(RecvBuf + 16);
-			float* gyr_z = (float*)(RecvBuf + 20);
-			printf("Tracker ID: %d\n", RecvBuf[24]);
-			printf("Acceleration: %f, %f, %f\n", *acc_x, *acc_y, *acc_z);
+			float* gyr_x = (float*)(RecvBuf + 0);
+			float* gyr_y = (float*)(RecvBuf + 4);
+			float* gyr_z = (float*)(RecvBuf + 8);
+			short tracker_id = (short) (*(float*)(RecvBuf + 12));
+			printf("Tracker ID: %d\n", tracker_id);
 			printf("Rotation: %f, %f, %f\n", *gyr_x, *gyr_y, *gyr_z);
-
-
-
-			// Below code is for raw data
-			/*
-			double waist_pos[3] = { 0, 0, 0 };
-			Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]) - 4;
-			Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]) + 4;
-			Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]) - 3;
-
-
-			printf("Raw: %d, %d, %d\n", Gx, Gy, Gz);
-
-			ang_x = deg_to_rad((double)Gx);
-			ang_y = deg_to_rad((double)Gy);
-			ang_z = deg_to_rad((double)Gz);
-
-			Vector3_d angle_vector(ang_x, ang_y, ang_z);
-			
-			
-			Quaternion q_t0(pose[0], pose[1], pose[2], pose[3]);
-			Matrix44_d omega_Matrix;
-			Matrix44_d identity_Matrix;
-			omega_Matrix.set_as_Omega_Matrix(angle_vector);
-			identity_Matrix.set_as_Identity();
-			double ang_mag = angle_vector.getMag();
-
-
-			double scale_Ident = cos(ang_mag / 2.0);
-			double scale_Omega = (1.0 / ang_mag) * sin(ang_mag / 2);
-			identity_Matrix.scale_Matrix(scale_Ident);
-			omega_Matrix.scale_Matrix(scale_Omega);
-			Matrix44_d result = omega_Matrix + identity_Matrix;
-
-			Quaternion q_t1 = result.getNewQuat(q_t0);
-			q_t1.normalize();
-			printf("x: %f, y: %f, z: %f\n", q_t1.x, q_t1.y, q_t1.z);
-			pose[0] = q_t1.w;
-			pose[1] = q_t1.x;
-			pose[2] = q_t1.y;
-			pose[3] = q_t1.z;
-
-			Quaternion posVec, newPos;
-			posVec = Quaternion(0, 0, 0.8, 0);
-			newPos = q_t1 * posVec * q_t1.GetInverse();
-			printf("w: %f, x: %f, y: %f, z: %f\n", newPos.w, newPos.x, newPos.y, newPos.z);
-
-			waist_pos[0] = hmd_pos[0] + newPos.x;
-			waist_pos[1] = hmd_pos[1] - newPos.y;
-			waist_pos[2] = hmd_pos[2] + newPos.z;
-
-
-			printf("x: %f, y: %f, z: %f\n", waist_pos[0], waist_pos[1], waist_pos[2]);
-			*/
-			
 
 
 			

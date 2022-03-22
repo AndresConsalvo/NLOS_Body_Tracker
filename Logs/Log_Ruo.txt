@@ -123,3 +123,7 @@ Ruo Log:
 3/15/2022
 - Utilized DMP on the MPU6050 to minimize the error from gyroscope drift
 - Rewrote driver code to account for calculations shifting to the server, rather than handling everything on the driver.
+
+3/21/2022
+- Improved server robustness
+- Working on moving all calculations to the server, rather than the driver.

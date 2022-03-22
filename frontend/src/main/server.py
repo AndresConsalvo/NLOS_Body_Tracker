@@ -16,7 +16,7 @@ from ctypes import *
 
 
 # LOCAL_IP = socket.gethostbyname(socket.gethostname())
-LOCAL_IP = "192.168.1.51"
+LOCAL_IP = "192.168.1.59"
 LOCAL_PORT = 20000
 BUFFER_SIZE = 1024
 ADDR = (LOCAL_IP, LOCAL_PORT)
@@ -100,9 +100,12 @@ def start(verbose:bool):
 
   try:
     while(listening):
-
-      bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
-
+      
+      try:
+        bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
+      except ConnectionResetError:
+        openvr_address = []
+        print("Connection lost!")
       recv_counter += 1
 
       message = format(bytes_address_pair[0])
@@ -111,8 +114,10 @@ def start(verbose:bool):
         payload = json.loads(message[2:-1])
       except json.decoder.JSONDecodeError:
         payload = message[2:-1]
-        openvr_address = address
-        print(openvr_address)
+        if (not openvr_address):
+          openvr_address = address
+          print(openvr_address)
+
 
 
       # print(f"[PAYLOAD]--->{payload}")
