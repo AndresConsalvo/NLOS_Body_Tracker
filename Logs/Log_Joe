@@ -59,7 +59,6 @@
  - IMU was successfully integrated via I2C and data was recieved via ESP32
  - Formatted UDP packets into JSON 
  - Cleaned up code and added debug statements 
- 
-
- 
- 
+  
+3/16/2022
+ - Cleaned up code, added function descriptions, removed debug statements 
