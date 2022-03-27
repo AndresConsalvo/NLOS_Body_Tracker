@@ -152,32 +152,34 @@ int main() {
 	std::thread second(reconnectUDP);
 
 	while (1) {
-		
-
-		printf("Sending hmd data\n");
-		data_pkg hmd_payload;
-		hmd_payload.header = (uint8_t)'H';
-		hmd_payload.x = hmd_pos[0];
-		hmd_payload.y = hmd_pos[1];
-		hmd_payload.z = hmd_pos[2];
-		hmd_payload.qw = hmd_quat[0];
-		hmd_payload.qx = hmd_quat[1];
-		hmd_payload.qy = hmd_quat[2];
-		hmd_payload.qz = hmd_quat[3];
-		hmd_payload.tracker_id = 0;
-		hmd_payload.footer = (uint8_t)'h';
-
-		sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
-
-		current_time = std::chrono::high_resolution_clock::now();
-		elapsed_time_s = std::chrono::duration<double, std::milli>(current_time - last_received).count() / 1000.0;
-		printf("%f\n", elapsed_time_s);
-
 		if (elapsed_time_s > 5.0) {
 			broadcast_en = true;
+			server_connected = false;
+		}
+		
+		if (server_connected) {
+			printf("Sending hmd data\n");
+			data_pkg hmd_payload;
+			hmd_payload.header = (uint8_t)'H';
+			hmd_payload.x = hmd_pos[0];
+			hmd_payload.y = hmd_pos[1];
+			hmd_payload.z = hmd_pos[2];
+			hmd_payload.qw = hmd_quat[0];
+			hmd_payload.qx = hmd_quat[1];
+			hmd_payload.qy = hmd_quat[2];
+			hmd_payload.qz = hmd_quat[3];
+			hmd_payload.tracker_id = 0;
+			hmd_payload.footer = (uint8_t)'h';
+
+			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
+
+			current_time = std::chrono::high_resolution_clock::now();
+			elapsed_time_s = std::chrono::duration<double, std::milli>(current_time - last_received).count() / 1000.0;
+			printf("%f\n", elapsed_time_s);
+
+			Sleep(1000);
 		}
 
-		Sleep(1000);
 	}
 	return 0;
 }	

@@ -1,4 +1,6 @@
+from operator import truediv
 import socket
+from struct import *
 
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
 
@@ -9,11 +11,25 @@ client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # 
 # Thanks to @stevenreddie
 client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-# Enable broadcasting mode
-client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+client.bind(("127.0.0.1", 4242))
+server_found = False
 
-client.bind(("", 4242))
 while True:
     # Thanks @seym45 for a fix
+    print("Receiving data!")
     data, addr = client.recvfrom(1024)
-    print("received message: %s"%data)
+    payload_length = len(data)
+
+    if (payload_length == 3):
+        header, msg, footer = unpack("=cbc", data)
+        print(header, msg, footer)
+
+        if (header == b'P' and footer == b'p'):
+            server_found = True
+            payload = pack("=cbc", b'P', 45, b'p')
+            client.sendto(payload, addr)
+
+    if (server_found):
+        print("received message: %s"%data)
+
+    
