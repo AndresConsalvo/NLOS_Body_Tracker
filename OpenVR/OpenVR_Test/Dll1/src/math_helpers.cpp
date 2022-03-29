@@ -24,6 +24,7 @@ void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_s) {
 			break;
 	}
 
+	// Move to initialization
 	HmdQuaternion_t quat;
 
 	quat.x, quat.y, quat.z = 0;

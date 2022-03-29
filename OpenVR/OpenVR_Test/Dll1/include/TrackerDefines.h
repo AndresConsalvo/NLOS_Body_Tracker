@@ -2,9 +2,10 @@
 
 
 // Limb index
-#define WAIST	0
-#define LFOOT	1
-#define RFOOT	2
-#define LTHIGH	3
-#define RTHIGH	4
-#define CHEST	5
+#define HMD		0
+#define CHEST	1
+#define WAIST	2
+#define LKNEE	3
+#define RKNEE	4
+#define LFOOT	5
+#define RFOOT	6

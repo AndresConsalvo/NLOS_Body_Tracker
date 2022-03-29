@@ -1,4 +1,5 @@
 import json
+from lib2to3.pgen2.driver import Driver
 import socket
 import time
 import timeit
@@ -12,10 +13,17 @@ from psutil import process_iter
 from os import kill
 from signal import SIGTERM
 from ctypes import *
+from kinematics import *
+from math_helpers import *
+from struct import *
 
 
 
 # LOCAL_IP = socket.gethostbyname(socket.gethostname())
+LOCAL_HOST = "127.0.0.1"
+DRIVER_PORT = 4242
+LOCAL_ADDR = (LOCAL_HOST, DRIVER_PORT)
+
 LOCAL_IP = "192.168.1.59"
 LOCAL_PORT = 20000
 BUFFER_SIZE = 1024
@@ -25,6 +33,12 @@ recv_counter = 0
 
 OPENVR_MESSAGE = "Hello\\x00"
 UDP_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
+client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+
+
 
 def print_trackers(trackers:dict, go):
   while go:
@@ -76,6 +90,7 @@ def start(verbose:bool):
   unbinded = True
   while unbinded:
     try:
+      client.bind(LOCAL_ADDR)
       UDP_server_socket.bind(ADDR)
       unbinded = False
     except OSError:
@@ -95,19 +110,38 @@ def start(verbose:bool):
   electron_address = None
   openvr_address = None
 
+  tracker_read = [0] * 7
+  
+  driver_addr = []
+  driver_connected = False
+  kinematics = Skeleton()
+
   # go = True
   # print_thread = threading.Thread(target=print_trackers, args=(trackers,go,))
-
+  #bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
   try:
     while(listening):
-      
-      try:
-        bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
-      except ConnectionResetError:
-        openvr_address = []
-        print("Connection lost!")
-      recv_counter += 1
+      while(driver_connected == False):
+        try:
+          data, bytes_address_pair = client.recvfrom(BUFFER_SIZE)
+          payload_length = len(data)
 
+          if (payload_length == 3):
+            header, msg, footer = unpack("=cbc", data)
+            print(header, msg, footer)
+
+            if (header == b'P' and footer == b'p'):
+                print("Driver found!")
+                driver_connected = True
+                payload = pack("=cbc", b'P', 45, b'p')
+                client.sendto(payload, bytes_address_pair)
+                driver_addr = bytes_address_pair
+
+        except ConnectionResetError:
+          openvr_address = []
+          print("Connection lost!")
+
+      bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
       message = format(bytes_address_pair[0])
       address = bytes_address_pair[1]
       try:
@@ -176,17 +210,43 @@ def start(verbose:bool):
           gyro  = payload["data"]["gyro"]
           id    = payload["data"]["id"]
 
+          print(gyro)
+
           tracker = Tracker(address,
                             accel,
                             gyro,
                             4.2,
                             id,
                             None)
-
+          
+          print(gyro)
           if not (id in trackers):
             store_new_tracker(trackers, tracker)
           else:
             update_tracker_info(trackers, tracker)
+            trackers.get(id).quat = updateRotation(trackers.get(id).quat, trackers.get(id).gyro)
+          
+          tracker_read[id] = 1
+          print(id)
+          print(sum(tracker_read))
+
+          if(sum(tracker_read) == 3):
+            data, bytes_address_pair = client.recvfrom(BUFFER_SIZE)
+            if (len(data) == 31):
+              header, x, y, z, qw, qx, qy, qz, id, footer = unpack("=cfffffffbc", data)
+              hmd_pos = quaternion(0, x, y, z)
+              hmd_quat = quaternion(qw, qx, qy, qz)
+              update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=True)
+
+              for i in trackers:
+                track = trackers.get(i)
+                id = track.id
+                quat = track.quat
+                pos = track.pos
+                payload = pack('=cfffffffbc', b'T', pos.x, pos.y, pos.z, quat.w, quat.x, quat.y, quat.z, id, b't')
+                client.sendto(payload, driver_addr)
+
+              
 
           if openvr_address:
 

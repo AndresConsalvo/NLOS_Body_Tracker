@@ -1,4 +1,5 @@
 import math
+from math_helpers import quaternion
 
 MAX_VOLTAGE = 4.2
 MIN_VOLTAGE = 3.0
@@ -13,6 +14,9 @@ class Tracker:
     self.gyro = gyro
     self.battery = self.compute_battery_percent(battery)
     self.body_part = body_part
+
+    self.quat = quaternion(1.0, 0.0, 0.0, 0.0)
+    self.pos = quaternion(0.0, 0.0, 0.0, 0.0)
 
   def get_data(self) -> dict:
     data = {

@@ -6,21 +6,9 @@
 const char* srcIP = "192.168.1.59";
 
 char log_str[100];
-char RecvBuf[25];
-
-float* gyr_x = (float*)(RecvBuf + 0);
-float* gyr_y = (float*)(RecvBuf + 4);
-float* gyr_z = (float*)(RecvBuf + 8);
-float* tracker_id = (float*)(RecvBuf + 12);
 
 
-char* config_header = (char*)(RecvBuf + 0);
-float* ankleToGround = (float*)(RecvBuf + 1);
-float* headToNeck = (float*)(RecvBuf + 5);
-float* neckToWaist = (float*)(RecvBuf + 9);
-float* waistToAnkle = (float*)(RecvBuf + 13);
-
-
+// Initializes UDP socket
 void UDP::init() {
 	WSADATA wsaData;
 	int iResult;
@@ -35,10 +23,16 @@ void UDP::init() {
 	} else {
 		
 		local.sin_family = AF_INET;
-		local.sin_port = htons(PORT);
-		local.sin_addr.s_addr = inet_addr(srcIP);
+		local.sin_port = htons(serverPort);
+		local.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+		int enable = 1;
+		int iTimeout = 100;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(enable));
+		setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&iTimeout, sizeof(iTimeout));
+
 		SocketActivated = true;
 		if (sock == INVALID_SOCKET) {
 			WSACleanup();
@@ -48,10 +42,6 @@ void UDP::init() {
 
 		receiveThread = new std::thread(&UDP::start, this);
 	}
-
-	char message[] = "Hello";
-	int ret = sendto(sock, message, sizeof(message), 0, (struct sockaddr*)&local, sizeof(local));
-	VRDriverLog()->Log("Sent message!");
 }
 
 void UDP::deinit() {
@@ -68,9 +58,6 @@ void UDP::deinit() {
 }
 
 void UDP::start() {
-
-	
-	int localAddrSize = sizeof(local);
 	while (SocketActivated) {
 		vr::VRDriverLog()->Log("Receiving data!");
 		bytes_read = recvfrom(sock, RecvBuf, 25, 0, (sockaddr*)&local, &localAddrSize);
@@ -78,7 +65,6 @@ void UDP::start() {
 		VRDriverLog()->Log(log_str);
 		if (bytes_read == 16) {
 			VRDriverLog()->Log("Setting value!");
-			setValue((char*)RecvBuf);
 		} else if (bytes_read == 17) {
 			VRDriverLog()->Log("Setting body measurements!");
 		} else {
@@ -88,135 +74,41 @@ void UDP::start() {
 	}
 }
 
-void UDP::setValue(char* RecvBuf) {
-	// Need to move the gyroscope receive and calculate somewhere else.
-	short tracker_ID = *tracker_id;
-	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
-	VRDriverLog()->Log(log_str);
+void UDP::setValue(data_pkg* payload) {
+	DriverPose_t* pose = &hmd_pose;
 
-	double ang_x = *gyr_x;
-	double ang_y = *gyr_y;
-	double ang_z = *gyr_z;
-
-	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
-	VRDriverLog()->Log(log_str);
-	// red = x
-	// green = y
-	// blue = z ( -z is forwards)
-	
-
-	if (tracker_ID == 4) {
-		reset_trackers();
-	} else {
-		switch (tracker_ID) {
-		case WAIST:
-			VRDriverLog()->Log("Posing waist\n");
-
-			t_waist_last = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(t_waist_last - t_recv_end).count() / 1000.0;
-			getNewPose(WAIST, Vector3_d(-ang_x, -ang_y, ang_z), elapsed_time_s);
-
-			waist_pose.poseIsValid = true;
-			waist_pose.result = TrackingResult_Running_OK;
-			waist_pose.deviceIsConnected = true;
-			break;
-		case LFOOT:
-			VRDriverLog()->Log("Posing left foot\n");
-			t_lfoot_last = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(LFOOT, Vector3_d(-ang_z, -ang_y, -ang_x), elapsed_time_s);
-
-			lfoot_pose.poseIsValid = true;
-			lfoot_pose.result = TrackingResult_Running_OK;
-			lfoot_pose.deviceIsConnected = true;
-			break;
-		case RFOOT:
-			VRDriverLog()->Log("Posing right foot\n");
-
-			t_rfoot_last = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(RFOOT, Vector3_d(ang_z, -ang_y, ang_x), elapsed_time_s);
-
-			rfoot_pose.poseIsValid = true;
-			rfoot_pose.result = TrackingResult_Running_OK;
-			rfoot_pose.deviceIsConnected = true;
-	
-		default:
-			break;
-		}
-
-		updateSkeleton();
-	}
-
-}
-
-void UDP::configureMeasurements(char* RecvBuf) {
-	// Need to move the gyroscope receive and calculate somewhere else.
-
-	if (*config_header != 'a') {
+	switch (payload->tracker_id) {
+	case CHEST:
+		break;
+	case WAIST:
+		pose = &waist_pose;
+		break;
+	case LKNEE:
+		pose = &lknee_pose;
+		break;
+	case RKNEE:
+		pose = &rknee_pose;
+		break;
+	case LFOOT:
+		pose = &lfoot_pose;
+		break;
+	case RFOOT:
+		pose = &rfoot_pose;
+		break;
+	default:
+		vr::VRDriverLog()->Log("Invalid tracker ID received! Default to HMD");
+		pose = &hmd_pose;
 		return;
-	} else {
-		Head_to_Neck = *headToNeck;
-		Neck_to_Waist = *neckToWaist;
-		Hip_to_Foot_len_m = *waistToAnkle;
-		ankle_to_ground = *ankleToGround;
-		reset_trackers();
 	}
 
+	pose->qRotation.w = payload->qw;
+	pose->qRotation.x = payload->qx;
+	pose->qRotation.y = payload->qy;
+	pose->qRotation.z = payload->qz;
 
-	char* config_header = (char*)(RecvBuf + 0);
-	float* ankleToGround = (float*)(RecvBuf + 1);
-	float* headToNeck = (float*)(RecvBuf + 5);
-	float* neckToWaist = (float*)(RecvBuf + 9);
-	float* waistToAnkle = (float*)(RecvBuf + 13);
-
-
-	double ang_x = *gyr_x;
-	double ang_y = *gyr_y;
-	double ang_z = *gyr_z;
-
-
-}
-
-void UDP::reset_trackers() {
-	VRDriverLog()->Log("Resetting tracker pos!\n");
-
-	neck_pose.vecPosition[0] = 0.0;
-	neck_pose.vecPosition[1] = 1.6;
-	neck_pose.vecPosition[2] = -Head_to_Neck;
-
-	waist_pose.vecPosition[0] = 0.0;
-	waist_pose.vecPosition[1] = neck_pose.vecPosition[1] - Neck_to_Waist;
-	waist_pose.vecPosition[2] = neck_pose.vecPosition[2];
-
-	lfoot_pose.vecPosition[0] = lhip_pose.vecPosition[0];
-	lfoot_pose.vecPosition[1] = lhip_pose.vecPosition[1] - Hip_to_Foot_len_m;
-	lfoot_pose.vecPosition[2] = lhip_pose.vecPosition[2];
-
-	rfoot_pose.vecPosition[0] = rhip_pose.vecPosition[0];
-	rfoot_pose.vecPosition[1] = rhip_pose.vecPosition[1] - Hip_to_Foot_len_m;
-	rfoot_pose.vecPosition[2] = rhip_pose.vecPosition[2];
-
-	lfoot_pose.qRotation.w = 1.0;
-	lfoot_pose.qRotation.x = 0;
-	lfoot_pose.qRotation.y = 0;
-	lfoot_pose.qRotation.z = 0;
-
-
-	waist_pose.qRotation.w = 1.0;
-	waist_pose.qRotation.x = 0;
-	waist_pose.qRotation.y = 0;
-	waist_pose.qRotation.z = 0;
-
-	lfoot_pose.qRotation.w = 1.0;
-	lfoot_pose.qRotation.x = 0;
-	lfoot_pose.qRotation.y = 0;
-	lfoot_pose.qRotation.z = 0;
-
-	rfoot_pose.qRotation.w = 1.0;
-	rfoot_pose.qRotation.x = 0;
-	rfoot_pose.qRotation.y = 0;
-	rfoot_pose.qRotation.z = 0;
+	pose->vecPosition[0] = payload->x;
+	pose->vecPosition[1] = payload->y;
+	pose->vecPosition[2] = payload->z;
 
 	return;
 }

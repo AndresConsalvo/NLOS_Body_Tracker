@@ -35,13 +35,13 @@ int BufLen = 255;
 
 char RecvBuf[255];
 
-double hmd_pos[3] = { 0, 1.8, 0};
-double hmd_quat[4] = { 1.0, 0.0, 0.0, 0.0 };
+float hmd_pos[3] = { 0.0, 1.8, 0.0};
+float hmd_quat[4] = { 1.0, 0.0, 0.0, 0.0 };
 
 
 #pragma pack(push, 1)
 struct data_pkg {
-	uint8_t header;
+	uint8_t header = 'T';
 	float x = 0.0;
 	float y = 0.0;
 	float z = 0.0;
@@ -50,7 +50,7 @@ struct data_pkg {
 	float qy = 0.0;
 	float qz = 0.0;
 	uint8_t tracker_id = 0;
-	uint8_t footer;
+	uint8_t footer = 't';
 };
 #pragma pack(pop)
 
@@ -67,13 +67,12 @@ data_pkg* payload;
 bool broadcast_en = true;
 bool server_connected = false;
 
-
-
 void readUDP() {
 	while (1) {
 		memset(RecvBuf, 0, sizeof(RecvBuf));
 		//printf("Scanning for data\n");
 		bytes_read = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)&local, &localAddrSize);
+		
 		printf("%d\n", bytes_read);
 
 		if (bytes_read == sizeof(ping_pkg)) {
@@ -87,6 +86,7 @@ void readUDP() {
 		}
 		
 		if (bytes_read == sizeof(data_pkg)) {
+			last_received = std::chrono::high_resolution_clock::now();
 			payload = (data_pkg*)RecvBuf;
 
 			if (payload->header == 'T' && payload->footer == 't') {
@@ -94,10 +94,8 @@ void readUDP() {
 				printf("Tracker ID: %d\n", payload->tracker_id);
 				printf("Rotation [w, x, y, z] = [%f, %f, %f, %f]\n", payload->qw, payload->qx, payload->qy, payload->qz);
 				printf("Position [x, y, z] = [%f, %f, %f]\n", payload->x, payload->y, payload->z);
-				last_received = std::chrono::high_resolution_clock::now();
 			}
 		}
-		
 	}
 }
 
@@ -133,7 +131,10 @@ int main() {
 		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 		int enable = 1;
+		int iTimeout = 100;
 		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(enable));
+		setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&iTimeout, sizeof(iTimeout));
+		// Set timeout
 
 
 		if (sock == INVALID_SOCKET) {
@@ -152,6 +153,8 @@ int main() {
 	std::thread second(reconnectUDP);
 
 	while (1) {
+		current_time = std::chrono::high_resolution_clock::now();
+		elapsed_time_s = std::chrono::duration<double, std::milli>(current_time - last_received).count() / 1000.0;
 		if (elapsed_time_s > 5.0) {
 			broadcast_en = true;
 			server_connected = false;
@@ -172,9 +175,7 @@ int main() {
 			hmd_payload.footer = (uint8_t)'h';
 
 			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
-
-			current_time = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(current_time - last_received).count() / 1000.0;
+			
 			printf("%f\n", elapsed_time_s);
 
 			Sleep(1000);

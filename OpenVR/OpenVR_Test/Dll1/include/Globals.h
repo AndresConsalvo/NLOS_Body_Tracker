@@ -15,16 +15,11 @@ extern bool SocketActivated;
 extern DriverPose_t hmd_pose;
 
 extern DriverPose_t waist_pose;
+extern DriverPose_t lknee_pose;
+extern DriverPose_t rknee_pose;
 extern DriverPose_t lfoot_pose;
 extern DriverPose_t rfoot_pose;
-extern DriverPose_t lthigh_pose;
-extern DriverPose_t rthigh_pose;
 
-// Skeleton
-extern DriverPose_t neck_pose;
-extern DriverPose_t tailbone_pose;
-extern DriverPose_t lhip_pose;
-extern DriverPose_t rhip_pose;
 // = q (4 floats) 3d position (3 floats) x, y, z
 
 // Offsets
