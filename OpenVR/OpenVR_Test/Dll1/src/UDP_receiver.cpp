@@ -1,10 +1,7 @@
 #pragma once
 #include <UDP_receiver.h>
 
-
-#define PORT 20000
-const char* srcIP = "192.168.1.59";
-
+// For logging purposes (no use in normal operation)
 char log_str[100];
 
 
@@ -59,14 +56,13 @@ void UDP::deinit() {
 
 void UDP::start() {
 	while (SocketActivated) {
-		vr::VRDriverLog()->Log("Receiving data!");
-		bytes_read = recvfrom(sock, RecvBuf, 25, 0, (sockaddr*)&local, &localAddrSize);
-		snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
-		VRDriverLog()->Log(log_str);
-		if (bytes_read == 16) {
-			VRDriverLog()->Log("Setting value!");
-		} else if (bytes_read == 17) {
-			VRDriverLog()->Log("Setting body measurements!");
+		//vr::VRDriverLog()->Log("Receiving data!");
+		bytes_read = recvfrom(sock, RecvBuf, BufLen, 0, (sockaddr*)&local, &localAddrSize);
+		//snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
+		//VRDriverLog()->Log(log_str);
+		if (bytes_read == sizeof(data_pkg)) {
+			payload = (data_pkg*)(RecvBuf);
+			setValue(payload);
 		} else {
 			vr::VRDriverLog()->Log("No data received!");
 		}
@@ -112,3 +108,5 @@ void UDP::setValue(data_pkg* payload) {
 
 	return;
 }
+
+

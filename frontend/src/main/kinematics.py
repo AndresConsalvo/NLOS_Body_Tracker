@@ -43,20 +43,20 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     lknee_pos = lhip_pos + (lknee.quat * quaternion(0, 0, -kinematics.Hip_to_Knee, 0) * lknee.quat.get_inverse())
     rknee_pos = rhip_pos + (rknee.quat * quaternion(0, 0, -kinematics.Hip_to_Knee, 0) * rknee.quat.get_inverse())
 
-    # lfoot_pos = lknee_pos + (lfoot.quat * quaternion(0, 0, -kinematics.Knee_to_Foot, 0) * lfoot.quat.get_inverse())
-    # rfoot_pos = rknee_pos + (rfoot.quat * quaternion(0, 0, -kinematics.Knee_to_Foot, 0) * rfoot.quat.get_inverse())
+    lfoot_pos = lknee_pos + (lfoot.quat * quaternion(0, 0, -kinematics.Knee_to_Foot, 0) * lfoot.quat.get_inverse())
+    rfoot_pos = rknee_pos + (rfoot.quat * quaternion(0, 0, -kinematics.Knee_to_Foot, 0) * rfoot.quat.get_inverse())
 
-    # if (lfoot_pos.y < 0):
-    #     lfoot_pos.y = 0
+    if (lfoot_pos.y < 0):
+        lfoot_pos.y = 0
     
-    # if (rfoot_pos.y < 0):
-    #     rfoot_pos.y = 0
+    if (rfoot_pos.y < 0):
+        rfoot_pos.y = 0
 
     waist.pos = waist_pos
     lknee.pos = lknee_pos
     rknee.pos = rknee_pos
-    # lfoot.pos = lfoot_pos
-    # rfoot.pos = rfoot_pos
+    lfoot.pos = lfoot_pos
+    rfoot.pos = rfoot_pos
 
     if (verbose == True):
         print("Neck pos:", vars(neck_pos))
@@ -65,8 +65,8 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
         print("Right hip pos:", vars(rhip_pos))
         print("Left knee pos:", vars(lknee_pos))
         print("Right knee pos:", vars(rknee_pos))
-        # print("Left foot pos:", vars(lfoot_pos))
-        # print("Right foot pos:", vars(rfoot_pos))
+        print("Left foot pos:", vars(lfoot_pos))
+        print("Right foot pos:", vars(rfoot_pos))
     
     
 

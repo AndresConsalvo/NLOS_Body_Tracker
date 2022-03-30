@@ -71,6 +71,10 @@ DriverPose_t TrackerDriver::GetPose() {
 	case (WAIST):
 		return waist_pose;
 		break;
+	case (LKNEE):
+		return lknee_pose;
+	case (RKNEE):
+		return rknee_pose;
 	case (LFOOT):
 		return lfoot_pose;
 		break;

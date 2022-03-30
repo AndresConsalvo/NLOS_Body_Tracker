@@ -22,12 +22,18 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		return initError;
 	}
 
+	HmdQuaternion_t quat;
+	quat.w = 1.0;
+	quat.x = 0.0;
+	quat.y = 0.0;
+	quat.z = 0.0;
+
 	if (waist_en) {
 		VRDriverLog()->Log("Initializing waist tracker...");
-		waist_pose.qRotation.w = 1.0;
-		waist_pose.qRotation.x = 0.0;
-		waist_pose.qRotation.y = 0.0;
-		waist_pose.qRotation.z = 0.0;
+
+		waist_pose.qRotation = quat;
+		waist_pose.qWorldFromDriverRotation = quat;
+		waist_pose.qDriverFromHeadRotation = quat;
 
 		waist_tracker = new TrackerDriver();
 		waist_tracker->setIndex(WAIST);
@@ -39,23 +45,43 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	}
 
 	if (lknee_en) {
+		VRDriverLog()->Log("Initializing lknee tracker...");
+
+		lknee_pose.qRotation = quat;
+		lknee_pose.qWorldFromDriverRotation = quat;
+		lknee_pose.qDriverFromHeadRotation = quat;
+
 		lknee_tracker = new TrackerDriver();
 		lknee_tracker->setIndex(LKNEE);
+
+		waist_tracker->SetModel("LKnee_Tracker");
+		waist_tracker->SetVersion("0.0.1");
+
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LThigh_Tracker", TrackedDeviceClass_GenericTracker, lknee_tracker);
 	}
 
 	if (rknee_en) {
+		VRDriverLog()->Log("Initializing rknee tracker...");
+
+		rknee_pose.qRotation = quat;
+		rknee_pose.qWorldFromDriverRotation = quat;
+		rknee_pose.qDriverFromHeadRotation = quat;
+
 		rknee_tracker = new TrackerDriver();
 		rknee_tracker->setIndex(RKNEE);
+
+		waist_tracker->SetModel("RKnee_Tracker");
+		waist_tracker->SetVersion("0.0.1");
+
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RThigh_Tracker", TrackedDeviceClass_GenericTracker, rknee_tracker);
 	}
 
 	if (lfoot_en) {
 		VRDriverLog()->Log("Initializing left foot tracker...");
-		lfoot_pose.qRotation.w = 1.0;
-		lfoot_pose.qRotation.x = 0.0;
-		lfoot_pose.qRotation.y = 0.0;
-		lfoot_pose.qRotation.z = 0.0;
+
+		lfoot_pose.qRotation = quat;
+		lfoot_pose.qWorldFromDriverRotation = quat;
+		lfoot_pose.qDriverFromHeadRotation = quat;
 
 		lfoot_tracker = new TrackerDriver();
 		lfoot_tracker->setIndex(LFOOT);
@@ -68,10 +94,10 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 
 	if (rfoot_en) {
 		VRDriverLog()->Log("Initializing right foot tracker...");
-		rfoot_pose.qRotation.w = 1.0;
-		rfoot_pose.qRotation.x = 0.0;
-		rfoot_pose.qRotation.y = 0.0;
-		rfoot_pose.qRotation.z = 0.0;
+
+		rfoot_pose.qRotation = quat;
+		rfoot_pose.qWorldFromDriverRotation = quat;
+		rfoot_pose.qDriverFromHeadRotation = quat;
 
 		rfoot_tracker = new TrackerDriver();
 		rfoot_tracker->setIndex(RFOOT);

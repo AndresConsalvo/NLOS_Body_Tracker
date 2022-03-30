@@ -22,7 +22,7 @@ extern DriverPose_t rfoot_pose;
 
 // = q (4 floats) 3d position (3 floats) x, y, z
 
-// Offsets
+// Offsets (Legacy, not needed anymore)
 extern const double HMD_to_Head;
 extern double Head_to_Neck;
 

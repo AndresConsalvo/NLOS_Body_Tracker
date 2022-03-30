@@ -55,14 +55,15 @@ struct data_pkg {
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-struct ping_pkg {
+struct cmd_pkg {
 	uint8_t header = 'P';
 	uint8_t msg = 45;
 	uint8_t footer = 'p';
 };
 #pragma pack(pop)
 
-ping_pkg* server_response;
+
+cmd_pkg* server_response;
 data_pkg* payload;
 bool broadcast_en = true;
 bool server_connected = false;
@@ -72,24 +73,54 @@ void readUDP() {
 		memset(RecvBuf, 0, sizeof(RecvBuf));
 		//printf("Scanning for data\n");
 		bytes_read = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)&local, &localAddrSize);
-		
-		printf("%d\n", bytes_read);
+		//printf("%s\n", RecvBuf);
 
-		if (bytes_read == sizeof(ping_pkg)) {
-			server_response = (ping_pkg*)RecvBuf;
-			printf("Server responded, ending broadcast.\n");
+		if (bytes_read == sizeof(cmd_pkg)) {
+			server_response = (cmd_pkg*)RecvBuf;
+			//printf("Server responded\n");
 
 			if (server_response->header == 'P' && server_response->footer == 'p') {
+				last_received = std::chrono::high_resolution_clock::now();
+				printf("Server responded, ending broadcast.\n");
 				broadcast_en = false;
 				server_connected = true;
+			}
+
+			if (server_response->header == 'C' && server_response->footer == 'c') {
+				last_received = std::chrono::high_resolution_clock::now();
+				data_pkg hmd_payload;
+
+				switch (server_response->msg) {
+				case 0:
+					//printf("Sending hmd data\n");
+
+					hmd_payload.header = (uint8_t)'H';
+					hmd_payload.x = hmd_pos[0];
+					hmd_payload.y = hmd_pos[1];
+					hmd_payload.z = hmd_pos[2];
+					hmd_payload.qw = hmd_quat[0];
+					hmd_payload.qx = hmd_quat[1];
+					hmd_payload.qy = hmd_quat[2];
+					hmd_payload.qz = hmd_quat[3];
+					hmd_payload.tracker_id = 0;
+					hmd_payload.footer = (uint8_t)'h';
+
+					sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
+					break;
+				default:
+					printf("Invalid command\n");
+					break;
+				}
 			}
 		}
 		
 		if (bytes_read == sizeof(data_pkg)) {
-			last_received = std::chrono::high_resolution_clock::now();
+			
+			//printf("Data received.\n");
 			payload = (data_pkg*)RecvBuf;
 
 			if (payload->header == 'T' && payload->footer == 't') {
+				last_received = std::chrono::high_resolution_clock::now();
 				printf("Header and footer: %c %c\n", payload->header, payload->footer);
 				printf("Tracker ID: %d\n", payload->tracker_id);
 				printf("Rotation [w, x, y, z] = [%f, %f, %f, %f]\n", payload->qw, payload->qx, payload->qy, payload->qz);
@@ -102,7 +133,7 @@ void readUDP() {
 void reconnectUDP() {
 	while (1) {
 		if (broadcast_en) {
-			ping_pkg ping;
+			cmd_pkg ping;
 			sendto(sock, (char*)&ping, sizeof(ping), 0, (sockaddr*)&local, localAddrSize);
 			printf("Broadcasting!\n");
 		}
@@ -158,27 +189,6 @@ int main() {
 		if (elapsed_time_s > 5.0) {
 			broadcast_en = true;
 			server_connected = false;
-		}
-		
-		if (server_connected) {
-			printf("Sending hmd data\n");
-			data_pkg hmd_payload;
-			hmd_payload.header = (uint8_t)'H';
-			hmd_payload.x = hmd_pos[0];
-			hmd_payload.y = hmd_pos[1];
-			hmd_payload.z = hmd_pos[2];
-			hmd_payload.qw = hmd_quat[0];
-			hmd_payload.qx = hmd_quat[1];
-			hmd_payload.qy = hmd_quat[2];
-			hmd_payload.qz = hmd_quat[3];
-			hmd_payload.tracker_id = 0;
-			hmd_payload.footer = (uint8_t)'h';
-
-			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
-			
-			printf("%f\n", elapsed_time_s);
-
-			Sleep(1000);
 		}
 
 	}
