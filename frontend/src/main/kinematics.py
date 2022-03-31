@@ -2,10 +2,10 @@ from tracker import *
 from math_helpers import quaternion
 
 HMD = 0
-CHEST = -1
-WAIST = 1
-LKNEE = 2
-RKNEE = 3
+CHEST = 1
+WAIST = 2
+LKNEE = 3
+RKNEE = 4
 LFOOT = 5
 RFOOT = 6
 

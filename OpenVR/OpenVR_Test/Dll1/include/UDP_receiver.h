@@ -48,6 +48,7 @@ public:
 
 private:
 	void start();
+	void start_broadcasting();
 	void setValue(data_pkg* payload);
 
 	SOCKET sock;
@@ -61,9 +62,11 @@ private:
 	char RecvBuf[255];
 
 	std::thread* receiveThread = nullptr;
+	std::thread* broadcastThread = nullptr;
 
 	ping_pkg* server_response;
 	data_pkg* payload;
+
 	bool broadcast_en = true;
 	bool server_connected = false;
 

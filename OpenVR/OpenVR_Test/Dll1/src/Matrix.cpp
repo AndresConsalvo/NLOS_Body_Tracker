@@ -18,13 +18,13 @@ Vector3_d::Vector3_d() {
 	this->z = 0;
 }
 
-Vector3_d::Vector3_d(double x, double y, double z) {
+Vector3_d::Vector3_d(float x, float y, float z) {
 	this->x = x;
 	this->y = y;
 	this->z = z;
 }
 
-double Vector3_d::getMag() {
+float Vector3_d::getMag() {
 	return sqrt(x*x + y*y + z*z);
 }
 
@@ -48,7 +48,7 @@ Quaternion::Quaternion() {
 	this->z = 0.0;
 }
 
-Quaternion::Quaternion(double w, double x, double y, double z) {
+Quaternion::Quaternion(float w, float x, float y, float z) {
 	this->w = w;
 	this->x = x;
 	this->y = y;
@@ -60,7 +60,7 @@ Quaternion Quaternion::GetInverse() {
 }
 
 void Quaternion::normalize() {
-	double mag = sqrt(w*w + x*x + y*y + z*z);
+	float mag = sqrt(w*w + x*x + y*y + z*z);
 	w /= mag;
 	x /= mag;
 	y /= mag;
@@ -142,7 +142,7 @@ void Matrix44_d::set_as_Omega_Matrix(Vector3_d ang_vel) {
 	return;
 }
 
-void Matrix44_d::scale_Matrix(double scale) {
+void Matrix44_d::scale_Matrix(float scale) {
 	for (int i = 0; i < 16; i++) {
 		m[i] *= scale;
 	}

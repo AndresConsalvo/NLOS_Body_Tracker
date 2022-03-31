@@ -38,6 +38,7 @@ void UDP::init() {
 		}
 
 		receiveThread = new std::thread(&UDP::start, this);
+		broadcastThread = new std::thread(&UDP::start_broadcasting, this);
 	}
 }
 
@@ -47,26 +48,75 @@ void UDP::deinit() {
 		if (receiveThread) {
 			receiveThread->join();
 			delete receiveThread;
+
+			broadcastThread->join();
+			delete broadcastThread;
+
 			receiveThread = nullptr;
+			broadcastThread = nullptr;
 		}
 		closesocket(sock);
 		WSACleanup();
 	}
 }
 
+
+
 void UDP::start() {
 	while (SocketActivated) {
+
 		//vr::VRDriverLog()->Log("Receiving data!");
 		bytes_read = recvfrom(sock, RecvBuf, BufLen, 0, (sockaddr*)&local, &localAddrSize);
 		//snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
 		//VRDriverLog()->Log(log_str);
 		if (bytes_read == sizeof(data_pkg)) {
 			payload = (data_pkg*)(RecvBuf);
-			setValue(payload);
+			if (payload->header == 'T' && payload->footer == 't') {
+				setValue(payload);
+			}
+		} else if (bytes_read == sizeof(ping_pkg)) {
+			server_response = (ping_pkg*)(RecvBuf);
+
+			if (server_response->header == 'P' && server_response->footer == 'p') {
+				VRDriverLog()->Log("Server responded, ending broadcast.\n");
+				broadcast_en = false;
+			}
+			if (server_response->header == 'C' && server_response->footer == 'c') {
+				if (server_response->msg == 0) {
+					TrackedDevicePose_t device_pose[10];
+					VRServerDriverHost()->GetRawTrackedDevicePoses(0, device_pose, 10);
+					HmdMatrix34_t space_matrix = device_pose[k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+					Quaternion hmd_quat = getQuaternionFromHMD(space_matrix);
+
+					data_pkg hmd_data;
+
+					hmd_data.header = 'H';
+					hmd_data.x = space_matrix.m[0][3];
+					hmd_data.y = space_matrix.m[1][3];
+					hmd_data.z = space_matrix.m[2][3];
+					hmd_data.qw = hmd_quat.w;
+					hmd_data.qx = hmd_quat.x;
+					hmd_data.qy = hmd_quat.y;
+					hmd_data.qz = hmd_quat.z;
+					hmd_data.tracker_id = 0;
+					hmd_data.footer = 'h';
+					
+					sendto(sock, (char*)&hmd_data, sizeof(hmd_data), 0, (sockaddr*)&local, localAddrSize);
+				}
+			}
 		} else {
 			vr::VRDriverLog()->Log("No data received!");
 		}
 		t_recv_end = std::chrono::high_resolution_clock::now();
+	}
+}
+
+void UDP::start_broadcasting() {
+	while (broadcast_en) {
+		ping_pkg ping;
+		sendto(sock, (char*)&ping, sizeof(ping), 0, (sockaddr*)&local, localAddrSize);
+		VRDriverLog()->Log("Broadcasting!\n");
+		Sleep(1000);
 	}
 }
 
@@ -75,6 +125,7 @@ void UDP::setValue(data_pkg* payload) {
 
 	switch (payload->tracker_id) {
 	case CHEST:
+		pose = &chest_pose;
 		break;
 	case WAIST:
 		pose = &waist_pose;
@@ -96,6 +147,10 @@ void UDP::setValue(data_pkg* payload) {
 		pose = &hmd_pose;
 		return;
 	}
+
+	pose->poseIsValid = true;
+	
+	pose->deviceIsConnected = true;
 
 	pose->qRotation.w = payload->qw;
 	pose->qRotation.x = payload->qx;

@@ -14,6 +14,7 @@ extern bool SocketActivated;
 // Tracked Poses
 extern DriverPose_t hmd_pose;
 
+extern DriverPose_t chest_pose;
 extern DriverPose_t waist_pose;
 extern DriverPose_t lknee_pose;
 extern DriverPose_t rknee_pose;

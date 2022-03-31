@@ -28,6 +28,7 @@ private:
 
 	UDP* udpThread = nullptr;
 
+	TrackerDriver* chest_tracker = nullptr;
 	TrackerDriver* waist_tracker = nullptr;
 	TrackerDriver* lknee_tracker = nullptr;
 	TrackerDriver* rknee_tracker = nullptr;

@@ -1,14 +1,16 @@
 #include <DeviceProvider.h>
 
+bool chest_en = false;
 bool waist_en = true;
-bool lknee_en = false;
-bool rknee_en = false;
+bool lknee_en = true;
+bool rknee_en = true;
 bool lfoot_en = true;
 bool rfoot_en = true;
 
 bool SocketActivated = false;
 
 DriverPose_t hmd_pose = { 0 };
+DriverPose_t chest_pose = { 0 };
 DriverPose_t waist_pose = { 0 };
 DriverPose_t lknee_pose = { 0 };
 DriverPose_t rknee_pose = { 0 };
@@ -27,6 +29,22 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	quat.x = 0.0;
 	quat.y = 0.0;
 	quat.z = 0.0;
+
+	if (chest_en) {
+		VRDriverLog()->Log("Initializing waist tracker...");
+
+		chest_pose.qRotation = quat;
+		chest_pose.qWorldFromDriverRotation = quat;
+		chest_pose.qDriverFromHeadRotation = quat;
+
+		chest_tracker = new TrackerDriver();
+		chest_tracker->setIndex(WAIST);
+
+		chest_tracker->SetModel("Chest_Tracker");
+		chest_tracker->SetVersion("0.0.1");
+
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_Chest_Tracker", TrackedDeviceClass_GenericTracker, chest_tracker);
+	}
 
 	if (waist_en) {
 		VRDriverLog()->Log("Initializing waist tracker...");
@@ -117,6 +135,9 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 }
 
 void DeviceProvider::Cleanup() {
+	delete chest_tracker;
+	chest_tracker = NULL;
+
 	delete waist_tracker;
 	waist_tracker = NULL;
 
@@ -138,6 +159,10 @@ const char* const* DeviceProvider::GetInterfaceVersions() {
 }
 
 void DeviceProvider::RunFrame() {
+	if (chest_tracker) {
+		chest_tracker->RunFrame();
+	}
+
 	if (waist_tracker) {
 		waist_tracker->RunFrame();
 	}

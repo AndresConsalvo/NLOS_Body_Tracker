@@ -184,11 +184,6 @@
 
 // https://github.com/osudrl/OpenVR-Tracking-Example/blob/e17119b5129a3d77e4054f0fa30401a13daaf1dd/HTC%20Lighthouse%20Tracking%20Example/LighthouseTracking.cpp#L166-L177
 Quaternion getQuaternionFromHMD(HmdMatrix34_t& matrix) {
-	TrackedDevicePose_t device_pose[10];
-	VRServerDriverHost()->GetRawTrackedDevicePoses(0, device_pose, 10);
-
-	HmdMatrix34_t space_matrix = device_pose[k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
-
 	Quaternion newQuat;
 
 	newQuat.w = sqrt(fmax(0, 1 + matrix.m[0][0] + matrix.m[1][1] + matrix.m[2][2])) / 2;
