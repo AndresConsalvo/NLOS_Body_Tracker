@@ -8,7 +8,7 @@ import sys
 import argparse
 import threading
 import struct
-
+import keyboard
 
 from psutil import process_iter
 from os import kill
@@ -37,13 +37,13 @@ recv_counter = 0
 
 OPENVR_MESSAGE = "Hello\\x00"
 UDP_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-UDP_server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 10)
-UDP_server_socket.settimeout(0.1)
+UDP_server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 64)
+#UDP_server_socket.settimeout(0.1)
 
 driver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
 driver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-driver.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 10)
-driver.settimeout(0.1)
+driver.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 64)
+#driver.settimeout(0.01)
 
 trackers = {}
 trackers[1] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 1)
@@ -58,7 +58,10 @@ kinematics = Skeleton()
 
 run_server = True
 listening = True
+driver_found = False
+driver_addr = None
 
+start_time = time.time()
 
 
 
@@ -145,7 +148,6 @@ def start_server_udp(verbose:bool):
       payload = message[2:-1]
       if (not openvr_address):
         openvr_address = address
-        print(openvr_address)
     except socket.timeout:
       print("Socket timed out.")
       payload = None
@@ -208,8 +210,6 @@ def start_server_udp(verbose:bool):
         gyro  = payload["data"]["gyro"]
         id    = payload["data"]["id"]
 
-        print(gyro)
-
         tracker = Tracker(address,
                           accel,
                           gyro,
@@ -222,8 +222,7 @@ def start_server_udp(verbose:bool):
         else:
           update_tracker_info(trackers, tracker)
           trackers.get(id).quat = updateRotation(trackers.get(id).quat, trackers.get(id).gyro)
-        
-        tracker_read[id] = 1
+
 
     if verbose:
       print(f"[INFO] Client Address:\n{address}\n")
@@ -239,18 +238,18 @@ def start_driver_udp():
   driver.bind(LOCAL_ADDR)
 
   global listening
+  global driver_addr
+  global driver_found
 
-  driver_addr = None
+
 
   while(listening):
 
     # Request data once trackers have all received data
-    if (sum(tracker_read) == 1 and driver_addr is not None):
-      payload = pack('=cbc', b'C', 0, b'c')
-      driver.sendto(payload, driver_addr)
 
     try:
       data, driver_addr = driver.recvfrom(BUFFER_SIZE)
+      #print("--- Data received: %s seconds ---" % (time.time() - start_time))
       payload_length = len(data)
 
       if (payload_length == 3):
@@ -258,31 +257,37 @@ def start_driver_udp():
 
         if (header == b'P' and footer == b'p'):
             #print("Driver found!")
+            driver_found = True
             payload = pack("=cbc", b'P', 45, b'p')
             driver.sendto(payload, driver_addr)
 
       if (payload_length == 31):
         #print("Sending data!")
+        #print("--- HMD received: %s seconds ---" % (time.time() - start_time))
         header, x, y, z, qw, qx, qy, qz, id, footer = unpack("=cfffffffbc", data)
         if (header == b'H' and footer == b'h'):
           hmd_pos = quaternion(0, x, y, z)
           hmd_quat = quaternion(qw, qx, qy, qz)
 
-          update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=True)
+          update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False)
+          #print("--- Body updated: %s seconds ---" % (time.time() - start_time))
           
           for i in trackers:
-            #print("Sending tracker", i)
-            track = trackers.get(i)
+            #print("--- Getting tracker: %s seconds ---" % (time.time() - start_time))
+            track = trackers[i]
             id = track.id
             quat = track.quat
             pos = track.pos
+            #print("--- Payload packing: %s seconds ---" % (time.time() - start_time))
             payload = pack('=cfffffffbc', b'T', pos.x, pos.y, pos.z, quat.w, quat.x, quat.y, quat.z, id, b't')
+            #print("--- Payload packed: %s seconds ---" % (time.time() - start_time))
             driver.sendto(payload, driver_addr)
-            tracker_read[i] = 0
+            #print("--- Payload sent: %s seconds ---" % (time.time() - start_time))
+        #print("--- Send done: %s seconds ---" % (time.time() - start_time))
 
     except socket.timeout:
       print("socket timed out")
-      driver_addr = None
+      #driver_addr = None
     except ConnectionResetError:
       driver_addr = None
       print("Connection lost!")
@@ -294,6 +299,15 @@ def start_driver_udp():
   driver.close()
   print("Ending driver udp socket")
 
+def request_hmd():
+  global driver_found
+  global driver_addr
+  while True:
+    if (driver_addr is not None and driver_found is True):
+      payload = pack('=cbc', b'C', 0, b'c')
+      driver.sendto(payload, driver_addr)
+    time.sleep(0.00001)
+
 
 def sigint_handler(signum, frame):
   global listening
@@ -304,6 +318,10 @@ def sigint_handler(signum, frame):
   run_server = False
   exit(0)
 
+def calibrate(trackers):
+  for i in trackers:
+    trackers[i].quat = quaternion(1, 0, 0, 0)
+  return
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -320,10 +338,18 @@ if __name__ == "__main__":
   driver_udp = threading.Thread(target=start_driver_udp, daemon=True)
   driver_udp.start()
 
+  #request_udp = threading.Thread(target=request_hmd, daemon=True)
+  #request_udp.start()
+
   counter = 0
   while(run_server):
+    if keyboard.is_pressed('x'):  # if key 'x' is pressed 
+        print('Calibrating!')
+        calibrate(trackers)
+        #break  # finishing the loop
     counter = counter + 1
 
   server_udp.join()
   driver_udp.join()
+  #request_udp.join()
   #start(args.v)

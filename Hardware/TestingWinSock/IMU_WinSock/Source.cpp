@@ -125,6 +125,10 @@ void readUDP() {
 				printf("Tracker ID: %d\n", payload->tracker_id);
 				printf("Rotation [w, x, y, z] = [%f, %f, %f, %f]\n", payload->qw, payload->qx, payload->qy, payload->qz);
 				printf("Position [x, y, z] = [%f, %f, %f]\n", payload->x, payload->y, payload->z);
+
+				if (payload->tracker_id == 6) {
+					system("CLS");
+				}
 			}
 		}
 	}
@@ -136,8 +140,24 @@ void reconnectUDP() {
 			cmd_pkg ping;
 			sendto(sock, (char*)&ping, sizeof(ping), 0, (sockaddr*)&local, localAddrSize);
 			printf("Broadcasting!\n");
+			Sleep(1000);
+		} else {
+			data_pkg hmd_payload;
+			hmd_payload.header = (uint8_t)'H';
+			hmd_payload.x = hmd_pos[0];
+			hmd_payload.y = hmd_pos[1];
+			hmd_payload.z = hmd_pos[2];
+			hmd_payload.qw = hmd_quat[0];
+			hmd_payload.qx = hmd_quat[1];
+			hmd_payload.qy = hmd_quat[2];
+			hmd_payload.qz = hmd_quat[3];
+			hmd_payload.tracker_id = 0;
+			hmd_payload.footer = (uint8_t)'h';
+
+			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
+			Sleep(10);
 		}
-		Sleep(1000);
+		
 	}
 }
 

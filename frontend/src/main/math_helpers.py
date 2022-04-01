@@ -70,12 +70,11 @@ def updateRotation(q_t0:quaternion, angle_vector, verbose=False):
     mag = np.linalg.norm(angle_vector)
 
     if (np.isclose(mag, 0, rtol=1e-5)):
-        mag = 0.0001
+        return q_t0
+    else:
+        scale_Ident = np.cos(mag / 2.0)
+        scale_Omega = (1.0 / mag) * np.sin(mag / 2.0)
 
-    elapsed_time_ms = 1
-
-    scale_Ident = np.cos(mag * elapsed_time_ms / 2.0)
-    scale_Omega = (1.0 / mag) * np.sin(mag * elapsed_time_ms / 2.0)
 
     ident_m = ident_m * scale_Ident
     omega_m = omega_m * scale_Omega

@@ -127,3 +127,15 @@ Ruo Log:
 3/21/2022
 - Improved server robustness
 - Working on moving all calculations to the server, rather than the driver.
+
+3/25/2022
+- Worked on porting calculations to the server, wrote several python packages to facilitate this
+
+3/27/2022
+- Finished porting calculations to the server
+
+3/28/2022
+- Tested server, found noticeable lag.
+
+3/29/2022
+- Working on optimizing the server to improve speed, looking into memory-based IPC.
