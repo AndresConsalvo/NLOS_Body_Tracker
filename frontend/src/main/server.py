@@ -60,6 +60,7 @@ run_server = True
 listening = True
 driver_found = False
 driver_addr = None
+calibrate = False
 
 start_time = time.time()
 
@@ -209,6 +210,7 @@ def start_server_udp(verbose:bool):
         accel = payload["data"]["accel"]
         gyro  = payload["data"]["gyro"]
         id    = payload["data"]["id"]
+        quat  = payload["data"]["quat"]
 
         tracker = Tracker(address,
                           accel,
@@ -221,7 +223,7 @@ def start_server_udp(verbose:bool):
           store_new_tracker(trackers, tracker)
         else:
           update_tracker_info(trackers, tracker)
-          trackers.get(id).quat = updateRotation(trackers.get(id).quat, trackers.get(id).gyro)
+          trackers.get(id).quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
 
 
     if verbose:
@@ -240,7 +242,7 @@ def start_driver_udp():
   global listening
   global driver_addr
   global driver_found
-
+  global calibrate
 
 
   while(listening):
@@ -269,7 +271,11 @@ def start_driver_udp():
           hmd_pos = quaternion(0, x, y, z)
           hmd_quat = quaternion(qw, qx, qy, qz)
 
-          update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False)
+          if (calibrate == True):
+            set_offsets(kinematics, trackers, hmd_quat, verbose=True)
+            calibrate = False
+          else:
+            update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False)
           #print("--- Body updated: %s seconds ---" % (time.time() - start_time))
           
           for i in trackers:
@@ -318,11 +324,6 @@ def sigint_handler(signum, frame):
   run_server = False
   exit(0)
 
-def calibrate(trackers):
-  for i in trackers:
-    trackers[i].quat = quaternion(1, 0, 0, 0)
-  return
-
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('-v', type=bool)
@@ -345,7 +346,7 @@ if __name__ == "__main__":
   while(run_server):
     if keyboard.is_pressed('x'):  # if key 'x' is pressed 
         print('Calibrating!')
-        calibrate(trackers)
+        calibrate = True
         #break  # finishing the loop
     counter = counter + 1
 

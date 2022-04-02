@@ -7,7 +7,18 @@ class quaternion:
         self.y = y
         self.z = z
 
-    def get_inverse(self):
+    def get_magnitude(self):
+        return np.sqrt(self.w ** 2 + self.x ** 2 + self.y ** 2 + self.z ** 2)
+
+    def normalize(self):
+        mag = self.get_magnitude()
+        self.w = self.w / mag
+        self.x = self.x / mag
+        self.y = self.y / mag
+        self.z = self.z / mag
+        
+
+    def inverse(self):
         return quaternion(self.w, -self.x, -self.y, -self.z)
 
     def __mul__(self, other):
@@ -25,10 +36,6 @@ class quaternion:
         z = self.z + other.z
 
         return quaternion(w, x, y, z)
-
-    def get_np_array(self):
-        return np.array([self.w, self.x, self.y, self.z])
-
 
 def return_omega_matrix(angle_vector):
     omega_m = np.zeros([4, 4])
@@ -55,7 +62,7 @@ def return_omega_matrix(angle_vector):
 
     return omega_m
 
-def updateRotation(q_t0:quaternion, angle_vector, verbose=False):
+def updateRotation(q_t0, angle_vector, verbose=False):
     if (type(angle_vector) == list):
         angle_vector = np.asarray(angle_vector, dtype=np.float32)
 
@@ -70,18 +77,19 @@ def updateRotation(q_t0:quaternion, angle_vector, verbose=False):
     mag = np.linalg.norm(angle_vector)
 
     if (np.isclose(mag, 0, rtol=1e-5)):
-        return q_t0
-    else:
-        scale_Ident = np.cos(mag / 2.0)
-        scale_Omega = (1.0 / mag) * np.sin(mag / 2.0)
+        mag = 0.0001
 
+    elapsed_time_ms = 1
+
+    scale_Ident = np.cos(mag * elapsed_time_ms / 2.0)
+    scale_Omega = (1.0 / mag) * np.sin(mag * elapsed_time_ms / 2.0)
 
     ident_m = ident_m * scale_Ident
     omega_m = omega_m * scale_Omega
 
     result = ident_m + omega_m
-
-    q_t1 = np.matmul(result, q_t0.get_np_array())
+    
+    q_t1 = np.matmul(result, q_t0)
     q_t1 = q_t1 / np.linalg.norm(q_t1)
 
     if (verbose == True):
@@ -95,3 +103,5 @@ def updateRotation(q_t0:quaternion, angle_vector, verbose=False):
         print("qt1:\n", q_t1)
 
     return quaternion(q_t1[0], q_t1[1], q_t1[2], q_t1[3])
+
+

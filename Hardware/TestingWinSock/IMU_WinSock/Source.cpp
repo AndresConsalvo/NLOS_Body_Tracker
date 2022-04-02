@@ -1,4 +1,3 @@
-
 #define _USE_MATH_DEFINES
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #pragma pack(n)
@@ -36,7 +35,7 @@ int BufLen = 255;
 char RecvBuf[255];
 
 float hmd_pos[3] = { 0.0, 1.8, 0.0};
-float hmd_quat[4] = { 1.0, 0.0, 0.0, 0.0 };
+float hmd_quat[4] = { -0.776, 0.249, 0.093, 0.573 };
 
 
 #pragma pack(push, 1)

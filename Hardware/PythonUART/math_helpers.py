@@ -7,7 +7,18 @@ class quaternion:
         self.y = y
         self.z = z
 
-    def get_inverse(self):
+    def get_magnitude(self):
+        return np.sqrt(self.w ** 2 + self.x ** 2 + self.y ** 2 + self.z ** 2)
+
+    def normalize(self):
+        mag = self.get_magnitude()
+        self.w = self.w / mag
+        self.x = self.x / mag
+        self.y = self.y / mag
+        self.z = self.z / mag
+        
+
+    def inverse(self):
         return quaternion(self.w, -self.x, -self.y, -self.z)
 
     def __mul__(self, other):
