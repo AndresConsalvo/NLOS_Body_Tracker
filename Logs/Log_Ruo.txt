@@ -139,3 +139,8 @@ Ruo Log:
 
 3/29/2022
 - Working on optimizing the server to improve speed, looking into memory-based IPC.
+
+3/31/2022
+- Created kinematics.py, math_helpers.py
+- Added frame of reference transforms to account for difference in world space and imu space
+- tracking is now extremely accurate and server speed is noticeably improved

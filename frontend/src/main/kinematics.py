@@ -42,12 +42,12 @@ class Skeleton:
 
         # sensor transforms
         self.driver_transform_euler = [90.0, 0.0, 0.0]
-        self.chest_transform_euler = [90.0, 0.0, 0.0]
-        self.waist_transform_euler = [0.0, 0.0, 90.0]
-        self.lknee_transform_euler = [90.0, 0.0, 0.0]
-        self.rknee_transform_euler = [90.0, 0.0, 0.0]
-        self.lfoot_transform_euler = [90.0, 0.0, 0.0]
-        self.rfoot_transform_euler = [90.0, 0.0, 0.0]
+        self.chest_transform_euler = [90.0, 0.0, 90.0] # for front facing
+        self.waist_transform_euler = [90.0, 0.0, 270.0] # for back facing
+        self.lknee_transform_euler = [90.0, 0.0, 90.0]
+        self.rknee_transform_euler = [90.0, 0.0, 90.0]
+        self.lfoot_transform_euler = [90.0, 0.0, 90.0]
+        self.rfoot_transform_euler = [90.0, 0.0, 90.0]
 
         self.driver_transform = get_quat_from_euler(self.driver_transform_euler)
         self.chest_transform = get_quat_from_euler(self.chest_transform_euler)
