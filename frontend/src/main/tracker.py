@@ -15,6 +15,7 @@ class Tracker:
     self.battery = self.compute_battery_percent(battery)
     self.body_part = body_part
 
+    # necessary
     self.quat_from_imu = quaternion(1.0, 0.0, 0.0, 0.0)
     self.quat = quaternion(1.0, 0.0, 0.0, 0.0)
     self.pos = quaternion(0.0, 0.0, 0.0, 0.0)

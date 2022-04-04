@@ -1,5 +1,6 @@
 import numpy as np
 
+# why couldn't we have just done the server in C?
 class quaternion:
     def __init__(self, w, x, y, z) -> None:
         self.w = w
@@ -50,8 +51,6 @@ def get_quat_from_euler(euler_ang):
     cy = np.cos(Z * 0.5)
     sy = np.sin(Z * 0.5)
 
-
-
     w = cr * cp * cy + sr * sp * sy
     x = sr * cp * cy - cr * sp * sy
     y = cr * sp * cy + sr * cp * sy
@@ -84,6 +83,7 @@ def return_omega_matrix(angle_vector):
 
     return omega_m
 
+# legacy and unused, but it took time to write this so I'm leaving it here.
 def updateRotation(q_t0, angle_vector, verbose=False):
     if (type(angle_vector) == list):
         angle_vector = np.asarray(angle_vector, dtype=np.float32)

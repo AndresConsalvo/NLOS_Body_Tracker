@@ -9,16 +9,21 @@ RKNEE = 4
 LFOOT = 5
 RFOOT = 6
 
+# https://personal.utdallas.edu/~sxb027100/dock/quaternion.html - for more info on quaternions. Very useful concept, hard as heck to visualize.
+#                                                               - think of the x, y, z as the vector and w representing the clockwise rotation of the vector.
+#                                                               - quaternions are represented as a vector [w, x, y, z].
+
+# Spooky
 class Skeleton:
     def __init__(self) -> None:
         # body measurements
-        # defaults are for yours truly, Ruo
-        self.HMD_to_Head = 0.0
+        # defaults are for yours truly, Ruo :)
+        self.HMD_to_Head = 0.13
         self.Head_to_Neck = 0.18
-        self.Neck_to_Waist = 0.62
-        self.Hip_Width = 0.3
-        self.Hip_to_Knee = 0.45
-        self.Knee_to_Foot = 0.45
+        self.Neck_to_Waist = 0.51
+        self.Hip_Width = 0.22
+        self.Hip_to_Knee = 0.38
+        self.Knee_to_Foot = 0.38
         self.Head_to_Floor_len_m = 1.7
         self.Head_to_Waist_len_m = 0.8
         self.Hip_to_Foot_len_m = 0.5
@@ -42,9 +47,9 @@ class Skeleton:
 
         # sensor transforms
         self.driver_transform_euler = [90.0, 0.0, 0.0]
-        self.chest_transform_euler = [90.0, 0.0, 90.0] # for front facing
+        self.chest_transform_euler = [90.0, 0.0, 90.0] 
         self.waist_transform_euler = [90.0, 0.0, 270.0] # for back facing
-        self.lknee_transform_euler = [90.0, 0.0, 90.0]
+        self.lknee_transform_euler = [90.0, 0.0, 90.0] # for front facing
         self.rknee_transform_euler = [90.0, 0.0, 90.0]
         self.lfoot_transform_euler = [90.0, 0.0, 90.0]
         self.rfoot_transform_euler = [90.0, 0.0, 90.0]
@@ -97,9 +102,11 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     lfoot_tracker.quat = lfoot
     rfoot_tracker.quat = rfoot
     
-    neck_pos = hmd_pos + (hmd_quat * quaternion(0, 0, -kinematics.Head_to_Neck, 0.13) * hmd_quat.inverse())
+    # forward kinematics
+    neck_pos = hmd_pos + (hmd_quat * quaternion(0, 0, -kinematics.Head_to_Neck, kinematics.HMD_to_Head) * hmd_quat.inverse())
     waist_pos = neck_pos + (waist * quaternion(0, 0, -kinematics.Neck_to_Waist, 0) * waist.inverse())
 
+    # pseudo-joint tracking; these aren't actually represented by trackers (maybe could remove them to save on calculations?)
     lhip_pos = waist_pos + (waist * quaternion(0, -kinematics.Hip_Width / 2, 0, 0) * waist.inverse())
     rhip_pos = waist_pos + (waist * quaternion(0, kinematics.Hip_Width / 2, 0, 0) * waist.inverse())
 
