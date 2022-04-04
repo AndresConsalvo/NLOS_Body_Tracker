@@ -37,6 +37,28 @@ class quaternion:
 
         return quaternion(w, x, y, z)
 
+def get_quat_from_euler(euler_ang):
+    # https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    X = euler_ang[0] * np.pi / 180.0
+    Y = euler_ang[1] * np.pi / 180.0
+    Z = euler_ang[2] * np.pi / 180.0
+
+    cr = np.cos(X * 0.5)
+    sr = np.sin(X * 0.5)
+    cp = np.cos(Y * 0.5)
+    sp = np.sin(Y * 0.5)
+    cy = np.cos(Z * 0.5)
+    sy = np.sin(Z * 0.5)
+
+
+
+    w = cr * cp * cy + sr * sp * sy
+    x = sr * cp * cy - cr * sp * sy
+    y = cr * sp * cy + sr * cp * sy
+    z = cr * cp * sy - sr * sp * cy
+
+    return quaternion(w, x, y, z)
+
 def return_omega_matrix(angle_vector):
     omega_m = np.zeros([4, 4])
 

@@ -10,8 +10,9 @@
 #include <Ws2tcpip.h>
 #include "math_helpers.h"
 #pragma comment(lib, "ws2_32.lib")
-
+/*
 int main() {
 	char  textBuffer[] = "{\"type\": \"POSITION\", \"data\": {\"accel\": [";
 	printf("%s%.2f%s%.2f%s%.2f%s%.4f%s%.4f%s%.4f%s%s%s", textBuffer, 0.05, ",", 0.05, ",", 0.05, "], \"gyro\": [", 0.05, ",", 0.05, ",", 0.05, "], \"id\": ", "5", "}}");
 }
+*/

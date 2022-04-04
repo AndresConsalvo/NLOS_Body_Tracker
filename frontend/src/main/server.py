@@ -211,6 +211,8 @@ def start_server_udp(verbose:bool):
         gyro  = payload["data"]["gyro"]
         id    = payload["data"]["id"]
         quat  = payload["data"]["quat"]
+        
+        
 
         tracker = Tracker(address,
                           accel,
@@ -272,7 +274,7 @@ def start_driver_udp():
           hmd_quat = quaternion(qw, qx, qy, qz)
 
           if (calibrate == True):
-            set_offsets(kinematics, trackers, hmd_quat, verbose=True)
+            set_offsets(kinematics, trackers, hmd_quat, verbose=False)
             calibrate = False
           else:
             update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False)
@@ -292,7 +294,7 @@ def start_driver_udp():
         #print("--- Send done: %s seconds ---" % (time.time() - start_time))
 
     except socket.timeout:
-      print("socket timed out")
+      print("socket timed out") 
       #driver_addr = None
     except ConnectionResetError:
       driver_addr = None
