@@ -154,7 +154,7 @@ void reconnectUDP() {
 			hmd_payload.footer = (uint8_t)'h';
 
 			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
-			Sleep(10);
+			Sleep(30);
 		}
 		
 	}

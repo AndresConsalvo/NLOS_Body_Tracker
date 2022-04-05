@@ -154,9 +154,6 @@ def start_server_udp(verbose:bool):
       print("Socket timed out.")
       payload = None
 
-
-
-
     # print(f"[PAYLOAD]--->{payload}")
     # print(OPENVR_MESSAGE == payload)
 
@@ -191,6 +188,7 @@ def start_server_udp(verbose:bool):
           pprint.pprint(trackers)
           message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
           bytes_to_send = str.encode(message_to_send)
+          UDP_server_socket.sendto(bytes_to_send, electron_address)
 
 
       elif payload["type"] == "DEVICE_STATS":
@@ -199,7 +197,6 @@ def start_server_udp(verbose:bool):
       elif payload["type"] == "ELECTRON_HAND_SHAKE":
         message_from_server = "[CONNECTED] App and Server are communicating."
         bytes_to_send = str.encode(message_from_server)
-        print(bytes_to_send)
         UDP_server_socket.sendto(bytes_to_send, address)
         electron_address = address
         pass
@@ -213,8 +210,6 @@ def start_server_udp(verbose:bool):
         id    = payload["data"]["id"]
         quat  = payload["data"]["quat"]
         
-        
-
         tracker = Tracker(address,
                           accel,
                           gyro,
@@ -258,14 +253,17 @@ def start_driver_udp():
       #print("--- Data received: %s seconds ---" % (time.time() - start_time))
       payload_length = len(data)
 
-      if (payload_length == 1):
-        gui_msg = json.loads(data[2:-1])
+      if (payload_length == 30):
+        gui_msg = format(data)
+        gui_msg = json.loads(gui_msg[2:-1])
+        print(gui_msg)
 
         if gui_msg["type"] == "ELECTRON_HAND_SHAKE":
           message_from_server = "[CONNECTED] App and Server are communicating."
           bytes_to_send = str.encode(message_from_server)
           print(bytes_to_send)
-          UDP_server_socket.sendto(bytes_to_send, addr)
+          print(addr)
+          #UDP_server_socket.sendto(bytes_to_send, addr)
           electron_address = addr
 
       if (payload_length == 3):
@@ -317,17 +315,6 @@ def start_driver_udp():
   driver.close()
   print("Ending driver udp socket")
 
-# not used
-def request_hmd():
-  global driver_found
-  global driver_addr
-  while True:
-    if (driver_addr is not None and driver_found is True):
-      payload = pack('=cbc', b'C', 0, b'c')
-      driver.sendto(payload, driver_addr)
-    time.sleep(0.00001)
-
-
 def sigint_handler(signum, frame):
   global listening
   global run_server
@@ -352,19 +339,12 @@ if __name__ == "__main__":
   driver_udp = threading.Thread(target=start_driver_udp, daemon=True)
   driver_udp.start()
 
-  #request_udp = threading.Thread(target=request_hmd, daemon=True)
-  #request_udp.start()
-
-  counter = 0
   while(run_server):
     if keyboard.is_pressed('x'):  # if key 'x' is pressed 
         #time.sleep(5)
         print('Calibrating!')
         calibrate = True
         #break  # finishing the loop
-    counter = counter + 1
 
   server_udp.join()
   driver_udp.join()
-  #request_udp.join()
-  #start(args.v)
