@@ -19,14 +19,12 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-
-
-let pyshell = PythonShell.run(
-  __dirname + '/server.py',
+const pyshell = PythonShell.run(
+  path.join(__dirname, '/server.py'),
   {
     mode: 'text',
     pythonOptions: ['-u'],
-    args: ['True'],
+    args: ['-v True'],
   },
   function (err, results) {
     console.log('python-shell finished');
@@ -37,8 +35,6 @@ let pyshell = PythonShell.run(
 pyshell.on('message', function (message) {
   console.log(message);
 });
-
-
 
 const s = dgram.createSocket('udp4');
 const PORT = 20001;
@@ -59,14 +55,12 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 
 ipcMain.on('ipc-send-to-server', async (event, arg) => {
-  console.log('ipc-send-to-server', event, arg);
+  // console.log('ipc-send-to-server', event, arg);
   s.send(arg, PORT);
 });
 
 ipcMain.on('ipc-python', async (event, arg) => {
   // s.connect(20001);
-  console.log('event', event)
-  console.log('arg', arg)
 
   s.on('message', function (msg, rinfo) {
     console.log('message', new TextDecoder().decode(msg));

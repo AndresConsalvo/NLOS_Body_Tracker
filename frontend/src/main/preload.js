@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.send('ipc-python', args);
     },
     sendToServer(args) {
-      console.log('HERE sendToServer', args);
+      // console.log('HERE sendToServer', args);
       ipcRenderer.send('ipc-send-to-server', args);
     },
     on(channel, func) {

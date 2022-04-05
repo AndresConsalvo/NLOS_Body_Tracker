@@ -7,6 +7,9 @@ import sys
 import argparse
 import threading
 import struct
+import os
+from server_events import ServerEvent
+from dotenv import load_dotenv
 from tracker import Tracker
 from psutil import process_iter
 from os import kill
@@ -14,19 +17,19 @@ from signal import SIGTERM
 from ctypes import *
 
 
-
+load_dotenv()
 # LOCAL_IP = socket.gethostbyname(socket.gethostname())
-LOCAL_IP = "192.168.1.51"
-LOCAL_PORT = 20000
-BUFFER_SIZE = 1024
-ADDR = (LOCAL_IP, LOCAL_PORT)
-DISCONNECT = "!DISCONNECT"
+LOCAL_IP       = os.getenv("LOCAL_IP")          # "127.0.0.1"
+LOCAL_PORT     = int(os.getenv("LOCAL_PORT"))   # 20001
+BUFFER_SIZE    = int(os.getenv("BUFFER_SIZE"))  # 1024
+ADDR           = (LOCAL_IP, LOCAL_PORT)
+DISCONNECT     = "!DISCONNECT"
+OPENVR_MESSAGE = "Hello\\x00"
+
 recv_counter = 0
 
-OPENVR_MESSAGE = "Hello\\x00"
 UDP_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-<<<<<<< HEAD
 def update_app(t, sock:socket.socket, trackers:dict[str, Tracker], address, c):
   if address:
     # while True:
@@ -37,9 +40,6 @@ def update_app(t, sock:socket.socket, trackers:dict[str, Tracker], address, c):
   time.sleep(t)
 
 def print_trackers(trackers:dict[str,Tracker], go):
-=======
-def print_trackers(trackers:dict, go):
->>>>>>> 20bb9ed554344aad14feae1881078eae6e9fcdf0
   while go:
     for tracker in trackers.values():
       print(f"[INFO] Trackers data:")
@@ -106,11 +106,14 @@ def start(verbose:bool):
   listening = True
 
   trackers = {}
-  electron_address = None
-  openvr_address = None
+  addresses = { "openvr": None,
+                "electron": None}
+  body_measurements = {}
 
-  # go = True
-  # print_thread = threading.Thread(target=print_trackers, args=(trackers,go,))
+  server_event = ServerEvent()
+  server_event.addresses = addresses
+  server_event.trackers = trackers
+  server_event.body_measurements = body_measurements
 
   count = 0
   t1 = threading.Thread(target=update_app, args=(10,UDP_server_socket,trackers,addresses["electron"],count))
@@ -121,20 +124,16 @@ def start(verbose:bool):
       bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
 
       recv_counter += 1
-
       message = format(bytes_address_pair[0])
       address = bytes_address_pair[1]
+      print("[ADDRESS TYPE]",type(address))
       try:
         payload = json.loads(message[2:-1])
       except json.decoder.JSONDecodeError:
         payload = message[2:-1]
-        openvr_address = address
-        print(openvr_address)
+        addresses["openvr"] = address
 
-
-      # print(f"[PAYLOAD]--->{payload}")
-      # print(OPENVR_MESSAGE == payload)
-
+      # pprint.pprint(payload)
 
       if type(payload) is not dict and payload == DISCONNECT:
         listening = False
@@ -143,71 +142,9 @@ def start(verbose:bool):
         if payload["type"] == DISCONNECT:
           listening = False
 
-        elif payload["type"] == "DEVICE":
-          # MESSAGE FROM CLIENT
-          new_tracker = Tracker(payload["data"]["ip"],
-                                payload["data"]["accel"],
-                                payload["data"]["gyro"],
-                                payload["data"]["battery"],
-                                payload["data"]["id"],
-                                payload["data"]["body_part"])
-
-          new_tracker.battery = payload["data"]["battery"]
-
-          if not (payload["data"]["id"] in trackers):
-            store_new_tracker(trackers, new_tracker)
-            # pprint.pprint(new_tracker.get_device())
-
-          else:
-            update_tracker_info(trackers, new_tracker)
-
-          if electron_address:
-            # Send data to app
-            # pprint.pprint(trackers)
-            message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
-            bytes_to_send = str.encode(message_to_send)
-            UDP_server_socket.sendto(bytes_to_send, openvr_address)
-
-
-        elif payload["type"] == "DEVICE_STATS":
+        else:
           pass
-
-        elif payload["type"] == "ELECTRON_HAND_SHAKE":
-          # message_from_server = "[CONNECTED] App and Server are communicating."
-          # bytes_to_send = str.encode(message_from_server)
-          # print(bytes_to_send)
-          # UDP_server_socket.sendto(bytes_to_send, address)
-          electron_address = address
-          pass
-
-        elif payload["type"] == "CHANGE_ROLE":
-          pass
-
-        elif payload["type"] == "POSITION":
-          accel = payload["data"]["accel"]
-          gyro  = payload["data"]["gyro"]
-          id    = payload["data"]["id"]
-
-          tracker = Tracker(address,
-                            accel,
-                            gyro,
-                            4.2,
-                            id,
-                            None)
-
-          if not (id in trackers):
-            store_new_tracker(trackers, tracker)
-          else:
-            update_tracker_info(trackers, tracker)
-
-          if openvr_address:
-
-              arr = payload["data"]["gyro"]
-              arr.append(float(tracker.id))
-              message_to_send = arr
-              bytes_to_send = struct.pack('%sf' % len(message_to_send), *message_to_send)
-              print(f'[SIZE OF PCKG]--->{sys.getsizeof(bytes_to_send)}')
-              UDP_server_socket.sendto(bytes_to_send, openvr_address)
+          server_event.handle_event(payload, UDP_server_socket, address)
 
 
       if not t1.is_alive():

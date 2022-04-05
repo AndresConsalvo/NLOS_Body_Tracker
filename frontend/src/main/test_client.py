@@ -5,13 +5,16 @@ import json
 import sys
 import time
 import argparse
+from dotenv import load_dotenv
 
 from tracker import Tracker
 
 # from zmq import SERVER
 # Generate random seeded data
 
-SERVER_ADDR_PORT = ("192.168.1.51", 20000)
+load_dotenv()
+
+SERVER_ADDR_PORT = ("127.0.0.1", 20001)
 BUFFER_SIZE      = 1024
 IP = socket.gethostbyname(socket.gethostname())
 
