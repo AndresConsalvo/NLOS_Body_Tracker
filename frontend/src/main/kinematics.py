@@ -25,8 +25,6 @@ class Skeleton:
         self.Hip_Width = 0.22
         self.Hip_to_Knee = 0.38
         self.Knee_to_Foot = 0.38
-        self.Head_to_Floor_len_m = 1.7
-        self.Head_to_Waist_len_m = 0.8
         self.Hip_to_Foot_len_m = 0.5
         self.ankle_to_ground = 0.2
 
