@@ -65,7 +65,7 @@ class Skeleton:
 # -z = forward
 # x = right
 # y = up
-def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=False):
+def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=False, offset_front=False, static_pos=False):
 
     chest_tracker = trackers.get(CHEST)
     waist_tracker = trackers.get(WAIST)
@@ -132,12 +132,28 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
         waist_pos.y = 0
 
 
+
     #waist_tracker.pos = waist_pos
-    waist_tracker.pos = quaternion(0.0, 0.0, 1.0, -1.0)
+    waist_tracker.pos = waist_pos
     lknee_tracker.pos = lknee_pos
     rknee_tracker.pos = rknee_pos
     lfoot_tracker.pos = lfoot_pos
     rfoot_tracker.pos = rfoot_pos
+
+    if (offset_front == True):
+        waist_tracker.pos.z = waist_tracker.pos.z - 1.0
+        lknee_tracker.pos.z = waist_tracker.pos.z - 1.0
+        rknee_tracker.pos.z = waist_tracker.pos.z - 1.0
+        lfoot_tracker.pos.z = waist_tracker.pos.z - 1.0
+        rfoot_tracker.pos.z = waist_tracker.pos.z - 1.0
+
+    if (static_pos == True):
+        waist_tracker.pos = quaternion(0.0, 0.0, 1.5, -1.0)
+        lknee_tracker.pos = quaternion(0.0, 0.0, 1.0, -1.0)
+        rknee_tracker.pos = quaternion(0.0, 0.0, 1.0, -1.0)
+        lfoot_tracker.pos = quaternion(0.0, 0.0, 0.5, -1.0)
+        rfoot_tracker.pos = quaternion(0.0, 0.0, 0.5, -1.0)
+
 
     if (verbose == True):
         print("Neck pos:", vars(neck_pos))

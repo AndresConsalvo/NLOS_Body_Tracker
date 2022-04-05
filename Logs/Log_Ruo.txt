@@ -144,3 +144,6 @@ Ruo Log:
 - Created kinematics.py, math_helpers.py
 - Added frame of reference transforms to account for difference in world space and imu space
 - tracking is now extremely accurate and server speed is noticeably improved
+
+4/4/2022
+- Added additional options to server
