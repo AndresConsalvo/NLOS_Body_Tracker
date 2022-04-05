@@ -46,13 +46,13 @@ driver.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 64)
 #driver.settimeout(0.01)
 
 trackers = {}
+
 trackers[1] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 1)
 trackers[2] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 2)
 trackers[3] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 3)
 trackers[4] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 4)
 trackers[5] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 5)
 trackers[6] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 6)
-tracker_read = [0] * 7
 
 kinematics = Skeleton()
 
@@ -64,8 +64,6 @@ electron_address = None
 calibrate = False
 
 start_time = time.time()
-
-
 
 def print_trackers(trackers:dict, go):
   while go:

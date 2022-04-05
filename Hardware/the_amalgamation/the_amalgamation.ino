@@ -52,15 +52,10 @@ void loop() {
 
     //wifiConnect(ssid, password);
     
-    ssid[receive_length_ssid] = '\n';
-    password[receive_length_pass] = '\n';
-    
-    send_length = Serial.write(ssid);
-    Serial.write(password);
-    
     memset(ssid, 0, sizeof(ssid));
     memset(password, 0, sizeof(password));
     memset(ip, 0, sizeof(ip));
+    memset(port, 0 sizeof(port));
   }
   
   printImuValues();
