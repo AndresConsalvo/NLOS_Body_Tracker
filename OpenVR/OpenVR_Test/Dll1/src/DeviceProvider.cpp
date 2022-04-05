@@ -1,6 +1,6 @@
 #include <DeviceProvider.h>
 
-bool chest_en = false;
+bool chest_en = true;
 bool waist_en = true;
 bool lknee_en = true;
 bool rknee_en = true;
@@ -72,10 +72,10 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		lknee_tracker = new TrackerDriver();
 		lknee_tracker->setIndex(LKNEE);
 
-		waist_tracker->SetModel("LKnee_Tracker");
-		waist_tracker->SetVersion("0.0.1");
+		lknee_tracker->SetModel("LKnee_Tracker");
+		lknee_tracker->SetVersion("0.0.1");
 
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LThigh_Tracker", TrackedDeviceClass_GenericTracker, lknee_tracker);
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LKnee_Tracker", TrackedDeviceClass_GenericTracker, lknee_tracker);
 	}
 
 	if (rknee_en) {
@@ -88,10 +88,10 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		rknee_tracker = new TrackerDriver();
 		rknee_tracker->setIndex(RKNEE);
 
-		waist_tracker->SetModel("RKnee_Tracker");
-		waist_tracker->SetVersion("0.0.1");
+		rknee_tracker->SetModel("RKnee_Tracker");
+		rknee_tracker->SetVersion("0.0.1");
 
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RThigh_Tracker", TrackedDeviceClass_GenericTracker, rknee_tracker);
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RKnee_Tracker", TrackedDeviceClass_GenericTracker, rknee_tracker);
 	}
 
 	if (lfoot_en) {
@@ -104,8 +104,8 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		lfoot_tracker = new TrackerDriver();
 		lfoot_tracker->setIndex(LFOOT);
 
-		waist_tracker->SetModel("LFoot_Tracker");
-		waist_tracker->SetVersion("0.0.1");
+		lfoot_tracker->SetModel("LFoot_Tracker");
+		lfoot_tracker->SetVersion("0.0.1");
 
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LFoot_Tracker", TrackedDeviceClass_GenericTracker, lfoot_tracker);
 	}

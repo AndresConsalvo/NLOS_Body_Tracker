@@ -60,6 +60,7 @@ run_server = True
 listening = True
 driver_found = False
 driver_addr = None
+electron_address = None
 calibrate = False
 
 start_time = time.time()
@@ -128,7 +129,7 @@ def start_server_udp(verbose:bool):
   
 
   
-  electron_address = None
+  global electron_address
   openvr_address = None
 
   
@@ -187,7 +188,7 @@ def start_server_udp(verbose:bool):
 
         if electron_address:
           # Send data to app
-          # pprint.pprint(trackers)
+          pprint.pprint(trackers)
           message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
           bytes_to_send = str.encode(message_to_send)
 
@@ -196,10 +197,10 @@ def start_server_udp(verbose:bool):
         pass
 
       elif payload["type"] == "ELECTRON_HAND_SHAKE":
-        # message_from_server = "[CONNECTED] App and Server are communicating."
-        # bytes_to_send = str.encode(message_from_server)
-        # print(bytes_to_send)
-        # UDP_server_socket.sendto(bytes_to_send, address)
+        message_from_server = "[CONNECTED] App and Server are communicating."
+        bytes_to_send = str.encode(message_from_server)
+        print(bytes_to_send)
+        UDP_server_socket.sendto(bytes_to_send, address)
         electron_address = address
         pass
 
@@ -245,6 +246,7 @@ def start_driver_udp():
   global driver_addr
   global driver_found
   global calibrate
+  global electron_address
 
 
   while(listening):
@@ -252,9 +254,19 @@ def start_driver_udp():
     # Request data once trackers have all received data
 
     try:
-      data, driver_addr = driver.recvfrom(BUFFER_SIZE)
+      data, addr = driver.recvfrom(BUFFER_SIZE)
       #print("--- Data received: %s seconds ---" % (time.time() - start_time))
       payload_length = len(data)
+
+      if (payload_length == 1):
+        gui_msg = json.loads(data[2:-1])
+
+        if gui_msg["type"] == "ELECTRON_HAND_SHAKE":
+          message_from_server = "[CONNECTED] App and Server are communicating."
+          bytes_to_send = str.encode(message_from_server)
+          print(bytes_to_send)
+          UDP_server_socket.sendto(bytes_to_send, addr)
+          electron_address = addr
 
       if (payload_length == 3):
         header, msg, footer = unpack("=cbc", data)
@@ -262,6 +274,7 @@ def start_driver_udp():
         if (header == b'P' and footer == b'p'):
             #print("Driver found!")
             driver_found = True
+            driver_addr = addr
             payload = pack("=cbc", b'P', 45, b'p')
             driver.sendto(payload, driver_addr)
 
@@ -277,7 +290,7 @@ def start_driver_udp():
             set_offsets(kinematics, trackers, hmd_quat, verbose=False)
             calibrate = False
           else:
-            update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False)
+            update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False, offset_front=False, static_pos=False)
           #print("--- Body updated: %s seconds ---" % (time.time() - start_time))
           
           for i in trackers:
@@ -289,8 +302,9 @@ def start_driver_udp():
             #print("--- Payload packing: %s seconds ---" % (time.time() - start_time))
             payload = pack('=cfffffffbc', b'T', pos.x, pos.y, pos.z, quat.w, quat.x, quat.y, quat.z, id, b't')
             #print("--- Payload packed: %s seconds ---" % (time.time() - start_time))
-            driver.sendto(payload, driver_addr)
-            #print("--- Payload sent: %s seconds ---" % (time.time() - start_time))
+            if (driver_addr) is not None:
+              driver.sendto(payload, driver_addr)
+              #print("--- Payload sent: %s seconds ---" % (time.time() - start_time))
         #print("--- Send done: %s seconds ---" % (time.time() - start_time))
 
     except socket.timeout:
@@ -300,13 +314,10 @@ def start_driver_udp():
       driver_addr = None
       print("Connection lost!")
 
-    
-          # if(sum(tracker_read) == 3):
-          # 
-
   driver.close()
   print("Ending driver udp socket")
 
+# not used
 def request_hmd():
   global driver_found
   global driver_addr
@@ -347,6 +358,7 @@ if __name__ == "__main__":
   counter = 0
   while(run_server):
     if keyboard.is_pressed('x'):  # if key 'x' is pressed 
+        #time.sleep(5)
         print('Calibrating!')
         calibrate = True
         #break  # finishing the loop

@@ -41,7 +41,7 @@ pyshell.on('message', function (message) {
 
 
 const s = dgram.createSocket('udp4');
-const PORT = 20001;
+const PORT = 20000;
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -84,7 +84,7 @@ ipcMain.on('ipc-python', async (event, arg) => {
       type: 'ELECTRON_HAND_SHAKE',
     }),
     PORT,
-    'localhost',
+    '192.168.1.59',
     (err) => {
       console.log('[FAILED TO SEND HANDSHAKE TO SERVER]', err);
     }

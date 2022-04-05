@@ -48,7 +48,7 @@ class Skeleton:
 
         # sensor transforms
         self.driver_transform_euler = [90.0, 0.0, 0.0]
-        self.chest_transform_euler = [90.0, 0.0, 90.0] 
+        self.chest_transform_euler = [90.0, 0.0, 270.0] 
         self.waist_transform_euler = [90.0, 0.0, 270.0] # for back facing
         self.lknee_transform_euler = [90.0, 0.0, 90.0] # for front facing
         self.rknee_transform_euler = [90.0, 0.0, 90.0]
@@ -72,6 +72,9 @@ def convertFrame(imu, transform, driver):
 # x = right
 # y = up
 def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=False, offset_front=False, static_pos=False):
+
+    if (offset_front == True):
+        hmd_pos.z = hmd_pos.z - 1.0
 
     chest_tracker = trackers.get(CHEST)
     waist_tracker = trackers.get(WAIST)
@@ -111,7 +114,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     # forward kinematics
     neck_pos = hmd_pos + (hmd_quat * quaternion(0, 0, -kinematics.Head_to_Neck, kinematics.HMD_to_Head) * hmd_quat.inverse())
     chest_pos = neck_pos + (chest * quaternion(0, 0, -kinematics.Neck_to_Chest, 0) * chest.inverse())
-    waist_pos = neck_pos + (waist * quaternion(0, 0, -kinematics.Chest_to_Waist, 0) * waist.inverse())
+    waist_pos = chest_pos + (waist * quaternion(0, 0, -kinematics.Chest_to_Waist, 0) * waist.inverse())
 
     # pseudo-joint tracking; these aren't actually represented by trackers (maybe could remove them to save on calculations?)
     lhip_pos = waist_pos + (waist * quaternion(0, -kinematics.Hip_Width / 2, 0, 0) * waist.inverse())
@@ -148,13 +151,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     lfoot_tracker.pos = lfoot_pos
     rfoot_tracker.pos = rfoot_pos
 
-    if (offset_front == True):
-        chest_tracker.pos.z = chest_tracker.pos.z - 1.0
-        waist_tracker.pos.z = waist_tracker.pos.z - 1.0
-        lknee_tracker.pos.z = waist_tracker.pos.z - 1.0
-        rknee_tracker.pos.z = waist_tracker.pos.z - 1.0
-        lfoot_tracker.pos.z = waist_tracker.pos.z - 1.0
-        rfoot_tracker.pos.z = waist_tracker.pos.z - 1.0
+
 
     if (static_pos == True):
         chest_tracker.pos = quaternion(0.0, 0.0, 1.8, -1.0)
