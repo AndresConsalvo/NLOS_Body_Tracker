@@ -20,7 +20,8 @@ class Skeleton:
         # defaults are for yours truly, Ruo :)
         self.HMD_to_Head = 0.13
         self.Head_to_Neck = 0.18
-        self.Neck_to_Waist = 0.51
+        self.Neck_to_Chest = 0.19
+        self.Chest_to_Waist = 0.32
         self.Hip_Width = 0.22
         self.Hip_to_Knee = 0.38
         self.Knee_to_Foot = 0.38
@@ -61,6 +62,11 @@ class Skeleton:
         self.rknee_transform = get_quat_from_euler(self.rknee_transform_euler)
         self.lfoot_transform = get_quat_from_euler(self.lfoot_transform_euler)
         self.rfoot_transform = get_quat_from_euler(self.rfoot_transform_euler)
+
+def convertFrame(imu, transform, driver):
+    T_imu = driver * transform.inverse()
+    imu_zero = T_imu.inverse() * imu
+    return driver.inverse() * imu_zero * transform
 
 # -z = forward
 # x = right
@@ -104,7 +110,8 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     
     # forward kinematics
     neck_pos = hmd_pos + (hmd_quat * quaternion(0, 0, -kinematics.Head_to_Neck, kinematics.HMD_to_Head) * hmd_quat.inverse())
-    waist_pos = neck_pos + (waist * quaternion(0, 0, -kinematics.Neck_to_Waist, 0) * waist.inverse())
+    chest_pos = neck_pos + (chest * quaternion(0, 0, -kinematics.Neck_to_Chest, 0) * chest.inverse())
+    waist_pos = neck_pos + (waist * quaternion(0, 0, -kinematics.Chest_to_Waist, 0) * waist.inverse())
 
     # pseudo-joint tracking; these aren't actually represented by trackers (maybe could remove them to save on calculations?)
     lhip_pos = waist_pos + (waist * quaternion(0, -kinematics.Hip_Width / 2, 0, 0) * waist.inverse())
@@ -134,6 +141,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
 
 
     #waist_tracker.pos = waist_pos
+    chest_tracker.pos = chest_pos
     waist_tracker.pos = waist_pos
     lknee_tracker.pos = lknee_pos
     rknee_tracker.pos = rknee_pos
@@ -141,6 +149,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     rfoot_tracker.pos = rfoot_pos
 
     if (offset_front == True):
+        chest_tracker.pos.z = chest_tracker.pos.z - 1.0
         waist_tracker.pos.z = waist_tracker.pos.z - 1.0
         lknee_tracker.pos.z = waist_tracker.pos.z - 1.0
         rknee_tracker.pos.z = waist_tracker.pos.z - 1.0
@@ -148,6 +157,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
         rfoot_tracker.pos.z = waist_tracker.pos.z - 1.0
 
     if (static_pos == True):
+        chest_tracker.pos = quaternion(0.0, 0.0, 1.8, -1.0)
         waist_tracker.pos = quaternion(0.0, 0.0, 1.5, -1.0)
         lknee_tracker.pos = quaternion(0.0, 0.0, 1.0, -1.0)
         rknee_tracker.pos = quaternion(0.0, 0.0, 1.0, -1.0)
@@ -157,6 +167,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
 
     if (verbose == True):
         print("Neck pos:", vars(neck_pos))
+        print("Chest pos:", vars(chest_pos))
         print("Waist pos:", vars(waist_pos))
         print("Left hip pos:", vars(lhip_pos))
         print("Right hip pos:", vars(rhip_pos))
@@ -172,10 +183,7 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
         print("Left foot quat:", vars(lfoot))
         print("Right foot quat:", vars(rfoot))
 
-def convertFrame(imu, transform, driver):
-    T_imu = driver * transform.inverse()
-    imu_zero = T_imu.inverse() * imu
-    return driver.inverse() * imu_zero * transform
+
 
 
 def set_offsets(kinematics:Skeleton, trackers:dict, hmd_quat, verbose=False):
