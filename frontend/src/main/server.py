@@ -26,7 +26,20 @@ recv_counter = 0
 OPENVR_MESSAGE = "Hello\\x00"
 UDP_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
+<<<<<<< HEAD
+def update_app(t, sock:socket.socket, trackers:dict[str, Tracker], address, c):
+  if address:
+    # while True:
+    for track in trackers.values():
+      message_to_send = json.dumps(track.get_device())
+      bytes_to_send = str.encode(message_to_send)
+      sock.sendto(bytes_to_send, address)
+  time.sleep(t)
+
+def print_trackers(trackers:dict[str,Tracker], go):
+=======
 def print_trackers(trackers:dict, go):
+>>>>>>> 20bb9ed554344aad14feae1881078eae6e9fcdf0
   while go:
     for tracker in trackers.values():
       print(f"[INFO] Trackers data:")
@@ -74,6 +87,7 @@ def start(verbose:bool):
   print(f"[BINDING] {ADDR}...")
 
   unbinded = True
+
   while unbinded:
     try:
       UDP_server_socket.bind(ADDR)
@@ -98,6 +112,9 @@ def start(verbose:bool):
   # go = True
   # print_thread = threading.Thread(target=print_trackers, args=(trackers,go,))
 
+  count = 0
+  t1 = threading.Thread(target=update_app, args=(10,UDP_server_socket,trackers,addresses["electron"],count))
+  t1.start()
   try:
     while(listening):
 
@@ -193,30 +210,18 @@ def start(verbose:bool):
               UDP_server_socket.sendto(bytes_to_send, openvr_address)
 
 
+      if not t1.is_alive():
+        print('[START THREAD]')
+        t1 = threading.Thread(target=update_app, args=(1,UDP_server_socket,trackers,addresses["electron"],count))
+        t1.start()
+
+
+      # t1.join()
+      count += 1
       if verbose:
         print(f"[INFO] Client Address:\n{address}\n")
         print("[INFO] message_json:")
         pprint.pprint(payload)
-        # if not print_thread.is_alive():
-        #   print('is not alive')
-        #   print_thread.start()
-
-
-
-      # for t in trackers.values():
-      #   pprint.pprint(t.get_device())
-
-
-        # if recv_counter == 1:
-        #   start = timeit.timeit()
-
-        # if recv_counter%600 == 0:
-        #   # stop timer reset counter
-        #   end = timeit.timeit()
-        #   print(f"[INFO] Time elapsed for 600 messages = {end-start}")
-        #   recv_counter = 0
-    # go = False
-    # print_thread.join()
     UDP_server_socket.close()
     print("[DISCONNECTED]  Server Terminated.")
 

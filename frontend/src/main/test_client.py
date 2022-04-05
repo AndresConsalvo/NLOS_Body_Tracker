@@ -54,7 +54,7 @@ def start_test(n_messages, n_trackers, verbose):
   for m in range(0,n_messages):
     for i in range(0,n_trackers):
       handle_client(sockets[i], i+1, verbose)
-      # time.sleep(1)
+      time.sleep(0.07)
 
   end = timeit.timeit()
 
