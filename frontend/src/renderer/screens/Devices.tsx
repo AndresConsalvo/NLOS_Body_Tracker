@@ -1,9 +1,9 @@
-import { useSensors } from '../hooks/useSensors';
+import useStores from '../hooks/useStores';
 
-interface Props extends ReturnType<typeof useSensors> {}
+export default () => {
+  const { sensors } = useStores();
+  const { devices } = sensors;
 
-export default (props: Props) => {
-  const { devices } = props;
   return (
     <>
       <div className="main">

@@ -23,12 +23,12 @@ from math_helpers import *
 from util import wlan_ip
 
 
-# Handles receiving data from the driver and from the gui
+# Handles receiving data from the driver and to 
 LOCAL_HOST = "127.0.0.1"
 DRIVER_PORT = 4242
 LOCAL_ADDR = (LOCAL_HOST, DRIVER_PORT)
 
-# Handles receiving data from the trackers
+#192.168.1.59
 LOCAL_IP = wlan_ip()
 LOCAL_PORT = 20000
 BUFFER_SIZE = 1024
@@ -63,6 +63,8 @@ driver_found = False
 driver_addr = None
 electron_address = None
 calibrate = False
+
+start_time = time.time()
 
 def print_trackers(trackers:dict, go):
   while go:
@@ -153,7 +155,55 @@ def start_server_udp(verbose:bool):
 
     # print(f"[PAYLOAD]--->{payload}")
     # print(OPENVR_MESSAGE == payload)
-      if payload["type"] == "POSITION":
+
+
+    if type(payload) is not dict and payload == DISCONNECT:
+      listening = False
+
+    elif type(payload) is dict:
+      if payload["type"] == DISCONNECT:
+        listening = False
+
+      elif payload["type"] == "DEVICE":
+        # MESSAGE FROM CLIENT
+        new_tracker = Tracker(payload["data"]["ip"],
+                              payload["data"]["accel"],
+                              payload["data"]["gyro"],
+                              payload["data"]["battery"],
+                              payload["data"]["id"],
+                              payload["data"]["body_part"])
+
+        new_tracker.battery = payload["data"]["battery"]
+
+        if not (payload["data"]["id"] in trackers):
+          store_new_tracker(trackers, new_tracker)
+          # pprint.pprint(new_tracker.get_device())
+
+        else:
+          update_tracker_info(trackers, new_tracker)
+
+        if electron_address:
+          # Send data to app
+          pprint.pprint(trackers)
+          message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
+          bytes_to_send = str.encode(message_to_send)
+          UDP_server_socket.sendto(bytes_to_send, electron_address)
+
+
+      elif payload["type"] == "DEVICE_STATS":
+        pass
+
+      elif payload["type"] == "ELECTRON_HAND_SHAKE":
+        message_from_server = "[CONNECTED] App and Server are communicating."
+        bytes_to_send = str.encode(message_from_server)
+        UDP_server_socket.sendto(bytes_to_send, address)
+        electron_address = address
+        pass
+
+      elif payload["type"] == "CHANGE_ROLE":
+        pass
+
+      elif payload["type"] == "POSITION":
         accel = payload["data"]["accel"]
         gyro  = payload["data"]["gyro"]
         id    = payload["data"]["id"]
@@ -196,13 +246,24 @@ def start_driver_udp():
   while(listening):
 
     # Request data once trackers have all received data
+
     try:
-      print("Receiving data")
       data, addr = driver.recvfrom(BUFFER_SIZE)
       #print("--- Data received: %s seconds ---" % (time.time() - start_time))
       payload_length = len(data)
-      print(payload_length)
 
+      if (payload_length == 30):
+        gui_msg = format(data)
+        gui_msg = json.loads(gui_msg[2:-1])
+        print(gui_msg)
+
+        if gui_msg["type"] == "ELECTRON_HAND_SHAKE":
+          message_from_server = "[CONNECTED] App and Server are communicating."
+          bytes_to_send = str.encode(message_from_server)
+          print(bytes_to_send)
+          print(addr)
+          #UDP_server_socket.sendto(bytes_to_send, addr)
+          electron_address = addr
 
       if (payload_length == 3):
         header, msg, footer = unpack("=cbc", data)
@@ -214,7 +275,7 @@ def start_driver_udp():
             payload = pack("=cbc", b'P', 45, b'p')
             driver.sendto(payload, driver_addr)
 
-      elif (payload_length == 31):
+      if (payload_length == 31):
         #print("Sending data!")
         #print("--- HMD received: %s seconds ---" % (time.time() - start_time))
         header, x, y, z, qw, qx, qy, qz, id, footer = unpack("=cfffffffbc", data)
@@ -242,70 +303,6 @@ def start_driver_udp():
               driver.sendto(payload, driver_addr)
               #print("--- Payload sent: %s seconds ---" % (time.time() - start_time))
         #print("--- Send done: %s seconds ---" % (time.time() - start_time))
-
-      else:
-        message = format(data)
-        print(message)
-        address = addr
-        try:
-          payload = json.loads(message[2:-1])
-        except json.decoder.JSONDecodeError:
-          payload = message[2:-1]
-
-        if type(payload) is not dict and payload == DISCONNECT:
-          listening = False
-
-        elif type(payload) is dict:
-          if payload["type"] == DISCONNECT:
-            listening = False
-
-          elif payload["type"] == "DEVICE":
-            # MESSAGE FROM CLIENT
-            new_tracker = Tracker(payload["data"]["ip"],
-                                  payload["data"]["accel"],
-                                  payload["data"]["gyro"],
-                                  payload["data"]["battery"],
-                                  payload["data"]["id"],
-                                  payload["data"]["body_part"])
-
-            new_tracker.battery = payload["data"]["battery"]
-
-            if not (payload["data"]["id"] in trackers):
-              store_new_tracker(trackers, new_tracker)
-              # pprint.pprint(new_tracker.get_device())
-
-            else:
-              update_tracker_info(trackers, new_tracker)
-
-            if electron_address:
-              # Send data to app
-              pprint.pprint(trackers)
-              message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
-              bytes_to_send = str.encode(message_to_send)
-              driver.sendto(bytes_to_send, electron_address)
-
-
-          elif payload["type"] == "DEVICE_STATS":
-            pass
-
-          elif payload["type"] == "ELECTRON_HAND_SHAKE":
-            message_from_server = "[CONNECTED] App and Server are communicating."
-            print(message_from_server)
-            electron_address = address
-            pass
-
-          elif payload["type"] == "CHANGE_ROLE":
-            pass
-          elif (payload["type"] == "BODY_MEASUREMENTS"):
-            print('[EVENT] BODY_MEASUREMENTS')
-            print(payload)
-
-            kinematics.Head_to_Neck = payload["headToNeck"]["value"]
-            kinematics.Chest_to_Waist = payload["neckToWaist"]["value"]
-            kinematics.Hip_to_Knee = payload["waistToAnkle"]["value"]
-            kinematics.ankle_to_ground = payload["ankleToGround"]["value"]
-
-            
 
     except socket.timeout:
       print("socket timed out") 
