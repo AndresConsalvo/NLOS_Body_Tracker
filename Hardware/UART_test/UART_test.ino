@@ -4,18 +4,24 @@ int serialLength;
 char r[5];
 char ssid[128];
 char password[128];
+char ip[5];
+char port[16];
+char trackerID_recv[5];
 
 int send_length;
 int receive_length_ssid;
 int receive_length_pass;
+int receive_length_ip;
+int receive_length_port;
+int receive_length_trackerID;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   Serial.println("Hello, world!");
 
-  WiFi.onEvent(WiFiEvent);
-  WiFi.begin();
+  //WiFi.onEvent(WiFiEvent);
+  //WiFi.begin();
 }
 
 void loop() {
@@ -25,17 +31,25 @@ void loop() {
   if (serialLength) {
     receive_length_ssid = Serial.readBytesUntil('\n', ssid, sizeof(ssid));
     receive_length_pass = Serial.readBytesUntil('\n', password, sizeof(password));
+    receive_length_ip   = Serial.readBytesUntil('\n', ip, sizeof(ip));
+    receive_length_trackerID = Serial.readBytesUntil('\n', trackerID_recv, sizeof(trackerID_recv)); 
 
-    wifiConnect(ssid, password);
     
     ssid[receive_length_ssid] = '\n';
     password[receive_length_pass] = '\n';
+    ip[receive_length_ip] = '\n';
+    trackerID_recv[receive_length_trackerID] = '\n';
     
     send_length = Serial.write(ssid);
     Serial.write(password);
+    Serial.write(ip);
+    Serial.write(trackerID_recv);
     
     memset(ssid, 0, sizeof(ssid));
     memset(password, 0, sizeof(password));
+    memset(ip, 0, sizeof(ip));
+    memset(port, 0, sizeof(port));
+    memset(trackerID_recv, 0, sizeof(trackerID_recv));
   }
 }
 

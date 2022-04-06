@@ -2,7 +2,6 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <stdio.h>
-#include "defines.h"
 #include "EEPROM.h"
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -10,7 +9,7 @@
 
 
 #define TIMER_INTERVAL_MS       250
-#define EEPROM_SIZE 64
+#define EEPROM_SIZE 128
 
 MPU6050 mpu;
 
@@ -22,13 +21,16 @@ byte led_cycle[27] = {HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, HIGH, HIGH, LOW
 byte state = LOW;
 int count = 0;
 hw_timer_t * timer = NULL;
+bool connected = false;
 
 int serialLength;
 char ssid[128];
 char password[128];
 char ip[5];
-char port[16];
-char trackerID_recv[2];
+//char port[16];
+char trackerID_recv[5];
+
+int PORT = 20000;
 
 int TrackerID = 0;
 byte ip_arr[4];
@@ -116,23 +118,26 @@ void setup() {
   WiFi.begin();
 
   udpAddress = IPAddress(ip[0], ip[1], ip[2], ip[3]);
-  net_port = EEPROM.read(4) << 8 | EEPROM.read(5);
+  //net_port = EEPROM.read(4) << 8 | EEPROM.read(5);
   TrackerID = EEPROM.read(6);
   
   imu_init();
 }
 
 void loop() {
-  serialLength = Serial.available();
+
   
-  if (serialLength) {
+  while (Serial.available()) {
     receive_length_ssid = Serial.readBytesUntil('\n', ssid, sizeof(ssid));
     receive_length_pass = Serial.readBytesUntil('\n', password, sizeof(password));
     receive_length_ip   = Serial.readBytesUntil('\n', ip, sizeof(ip));
-    receive_length_port = Serial.readBytesUntil('\n', port, sizeof(port));
+    //receive_length_port = Serial.readBytesUntil('\n', port, sizeof(port));
     receive_length_trackerID = Serial.readBytesUntil('\n', trackerID_recv, sizeof(trackerID_recv)); 
 
+    
+
     wifiConnect(ssid, password);
+    Serial.write("test");
     
     ip_arr[0] = ip[0];
     ip_arr[1] = ip[1];
@@ -140,28 +145,31 @@ void loop() {
     ip_arr[3] = ip[3];
     
     udpAddress = IPAddress(ip[0], ip[1], ip[2], ip[3]);
-    net_port = (port[0] << 8) | port[1];
+    //net_port = (port[0] << 8) | port[1];
     TrackerID = trackerID_recv[0];
-    
+
     // writing byte-by-byte to EEPROM
     EEPROM.write(0, ip[0]);
     EEPROM.write(1, ip[1]);
     EEPROM.write(2, ip[2]);
     EEPROM.write(3, ip[3]);
-    EEPROM.write(4, port[0]);
-    EEPROM.write(5, port[1]);
+    //EEPROM.write(4, port[0]);
+    //EEPROM.write(5, port[1]);
     EEPROM.write(6, trackerID_recv[0]);
 
     EEPROM.commit();
     
-    memset(ssid, 0, sizeof(ssid));
-    memset(password, 0, sizeof(password));
+    //memset(ssid, 0, sizeof(ssid));
+    //memset(password, 0, sizeof(password));
     memset(ip, 0, sizeof(ip));
-    memset(port, 0, sizeof(port));
+    //memset(port, 0, sizeof(port));
     memset(trackerID_recv, 0, sizeof(trackerID_recv));
   }
-  
-  data_send();
+  Serial.print(ssid);
+  if (connected) {
+    data_send();
+  }
+
   //printImuValues();  
   delay(10);
 }
@@ -170,7 +178,7 @@ void loop() {
 /********************************************** FUNCTION DEFINES**************************************************/
 
 void imu_init(){
-
+  
   devStatus = mpu.dmpInitialize();
 
   //mpu.setXGyroOffset(-1914);
@@ -214,19 +222,19 @@ sensor_data getMpuValues(){
   if (abs(gyro[0]) < 5) {
     s.gyro_x = 0;
   } else {
-    s.gyro_x = ((float)gyro[1]) * M_PI/180.0 * 0.05;
+    s.gyro_x = ((float)gyro[1]) * M_PI/180.0;
   }
 
   if (abs(gyro[1]) < 5) {
     s.gyro_y = 0;
   } else {
-    s.gyro_y = -((float)gyro[0]) * M_PI/180.0 * 0.05;
+    s.gyro_y = -((float)gyro[0]) * M_PI/180.0;
   }
 
   if (abs(gyro[2]) < 5) {
     s.gyro_z = 0;
   } else {
-    s.gyro_z = ((float)gyro[2]) * M_PI/180.0 * 0.05;
+    s.gyro_z = ((float)gyro[2]) * M_PI/180.0;
   }
 
   s.quat_w = q.w;
@@ -322,8 +330,8 @@ void data_send(){
 
    
       Serial.print(udpAddress);
-      Serial.println(net_port);
-      Udp.beginPacket(udpAddress, net_port);
+      Serial.println(PORT);
+      Udp.beginPacket(udpAddress, PORT);
       Udp.printf(ReplyBuffer);
       Udp.endPacket();
 
@@ -332,6 +340,7 @@ void data_send(){
         Serial.println(ReplyBuffer);
         packet_count = 0;
       }
+      memset(ReplyBuffer, 0, sizeof(ReplyBuffer));
       packet_count += 1;
   }
 }
@@ -358,13 +367,17 @@ void WiFiEvent(WiFiEvent_t event) {
       Serial.println(WiFi.localIP());
       Serial.print("SSID: ");
       Serial.println(WiFi.SSID());
-
+      
+  
       Udp.begin(WiFi.localIP(), 4242);
       //initializes the UDP state
       //This initializes the transfer buffer
+      connected = true;
       break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
       Serial.println("WiFi lost connection");
+      connected = false;
+      WiFi.reconnect();
       break;
   }
 }

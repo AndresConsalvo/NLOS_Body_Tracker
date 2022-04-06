@@ -170,14 +170,12 @@ def start_server_udp(verbose:bool):
                           4.2,
                           id,
                           None)
-        id = str(id)
-        print(id)
-        print(type(id))
+
         if not (id in trackers):
           store_new_tracker(trackers, tracker)
         else:
           trackers[id].refresh(gyro=gyro,accel=accel)
-          #trackers.get(id).quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
+          trackers.get(id).quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
     except json.decoder.JSONDecodeError:
       payload = message[2:-1]
       print("Lol")
