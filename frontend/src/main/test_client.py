@@ -18,11 +18,11 @@ SERVER_ADDR_PORT = ("127.0.0.1", 20001)
 BUFFER_SIZE      = 1024
 IP = socket.gethostbyname(socket.gethostname())
 
-def generate_accel():
+def generate_gyro():
   return [random.random(), random.random(), random.random()]
 
-def generate_gyro():
-  return [random.randint(0,359), random.randint(0,359), random.randint(0,359)]
+def generate_accel():
+  return [random.randint(0,359), random.randint(900,1100), random.randint(900,1100)]
 
 def generate_voltage():
   return random.random()+3
