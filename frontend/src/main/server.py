@@ -56,12 +56,12 @@ gui_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 trackers = {}
 
-trackers[1] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 1)
-trackers[2] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 2)
-trackers[3] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 3)
-trackers[4] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 4)
-trackers[5] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 5)
-trackers[6] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 6)
+trackers["1"] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 1)
+trackers["2"] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 2)
+trackers["3"] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 3)
+trackers["4"] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 4)
+trackers["5"] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 5)
+trackers["6"] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 6)
 
 kinematics = Skeleton()
 
@@ -170,12 +170,14 @@ def start_server_udp(verbose:bool):
                           4.2,
                           id,
                           None)
-        
+        id = str(id)
+        print(id)
+        print(type(id))
         if not (id in trackers):
           store_new_tracker(trackers, tracker)
         else:
-          update_tracker_info(trackers, tracker)
-          trackers.get(id).quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
+          trackers[id].refresh(gyro=gyro,accel=accel)
+          #trackers.get(id).quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
     except json.decoder.JSONDecodeError:
       payload = message[2:-1]
       print("Lol")
