@@ -67,7 +67,7 @@ class ServerEvent:
 
     elif (payload["type"] == "POSITION"):
       print('[EVENT] position')
-      self.position_event(payload["data"], args[0])
+      self.position_event(payload["data"])
       pass
 
     elif (payload["type"] == "BODY_MEASUREMENTS"):
@@ -122,16 +122,14 @@ class ServerEvent:
         bytes_to_send = struct.pack('%sf' % len(message_to_send), *message_to_send)
         UDP_server_socket.sendto(bytes_to_send, self.addresses["openvr"])
 
-  def position_event(self, args):
+  def position_event(self, data):
 
-    UDP_server_socket:socket.socket = args[0]
+    accel = data["accel"]
+    gyro  = data["gyro"]
+    id    = int(data["id"])
+    quat  = data["quat"]
 
-    accel = self.data["accel"]
-    gyro  = self.data["gyro"]
-    id    = int(self.data["id"])
-    quat  = self.data["quat"]
-
-    tracker = Tracker(self.data["ip"],
+    tracker = Tracker("127.0.0.1",
                       accel,
                       gyro,
                       4.2,

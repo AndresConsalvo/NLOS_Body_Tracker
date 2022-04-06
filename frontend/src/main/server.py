@@ -254,7 +254,7 @@ def communicate_trackers_udp(verbose:bool):
           listening = False
 
         else:
-          server_events.handle_event(payload, trackers_server_socket, address)
+          server_events.handle_event(payload)
 
       if True:
         print(f"[INFO] Client Address:\n{address}\n")
