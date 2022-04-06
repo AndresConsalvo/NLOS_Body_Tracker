@@ -32,7 +32,7 @@ def handle_client(sock, id:int, verbose=False):
     print(f"[INFO] Tracker-{id} connecting...")
 
   voltage = generate_voltage()
-  tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, "Tracker-"+str(id))
+  tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, id)
   message = json.dumps(tracker.get_device())
   bytes_to_send = str.encode(message)
   sock.sendto(bytes_to_send,SERVER_ADDR_PORT)

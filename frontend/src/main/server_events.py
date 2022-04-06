@@ -3,7 +3,7 @@ import json
 import pprint
 import struct
 from dotenv import load_dotenv
-from frontend.src.main.math_helpers import *
+from math_helpers import *
 from tracker import Tracker
 
 load_dotenv()
