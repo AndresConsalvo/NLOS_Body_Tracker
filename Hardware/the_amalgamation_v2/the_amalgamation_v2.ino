@@ -3,6 +3,7 @@
 #include <WiFiUdp.h>
 #include <stdio.h>
 #include "EEPROM.h"
+#include "defines.h"
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #include "Wire.h"
@@ -112,12 +113,13 @@ void setup() {
   ip[3] = EEPROM.read(3);
 
 
-  
+  wifiConnect(WIFI_NETWORK, WIFI_PASSWORD);
   io_init();
   WiFi.onEvent(WiFiEvent);
   WiFi.begin();
 
-  udpAddress = IPAddress(ip[0], ip[1], ip[2], ip[3]);
+  //udpAddress = IPAddress(ip[0], ip[1], ip[2], ip[3]);
+  udpAddress = UDP_ADDRESS;
   //net_port = EEPROM.read(4) << 8 | EEPROM.read(5);
   TrackerID = EEPROM.read(6);
   
@@ -136,7 +138,7 @@ void loop() {
 
     
 
-    wifiConnect(ssid, password);
+    
     Serial.write("test");
     
     ip_arr[0] = ip[0];
@@ -331,7 +333,7 @@ void data_send(){
    
       Serial.print(udpAddress);
       Serial.println(PORT);
-      Udp.beginPacket(udpAddress, PORT);
+      Udp.beginPacket(udpAddress, UDP_PORT);
       Udp.printf(ReplyBuffer);
       Udp.endPacket();
 
