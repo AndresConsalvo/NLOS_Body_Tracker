@@ -34,7 +34,7 @@ DRIVER_PORT = 4242
 DRIVER_ADDR = (LOCAL_HOST, DRIVER_PORT)
 
 # COMMUNICATE WITH THE TRACKERS OVER WIFI
-LOCAL_IP = wlan_ip
+LOCAL_IP = wlan_ip()
 BUFFER_SIZE = int(os.getenv("BUFFER_SIZE"))
 TRACKERS_PORT = 20000
 TRACKERS_ADDR = (LOCAL_IP,   TRACKERS_PORT)
@@ -68,7 +68,7 @@ addresses = { "openvr": None,
 
 trackers:dict[int, Tracker] = {}
 for i in range (6):
-  trackers[i+1] = Tracker(socket.gethostbyname(socket.gethostname()), [0, 0, 0], [0, 0, 0], 4.0, i, i+1)
+  trackers[i+1] = Tracker(socket.gethostbyname(socket.gethostname()), [0, 0, 0], [0, 0, 0], 4.0, i+1, i+1)
 
 kinematics = Skeleton()
 
@@ -204,7 +204,7 @@ def communicate_gui_udp(verbose:bool):
         else:
           server_events.handle_event(payload, gui_server_socket, address)
 
-      if verbose:
+      if True:
         print(f"[INFO] Client Address:\n{address}\n")
         print("[INFO] message_json:")
         pprint.pprint(payload)
@@ -233,7 +233,7 @@ def communicate_trackers_udp(verbose:bool):
 
   print("[STARTING] GUI server is starting...")
   print(f"[BINDING] {TRACKERS_ADDR}...")
-  bind(gui_server_socket, TRACKERS_PORT, TRACKERS_ADDR)
+  bind(trackers_server_socket, TRACKERS_PORT, TRACKERS_ADDR)
 
   print("[LISTENING] UDP socket is up and listening")
 
@@ -256,7 +256,7 @@ def communicate_trackers_udp(verbose:bool):
         else:
           server_events.handle_event(payload, trackers_server_socket, address)
 
-      if verbose:
+      if True:
         print(f"[INFO] Client Address:\n{address}\n")
         print("[INFO] message_json:")
         pprint.pprint(payload)
@@ -277,6 +277,7 @@ def communicate_driver_udp():
 
   global listening
   global driver_found
+  driver_server_socket.bind(DRIVER_ADDR)
 
   while(listening):
     try:
@@ -341,16 +342,16 @@ if __name__ == "__main__":
   gui_udp = threading.Thread(target=communicate_gui_udp, args=(a.v,), daemon=True)
   gui_udp.start()
 
-  tracker_udp = threading.Thread(target=communicate_trackers_udp, args=(a,), daemon=True)
-  # tracker_udp.start()
+  tracker_udp = threading.Thread(target=communicate_trackers_udp, args=(a.v,), daemon=True)
+  tracker_udp.start()
 
   driver_udp =threading.Thread(target=communicate_driver_udp, daemon=True)
-  # driver_udp.start()
+  driver_udp.start()
 
   while(run_server):
     update_app(1, gui_server_socket, trackers, addresses['electron'])
 
 
   gui_udp.join()
-  # driver_udp.join()
+  driver_udp.join()
   tracker_udp.join()

@@ -3,6 +3,7 @@ import json
 import pprint
 import struct
 from dotenv import load_dotenv
+from frontend.src.main.math_helpers import *
 from tracker import Tracker
 
 load_dotenv()
@@ -139,6 +140,8 @@ class ServerEvent:
 
     if not (tracker.id in self.trackers):
       self.trackers[tracker.id] = tracker
+      self.trackers[tracker.id].quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
+
     else:
       self.trackers[tracker.id].update(id       =tracker.id,
                                        ip       =tracker.ip,
@@ -146,6 +149,8 @@ class ServerEvent:
                                        gyro     =tracker.gyro,
                                        battery  =tracker.battery,
                                        )
+      self.trackers[tracker.id].quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
+
 
   def body_measurements_event(self, data, UDP_server_socket):
     self.body_measurements = {
