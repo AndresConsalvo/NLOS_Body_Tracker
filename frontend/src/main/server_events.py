@@ -103,7 +103,15 @@ class ServerEvent:
     self.addresses["electron"] = address
 
   def change_role_event(self, data):
-    self.trackers[data["id"]].update(body_part=data["body_part"])
+    bodyparts = {
+      "Chest":1,
+      "Waist":2,
+      "Left Knee":3,
+      "Right Knee":4,
+      "Left Ankle":5,
+      "Right Ankle":6,
+    }
+    self.trackers[data["id"]].update(body_part=bodyparts[data["body_part"]])
 
   def calibrate_event(self, UDP_server_socket:socket.socket):
     for t in self.trackers.values():
@@ -119,25 +127,25 @@ class ServerEvent:
 
     accel = self.data["accel"]
     gyro  = self.data["gyro"]
-    id    = self.data["id"]
+    id    = int(self.data["id"])
+    quat  = self.data["quat"]
 
-    if not (id in self.trackers):
-      tracker = Tracker(self.data["ip"],
-                        accel,
-                        gyro,
-                        4.2,
-                        id,
-                        None)
+    tracker = Tracker(self.data["ip"],
+                      accel,
+                      gyro,
+                      4.2,
+                      id,
+                      None)
 
-      self.trackers[id]= tracker
-
+    if not (tracker.id in self.trackers):
+      self.trackers[tracker.id] = tracker
     else:
-      self.trackers[id].update(gyro=gyro,accel=accel)
-
-    if self.addresses["openvr"]:
-      message_to_send = gyro.append(float(tracker.id))
-      bytes_to_send = struct.pack('%sf' % len(message_to_send), *message_to_send)
-      UDP_server_socket.sendto(bytes_to_send, self.addresses["openvr"])
+      self.trackers[tracker.id].update(id       =tracker.id,
+                                       ip       =tracker.ip,
+                                       accel    =tracker.accel,
+                                       gyro     =tracker.gyro,
+                                       battery  =tracker.battery,
+                                       )
 
   def body_measurements_event(self, data, UDP_server_socket):
     self.body_measurements = {

@@ -66,7 +66,7 @@ export default () => {
                 <option value="Right Knee">Right Knee</option>
                 <option value="Left Knee">Left Knee</option>
                 <option value="Chest">Chest</option>
-                <option value="Back">Back</option>
+                <option value="Waist">Waist</option>
               </select>
             </td>
           </tr>

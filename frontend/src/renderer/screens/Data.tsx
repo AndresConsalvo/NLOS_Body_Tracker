@@ -21,7 +21,7 @@ export default () => {
             <th>Gz</th>
           </tr>
           {Object.values(devices).map((device) => (
-            <tr key={device.ip}>
+            <tr key={device.id}>
               <th>{device.id}</th>
               {[...device.accel, ...device.gyro].map((position) => (
                 <th key={position}>{position.toFixed(2)}</th>
