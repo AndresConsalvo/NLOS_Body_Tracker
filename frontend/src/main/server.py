@@ -46,6 +46,10 @@ driver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 driver.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 64)
 #driver.settimeout(0.01)
 
+gui_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
+gui_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#gui_sock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 64)
+
 trackers = {}
 
 trackers[1] = Tracker(0, [0, 0, 0], [0, 0, 0], 0.0, 1)
@@ -128,8 +132,6 @@ def start_server_udp(verbose:bool):
   
   global electron_address
   openvr_address = None
-
-  
   
   global listening
   print(listening)
@@ -197,11 +199,9 @@ def start_driver_udp():
 
     # Request data once trackers have all received data
     try:
-      print("Receiving data")
       data, addr = driver.recvfrom(BUFFER_SIZE)
       #print("--- Data received: %s seconds ---" % (time.time() - start_time))
       payload_length = len(data)
-      print(payload_length)
 
 
       if (payload_length == 3):
@@ -243,67 +243,7 @@ def start_driver_udp():
               #print("--- Payload sent: %s seconds ---" % (time.time() - start_time))
         #print("--- Send done: %s seconds ---" % (time.time() - start_time))
 
-      else:
-        message = format(data)
-        print(message)
-        address = addr
-        try:
-          payload = json.loads(message[2:-1])
-        except json.decoder.JSONDecodeError:
-          payload = message[2:-1]
-
-        if type(payload) is not dict and payload == DISCONNECT:
-          listening = False
-
-        elif type(payload) is dict:
-          if payload["type"] == DISCONNECT:
-            listening = False
-
-          elif payload["type"] == "DEVICE":
-            # MESSAGE FROM CLIENT
-            new_tracker = Tracker(payload["data"]["ip"],
-                                  payload["data"]["accel"],
-                                  payload["data"]["gyro"],
-                                  payload["data"]["battery"],
-                                  payload["data"]["id"],
-                                  payload["data"]["body_part"])
-
-            new_tracker.battery = payload["data"]["battery"]
-
-            if not (payload["data"]["id"] in trackers):
-              store_new_tracker(trackers, new_tracker)
-              # pprint.pprint(new_tracker.get_device())
-
-            else:
-              update_tracker_info(trackers, new_tracker)
-
-            if electron_address:
-              # Send data to app
-              pprint.pprint(trackers)
-              message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
-              bytes_to_send = str.encode(message_to_send)
-              driver.sendto(bytes_to_send, electron_address)
-
-
-          elif payload["type"] == "DEVICE_STATS":
-            pass
-
-          elif payload["type"] == "ELECTRON_HAND_SHAKE":
-            message_from_server = "[CONNECTED] App and Server are communicating."
-            print(message_from_server)
-            electron_address = address
-            pass
-
-          elif payload["type"] == "CHANGE_ROLE":
-            pass
-          elif (payload["type"] == "BODY_MEASUREMENTS"):
-            print('[EVENT] BODY_MEASUREMENTS')
-            print(payload)
-
-            kinematics.Head_to_Neck = payload["headToNeck"]["value"]
-            kinematics.Chest_to_Waist = payload["neckToWaist"]["value"]
-            kinematics.Hip_to_Knee = payload["waistToAnkle"]["value"]
-            kinematics.ankle_to_ground = payload["ankleToGround"]["value"]
+     
 
             
 
@@ -316,6 +256,97 @@ def start_driver_udp():
 
   driver.close()
   print("Ending driver udp socket")
+
+def start_gui_udp():
+  gui_sock.bind(("127.0.0.1", 4243))
+
+  global listening
+  global driver_addr
+  global driver_found
+  global calibrate
+  global electron_address
+
+
+  while(listening):
+
+    # Request data once trackers have all received data
+    try:
+      data, addr = gui_sock.recvfrom(BUFFER_SIZE)
+      #print("--- Data received: %s seconds ---" % (time.time() - start_time))
+      payload_length = len(data)
+      
+      message = format(data)
+      address = addr
+      try:
+        payload = json.loads(message[2:-1])
+      except json.decoder.JSONDecodeError:
+        payload = message[2:-1]
+
+      if type(payload) is not dict and payload == DISCONNECT:
+        listening = False
+
+      elif type(payload) is dict:
+        if payload["type"] == DISCONNECT:
+          listening = False
+
+        elif payload["type"] == "DEVICE":
+          # MESSAGE FROM CLIENT
+          new_tracker = Tracker(payload["data"]["ip"],
+                                payload["data"]["accel"],
+                                payload["data"]["gyro"],
+                                payload["data"]["battery"],
+                                payload["data"]["id"],
+                                payload["data"]["body_part"])
+
+          new_tracker.battery = payload["data"]["battery"]
+
+          if not (payload["data"]["id"] in trackers):
+            store_new_tracker(trackers, new_tracker)
+            # pprint.pprint(new_tracker.get_device())
+
+          else:
+            update_tracker_info(trackers, new_tracker)
+
+          if electron_address:
+            # Send data to app
+            pprint.pprint(trackers)
+            message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
+            bytes_to_send = str.encode(message_to_send)
+            driver.sendto(bytes_to_send, electron_address)
+
+
+        elif payload["type"] == "DEVICE_STATS":
+          pass
+
+        elif payload["type"] == "ELECTRON_HAND_SHAKE":
+          message_from_server = "[CONNECTED] App and Server are communicating."
+          print(message_from_server)
+          electron_address = address
+          pass
+
+        elif payload["type"] == "CHANGE_ROLE":
+          pass
+        elif (payload["type"] == "BODY_MEASUREMENTS"):
+          print('[EVENT] BODY_MEASUREMENTS')
+          data = payload["data"]
+
+          kinematics.Head_to_Neck = float(data["headToNeck"]["value"])
+          kinematics.Chest_to_Waist = float(data["neckToWaist"]["value"])
+          kinematics.Hip_to_Knee = float(data["waistToAnkle"]["value"])
+          kinematics.ankle_to_ground = float(data["ankleToGround"]["value"])
+          print(kinematics.Head_to_Neck)
+
+            
+
+    except socket.timeout:
+      print("socket timed out") 
+      #driver_addr = None
+    except ConnectionResetError:
+      print("Connection lost!")
+
+  gui_sock.close()
+  print("Ending driver udp socket")
+
 
 def sigint_handler(signum, frame):
   global listening
@@ -341,6 +372,11 @@ if __name__ == "__main__":
   driver_udp = threading.Thread(target=start_driver_udp, daemon=True)
   driver_udp.start()
 
+  gui_udp = threading.Thread(target=start_gui_udp, daemon=True)
+  gui_udp.start()
+
+  
+
   while(run_server):
     if keyboard.is_pressed('x'):  # if key 'x' is pressed 
         #time.sleep(5)
@@ -350,3 +386,4 @@ if __name__ == "__main__":
 
   server_udp.join()
   driver_udp.join()
+  gui_udp.join()

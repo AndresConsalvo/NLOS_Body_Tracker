@@ -74,6 +74,8 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     if (offset_front == True):
         hmd_pos.z = hmd_pos.z - 1.0
 
+    print(kinematics.Head_to_Neck)
+
     chest_tracker = trackers.get(CHEST)
     waist_tracker = trackers.get(WAIST)
     lknee_tracker = trackers.get(LKNEE)
