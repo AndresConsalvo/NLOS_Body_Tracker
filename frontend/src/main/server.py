@@ -24,9 +24,13 @@ from util import wlan_ip
 
 
 # Handles receiving data from the driver and from the gui
+
 LOCAL_HOST = "127.0.0.1"
 DRIVER_PORT = 4242
-LOCAL_ADDR = (LOCAL_HOST, DRIVER_PORT)
+GUI_PORT = 4243
+TO_DRIVER_ADDR = (LOCAL_HOST, DRIVER_PORT)
+TO_GUI_ADDR = (LOCAL_HOST, GUI_PORT)
+
 
 # Handles receiving data from the trackers
 LOCAL_IP = wlan_ip()
@@ -186,7 +190,7 @@ def start_server_udp(verbose:bool):
   return 0
 
 def start_driver_udp():
-  driver.bind(LOCAL_ADDR)
+  driver.bind(TO_DRIVER_ADDR)
 
   global listening
   global driver_addr
@@ -258,11 +262,9 @@ def start_driver_udp():
   print("Ending driver udp socket")
 
 def start_gui_udp():
-  gui_sock.bind(("127.0.0.1", 4243))
+  gui_sock.bind(TO_GUI_ADDR)
 
   global listening
-  global driver_addr
-  global driver_found
   global calibrate
   global electron_address
 
@@ -274,7 +276,7 @@ def start_gui_udp():
       data, addr = gui_sock.recvfrom(BUFFER_SIZE)
       #print("--- Data received: %s seconds ---" % (time.time() - start_time))
       payload_length = len(data)
-      
+
       message = format(data)
       address = addr
       try:
@@ -325,6 +327,15 @@ def start_gui_udp():
           pass
 
         elif payload["type"] == "CHANGE_ROLE":
+          bodyparts = {
+            "Chest":1,
+            "Waist":2,
+            "Left Knee":3,
+            "Right Knee":4,
+            "Left Ankle":5,
+            "Right Ankle":6,
+          }
+          trackers[data["id"]].update(body_part=bodyparts[data["body_part"]])
           pass
         elif (payload["type"] == "BODY_MEASUREMENTS"):
           print('[EVENT] BODY_MEASUREMENTS')
@@ -335,6 +346,10 @@ def start_gui_udp():
           kinematics.Hip_to_Knee = float(data["waistToAnkle"]["value"])
           kinematics.ankle_to_ground = float(data["ankleToGround"]["value"])
           print(kinematics.Head_to_Neck)
+
+        elif (payload["type"] == "CALIBRATE"):
+          print("Calibrating")
+          calibrate = True
 
             
 
@@ -376,13 +391,9 @@ if __name__ == "__main__":
   gui_udp.start()
 
   
-
   while(run_server):
     if keyboard.is_pressed('x'):  # if key 'x' is pressed 
-        #time.sleep(5)
-        print('Calibrating!')
-        calibrate = True
-        #break  # finishing the loop
+      print("X is pressed")
 
   server_udp.join()
   driver_udp.join()
