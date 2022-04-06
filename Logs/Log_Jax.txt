@@ -1,3 +1,50 @@
+4/4/22
+	- Received additional devboards to desolder pins from Ruo.
+	- Wired and resoldered all devboards and IMUs. 
+  - Returned trackers to Ruo
+4/2/22
+  - Handed off products to Ruo, received IMUs and still non-working IMU (due to enable pin on voltage regulator not functioning as traces lifted off near Vdd)
+4/1/22
+	- 2/2 straps sewed for chest/back
+	- Ruo brought over trackers to be converted into the new design of IMU on top of devboard.
+		○ Resoldered and fixed issue with 3.3V pinhole being burnt out by soldering directly to voltage regulator 
+		○ Also fixed issue with enable button needed to be pressed for wifi to activate on ESP32 (using the above fix)
+3/30/22
+	- 1/2 straps sewed for chest/back (by hand due to lack of machine), able to fix between 27" and 44" waist/chest
+3/29/22
+	- Communicating with team on next meeting with Evan for Check-in, Thursday 2:40pm
+  - Began printing more of the new version of cases to work on design and construct more straps for presenting
+3/27/22
+	- Finished up sewing straps for thighs well into the morning.
+  - Dropped off finished products to Ruo with extra parts
+3/26/22
+	- Began printing two new cases. Strap materials arrived
+	- Sewed straps by hand while new cases printed
+  - Revised strap connecting method to withstand more abuse, altered orientation to increase effectiveness
+3/25/22
+	- Car problems, couldn't go to get tulle to help with expander work until late.
+	- Continued working on case designs and method for straps to attach
+3/24/22
+	- Maintenance on 3D printer to continue expander modeling testing
+	- Desoldered all pins on two new dev boards and imus, soldered appropriate wires but in a different configuration
+	- Designing new cases for the newest configuration to reduce footprint and remove strap dependency
+	- Ordered webbing fabrics for new straps
+3/23/22
+	- meeting with Evan
+	- discussing with Ruo and Joe for overlapping work regarding credential setting for the trackers. Joe is now assigned to documentation
+	- Worked on modeling expander in case fabrics are too difficult
+3/22/22
+  - Talked with Ruo to get updates (working on robustness of the server). Decided with him that we needed proper straps for the tracker cases to be held to the body.
+3/18/22
+  - Talked with Evan about Beta Build
+3/17/22
+	- Joined Ruo and Andres in discussions about formatting data and tweaks before meeting with Evan for Demo.
+  - Stayed after meeting to ensure Fariha had stuff to work on
+3/16/22
+	- Talked with Ruo about what issues/progress he was having with the trackers with Andres
+		○ said he was able to us DMP to reduce a lot of ghosting, but there are some extremely small values attributing to ghosting over long periods of time. I suggested a filter to have a threshold of minimum values needed to make a difference.
+3/14/22
+	- debugged client tracker script and server code to help Ruo, whose client would not connect to the server, null error
 2/24/22
   - Found out that removing and shorting R7 and the MOSFET gave the 3.3V we needed, but every 100ms was a drop in voltage.
   - Ruo dropped off new ESP32 board, went to work on desoldering all the pins
