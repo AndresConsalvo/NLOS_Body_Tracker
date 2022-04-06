@@ -72,6 +72,15 @@ driver_addr = None
 electron_address = None
 calibrate = False
 
+def update_app(sock:socket.socket, trackers:dict, address):
+  if address:
+    # while True:
+    for track in trackers.values():
+      message_to_send = json.dumps(track.get_device())
+      bytes_to_send = str.encode(message_to_send)
+      sock.sendto(bytes_to_send, address)
+
+
 def print_trackers(trackers:dict, go):
   while go:
     for tracker in trackers.values():
@@ -138,7 +147,6 @@ def start_server_udp(verbose:bool):
   openvr_address = None
   
   global listening
-  print(listening)
   # go = True
   # print_thread = threading.Thread(target=print_trackers, args=(trackers,go,))
   #bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
@@ -149,16 +157,7 @@ def start_server_udp(verbose:bool):
       message = format(bytes_address_pair[0])
       address = bytes_address_pair[1]
       payload = json.loads(message[2:-1])
-    except json.decoder.JSONDecodeError:
-      payload = message[2:-1]
-      if (not openvr_address):
-        openvr_address = address
-    except socket.timeout:
-      print("Socket timed out.")
-      payload = None
 
-    # print(f"[PAYLOAD]--->{payload}")
-    # print(OPENVR_MESSAGE == payload)
       if payload["type"] == "POSITION":
         accel = payload["data"]["accel"]
         gyro  = payload["data"]["gyro"]
@@ -177,6 +176,18 @@ def start_server_udp(verbose:bool):
         else:
           update_tracker_info(trackers, tracker)
           trackers.get(id).quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
+    except json.decoder.JSONDecodeError:
+      payload = message[2:-1]
+      print("Lol")
+      if (not openvr_address):
+        openvr_address = address
+    except socket.timeout:
+      print("Socket timed out.")
+      payload = None
+
+      print(f"[PAYLOAD]--->{payload}")
+    # print(OPENVR_MESSAGE == payload)
+      
 
 
     if verbose:
@@ -392,8 +403,9 @@ if __name__ == "__main__":
 
   
   while(run_server):
-    if keyboard.is_pressed('x'):  # if key 'x' is pressed 
-      print("X is pressed")
+    update_app(gui_sock, trackers, electron_address)
+
+    time.sleep(1.0)
 
   server_udp.join()
   driver_udp.join()

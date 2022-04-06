@@ -126,6 +126,7 @@ void readUDP() {
 				printf("Position [x, y, z] = [%f, %f, %f]\n", payload->x, payload->y, payload->z);
 
 				if (payload->tracker_id == 6) {
+					Sleep(1000);
 					system("CLS");
 				}
 			}
