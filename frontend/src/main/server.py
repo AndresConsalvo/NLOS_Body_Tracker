@@ -82,7 +82,7 @@ run_server = True
 listening = True
 driver_found = False
 driver_addr = None
-calibrate = False
+calibrating = {'c' : False}
 
 def update_app(t, sock:socket.socket, trackers:dict[str, Tracker], address):
   # ************
@@ -202,11 +202,16 @@ def communicate_gui_udp(verbose:bool):
           listening = False
 
         else:
-          server_events.handle_event(payload, gui_server_socket, address)
+          server_events.handle_event(payload, gui_server_socket, address, kinematics, calibrating)
 
       if True:
         print(f"[INFO] Client Address:\n{address}\n")
         print("[INFO] message_json:")
+
+        print('Head_to_Neck' , kinematics.Head_to_Neck)
+        print('Chest_to_Waist' , kinematics.Chest_to_Waist)
+        print('Hip_to_Knee' , kinematics.Hip_to_Knee)
+        print('ankle_to_ground' , kinematics.ankle_to_ground)
         pprint.pprint(payload)
 
     except socket.timeout:
@@ -300,9 +305,10 @@ def communicate_driver_udp():
           hmd_pos = quaternion(0, x, y, z)
           hmd_quat = quaternion(qw, qx, qy, qz)
 
-          if (calibrate):
+          if (calibrating["c"]):
+            print('----------------------------------------AQUI----------------------------------------')
             set_offsets (kinematics, trackers, hmd_quat, verbose=False)
-            calibrate = False
+            calibrating["c"] = False
 
           else:
             update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False, offset_front=False, static_pos=False)
@@ -345,7 +351,7 @@ if __name__ == "__main__":
   tracker_udp = threading.Thread(target=communicate_trackers_udp, args=(a.v,), daemon=True)
   tracker_udp.start()
 
-  driver_udp =threading.Thread(target=communicate_driver_udp, daemon=True)
+  driver_udp = threading.Thread(target=communicate_driver_udp, daemon=True)
   driver_udp.start()
 
   while(run_server):

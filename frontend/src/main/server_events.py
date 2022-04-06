@@ -5,6 +5,7 @@ import struct
 from dotenv import load_dotenv
 from math_helpers import *
 from tracker import Tracker
+from kinematics import *
 
 load_dotenv()
 
@@ -63,7 +64,7 @@ class ServerEvent:
 
     elif (payload["type"] == "CALIBRATE"):
       print('[EVENT] calibrate')
-      self.calibrate_event(args[0])
+      self.calibrate_event(args[3])
 
     elif (payload["type"] == "POSITION"):
       print('[EVENT] position')
@@ -72,7 +73,7 @@ class ServerEvent:
 
     elif (payload["type"] == "BODY_MEASUREMENTS"):
       print('[EVENT] BODY_MEASUREMENTS')
-      self.body_measurements_event(payload["data"], args[0])
+      self.body_measurements_event(payload["data"], args[2])
 
   def device_event(self,data, UDP_server_socket:socket.socket):
     tracker = Tracker(data["ip"],
@@ -114,13 +115,9 @@ class ServerEvent:
     }
     self.trackers[data["id"]].update(body_part=bodyparts[data["body_part"]])
 
-  def calibrate_event(self, UDP_server_socket:socket.socket):
-    for t in self.trackers.values():
-      t.update(gyro=[0,0,0])
-      if self.addresses["openvr"]:
-        message_to_send = t.gyro.append(4)
-        bytes_to_send = struct.pack('%sf' % len(message_to_send), *message_to_send)
-        UDP_server_socket.sendto(bytes_to_send, self.addresses["openvr"])
+  def calibrate_event(self, calibrating:dict[str,bool]):
+    print('[CALIBRATING]')
+    calibrating['check' : True]
 
   def position_event(self, data):
 
@@ -150,7 +147,7 @@ class ServerEvent:
       self.trackers[tracker.id].quat_from_imu = quaternion(quat[0], quat[1], quat[2], quat[3])
 
 
-  def body_measurements_event(self, data, UDP_server_socket):
+  def body_measurements_event(self, data, kinematics:Skeleton):
     self.body_measurements = {
       "ankleToGround": data["ankleToGround"]["value"],
       "headToNeck": data["headToNeck"]["value"],
@@ -158,16 +155,9 @@ class ServerEvent:
       "waistToAnkle": data["waistToAnkle"]["value"],
     }
 
-    message_to_send = ['a',
-                        float(self.body_measurements["ankleToGround"]),
-                        float(self.body_measurements["headToNeck"]),
-                        float(self.body_measurements["neckToWaist"]),
-                        float(self.body_measurements["waistToAnkle"])
-                        ]
-
-    print('[MESSAGE_TO_SEND]',message_to_send)
-    if self.addresses["openvr"]:
-      print('[SENDING] body measurements to openvr')
-      bytes_to_send = str.encode(message_to_send)
-      UDP_server_socket.sendto(bytes_to_send, self.addresses["openvr"])
+    print("[BODY MEASUREMENTS SAVED]")
+    kinematics.Head_to_Neck = self.body_measurements["headToNeck"]
+    kinematics.Chest_to_Waist = self.body_measurements["neckToWaist"]
+    kinematics.Hip_to_Knee = self.body_measurements["waistToAnkle"]
+    kinematics.ankle_to_ground = self.body_measurements["ankleToGround"]
 

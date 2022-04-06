@@ -1,5 +1,14 @@
 import useStores from '../hooks/useStores';
 
+const bp = {
+  1: 'Chest',
+  2: 'Waist',
+  3: 'Left Knee',
+  4: 'Right Knee',
+  5: 'Left Ankle',
+  6: 'Right Ankle',
+};
+
 export default () => {
   const { sensors } = useStores();
   const { devices } = sensors;
@@ -23,7 +32,7 @@ export default () => {
               <td>{device.id}</td>
               <td>{device.ip}</td>
               <td>{device.battery}</td>
-              <td>{device.body_part}</td>
+              <td>{bp[device.body_part]}</td>
             </tr>
           ))}
         </table>

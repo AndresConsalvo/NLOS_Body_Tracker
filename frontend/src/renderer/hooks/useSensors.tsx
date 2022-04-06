@@ -11,7 +11,7 @@ export type Sensor = {
   accel: number[];
   gyro: number[];
   battery: string;
-  body_part: string;
+  body_part: 1 | 2 | 3 | 4 | 5 | 6;
 };
 
 export type SensorMap = {
