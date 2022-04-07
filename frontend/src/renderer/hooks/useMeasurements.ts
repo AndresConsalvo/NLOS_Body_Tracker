@@ -10,16 +10,24 @@ const initialState = {
     label: 'Head to Neck',
     value: '',
   },
-  neckToWaist: {
-    label: 'Neck to Waist',
+  neckToChest: {
+    label: 'Neck to Chest',
     value: '',
   },
-  waistToAnkle: {
-    label: 'Waist to Ankle',
+  chestToWaist: {
+    label: 'Chest to Waist',
     value: '',
   },
-  ankleToGround: {
-    label: 'Ankle to Ground',
+  hipWidth: {
+    label: 'Hip Width',
+    value: '',
+  },
+  hipToKnee: {
+    label: 'Hip to Knee',
+    value: '',
+  },
+  kneeToFoot: {
+    label: 'Knee to Foot',
     value: '',
   },
 };

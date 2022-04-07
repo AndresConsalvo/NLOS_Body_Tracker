@@ -28,3 +28,4 @@ npm-debug.log.*
 *.sass.d.ts
 *.scss.d.ts
 __pycache__
+frontend/src/main/__pycache__/tracker.cpython-39.pyc
