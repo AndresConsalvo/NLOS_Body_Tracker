@@ -36,10 +36,12 @@ class ServerEvent:
       "electron": None
     }
     self.body_measurements = {
-      "ankleToGround": None,
-      "headToNeck": None,
-      "neckToWaist": None,
-      "waistToAnkle": None,
+      "neckToChest" : None,
+      "headToNeck" : None,
+      "chestToWaist" : None,
+      "hipWidth" : None,
+      "hipToKnee" : None,
+      "kneeToFoot" : None,
     }
     self.trackers = trackers
 
@@ -149,15 +151,20 @@ class ServerEvent:
 
   def body_measurements_event(self, data, kinematics:Skeleton):
     self.body_measurements = {
-      "ankleToGround": data["ankleToGround"]["value"],
+      "neckToChest": data["neckToChest"]["value"],
       "headToNeck": data["headToNeck"]["value"],
-      "neckToWaist": data["neckToWaist"]["value"],
-      "waistToAnkle": data["waistToAnkle"]["value"],
+      "chestToWaist": data["chestToWaist"]["value"],
+      "hipWidth": data["hipWidth"]["value"],
+      "hipToKnee": data["hipToKnee"]["value"],
+      "kneeToFoot": data["kneeToFoot"]["value"],
     }
 
     print("[BODY MEASUREMENTS SAVED]")
     kinematics.Head_to_Neck = float(self.body_measurements["headToNeck"]) / 100.0
-    kinematics.Chest_to_Waist = float(self.body_measurements["neckToWaist"]) / 100.0
-    kinematics.Hip_to_Knee = float(self.body_measurements["waistToAnkle"]) / 100.0
-    kinematics.ankle_to_ground = float(self.body_measurements["ankleToGround"]) / 100.0
+    kinematics.Neck_to_Chest = float(self.body_measurements["neckToChest"]) / 100.0
+    kinematics.Hip_to_Knee = float(self.body_measurements["hipToKnee"]) / 100.0
+    kinematics.Hip_Width = float(self.body_measurements["hipWidth"]) / 100.0
+    kinematics.Knee_to_Foot = float(self.body_measurements["kneeToFoot"]) / 100.0
+    kinematics.Chest_to_Waist = float(self.body_measurements["chestToWaist"]) / 100.0
+
 
