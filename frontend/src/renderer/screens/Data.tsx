@@ -23,8 +23,9 @@ export default () => {
           {Object.values(devices).map((device) => (
             <tr key={device.id}>
               <th>{device.id}</th>
-              {[...device.accel, ...device.gyro].map((position) => (
-                <th key={position}>{position.toFixed(2)}</th>
+              {[...device.accel, ...device.gyro].map((position, index) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <th key={index + device.id}>{position.toFixed(2)}</th>
               ))}
             </tr>
           ))}

@@ -46,7 +46,7 @@ class Skeleton:
 
         # sensor transforms
         self.driver_transform_euler = [90.0, 0.0, 0.0]
-        self.chest_transform_euler = [90.0, 0.0, 270.0] 
+        self.chest_transform_euler = [90.0, 0.0, 270.0]
         self.waist_transform_euler = [90.0, 0.0, 270.0] # for back facing
         self.lknee_transform_euler = [90.0, 0.0, 90.0] # for front facing
         self.rknee_transform_euler = [90.0, 0.0, 90.0]
@@ -73,8 +73,6 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
 
     if (offset_front == True):
         hmd_pos.z = hmd_pos.z - 1.0
-
-    print(kinematics.Head_to_Neck)
 
     chest_tracker = trackers.get(CHEST)
     waist_tracker = trackers.get(WAIST)
@@ -110,7 +108,6 @@ def update_body(kinematics:Skeleton, trackers:dict, hmd_pos, hmd_quat, verbose=F
     rknee_tracker.quat = rknee
     lfoot_tracker.quat = lfoot
     rfoot_tracker.quat = rfoot
-    
     # forward kinematics
     neck_pos = hmd_pos + (hmd_quat * quaternion(0, 0, -kinematics.Head_to_Neck, kinematics.HMD_to_Head) * hmd_quat.inverse())
     chest_pos = neck_pos + (chest * quaternion(0, 0, -kinematics.Neck_to_Chest, 0) * chest.inverse())

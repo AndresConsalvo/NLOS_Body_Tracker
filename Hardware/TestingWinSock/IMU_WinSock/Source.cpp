@@ -34,7 +34,7 @@ int BufLen = 255;
 
 char RecvBuf[255];
 
-float hmd_pos[3] = { 0.0, 1.8, 0.0};
+float hmd_pos[3] = { 0.0, 1.8, 0.0 };
 float hmd_quat[4] = { -0.776, 0.249, 0.093, 0.573 };
 
 
@@ -112,9 +112,9 @@ void readUDP() {
 				}
 			}
 		}
-		
+
 		if (bytes_read == sizeof(data_pkg)) {
-			
+
 			//printf("Data received.\n");
 			payload = (data_pkg*)RecvBuf;
 
@@ -157,7 +157,7 @@ void reconnectUDP() {
 			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
 			Sleep(20);
 		}
-		
+
 	}
 }
 
@@ -172,9 +172,8 @@ int main() {
 	if (iResult != 0) {
 		printf("WSAStartup failed!\n");
 		return 0;
-	}
-	else {
-		
+	} else {
+
 		local.sin_family = AF_INET;
 		local.sin_port = htons(serverPort);
 		local.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -213,5 +212,4 @@ int main() {
 
 	}
 	return 0;
-}	
-
+}

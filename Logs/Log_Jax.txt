@@ -1,3 +1,61 @@
+2/24/22
+  - Found out that removing and shorting R7 and the MOSFET gave the 3.3V we needed, but every 100ms was a drop in voltage.
+  - Ruo dropped off new ESP32 board, went to work on desoldering all the pins
+2/23/22
+  - Worked with Carsten in diagnosing the voltage issue. He suggested R7 as we are running through with the voltage supplier
+  - Worked on desoldering battery management to get better voltages to LDO.
+2/22/22
+  - Tested CP2102 with soldered VREGIN, but no luck in getting COM port open.
+  - Head to lab to meet Ruo and Joe.
+  - No progress on ESP8266 programming, SPI still had issues with arduino
+  - Ruo suggested getting new boards but ESP32s instead
+    - discussed with Ruo on replacement wifi modules
+2/21/22
+  - USBCs arrived and soldered. Charge LED shines and battery management work.
+  - USB to UART does not work.
+  - Voltage issues going to LDO.
+  - Tried to help Joe with ESP8266 issues in SPI
+  - Ruo ordered more dev boards and breakout boards for ESP, IMU, and USB to UART
+  - Dropped off 2 PCBs to Ruo and 1 to Joe
+  - Reviewed docs for CP2102 and found that we were missing a VDD or VREGIN connection to 3.3V or VDD
+    - solution is to attach VREGIN to nearby via w/ 5V.
+2/20/22
+  - Stayed in discord for group members to join and update (Andres and Fariha were not available)
+  - Tried to get Joe set up with th IMU data retrieval by sending appropriate docs
+  - checked in with Ruo's progress in VR
+2/19/22
+  - Finished soldering in the AM. Set up group meeting for Sunday
+  - Dropped off new breakout board to Joe with MPU
+2/18/22
+  - Arrived in lab and stayed til 5:30
+  - Got some advice from Carsten regarding replacement for USBCs in the meantime
+  - Realized I soldered the wrong QFN to Joe's breakout board and relayed to him.
+  - Soldered all parts to a PCB in lab (3.5 hours) and the rest through Saturday (another 12 hours).
+2/17/22
+  - In lab, finishing up putting solder on last of 6 of the PCBs using the liquid flux
+  - After meeting with Evan, ordered 1054500101 I found with little lead time (possibly arrive by Friday and cheaper)
+2/16/22
+  - Arrived in lab to ask questions to Carsten and bring in more gear.
+  - Put solder on some PCBs
+  - Considered reordering PCBs with Ruo
+2/15/22
+  - Arrived in lab, brought a lot of my gear for soldering to store in locker if anyone needed it.
+  - Ordered Liquid flux for soldering.
+  - Assigned tasks to everyone so that clear objectives were made.
+  - Joe's breakout boards arrive
+  - Gave Joe the ESP8266 dev board when he arrived to lab.
+2/14/22
+  - Boards arrived today.
+  - Adjusted CAD models to fit the PCBs.
+  - Found out that our USBCs were the wrong footprint needed for this PCB (notified Evan)
+    - worked with Ruo to immediately find a replacement. The 1054500101 seemed to be OOS everywhere or long lead times.
+    - Ruo checked ECE groups at UF for the part, since he pulled it from their library.
+  - Tried to put solder on all the pads. It was really difficult, needed liquid flux badly to continue.
+2/11/22
+  - PCBs projected for next week
+2/10/22
+  - Presentation day, did a dry-run of the presentation before class.
+  - FOund Espressif boards and new breakout boards for Joe to use to test programs for ESP8266
 2/9/22
   - Received final set of breakout boards to find that they were the wrong size. This delays Joe's progress in programming
     - Resolution: just wait for PCBs to come in as the items would get there on the Saturday at the earliest. 
