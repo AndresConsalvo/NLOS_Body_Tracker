@@ -117,7 +117,7 @@ class ServerEvent:
 
   def calibrate_event(self, calibrating:dict[str,bool]):
     print('[CALIBRATING]')
-    calibrating['check' : True]
+    calibrating['c'] = True
 
   def position_event(self, data):
 
@@ -156,8 +156,8 @@ class ServerEvent:
     }
 
     print("[BODY MEASUREMENTS SAVED]")
-    kinematics.Head_to_Neck = self.body_measurements["headToNeck"]
-    kinematics.Chest_to_Waist = self.body_measurements["neckToWaist"]
-    kinematics.Hip_to_Knee = self.body_measurements["waistToAnkle"]
-    kinematics.ankle_to_ground = self.body_measurements["ankleToGround"]
+    kinematics.Head_to_Neck = float(self.body_measurements["headToNeck"]) / 100.0
+    kinematics.Chest_to_Waist = float(self.body_measurements["neckToWaist"]) / 100.0
+    kinematics.Hip_to_Knee = float(self.body_measurements["waistToAnkle"]) / 100.0
+    kinematics.ankle_to_ground = float(self.body_measurements["ankleToGround"]) / 100.0
 

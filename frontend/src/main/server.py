@@ -31,7 +31,7 @@ load_dotenv()
 # COMMUNICATE WITH THE DRIVER/OPENVR
 LOCAL_HOST = os.getenv("LOCAL_HOST")
 DRIVER_PORT = 4242
-DRIVER_ADDR = (LOCAL_HOST, DRIVER_PORT)
+DRIVER_ADDR = ("127.0.0.1", 4242)
 
 # COMMUNICATE WITH THE TRACKERS OVER WIFI
 LOCAL_IP = wlan_ip()
@@ -288,13 +288,13 @@ def communicate_driver_udp():
     try:
       data, addr = driver_server_socket.recvfrom(BUFFER_SIZE)
       payload_length = len(data)
-
       if (payload_length == 3):
         header, msg, footer = unpack("=cbc", data)
 
-        if (header == b'P' and footer == b'P'):
+        if (header == b'P' and footer == b'p'):
           driver_found = True
-          addresses["openvr"] = addr
+          
+          addresses['openvr'] = addr
           payload = pack("=cbc", b'P', 45, b'p')
           driver_server_socket.sendto(payload, addr)
 
@@ -307,16 +307,17 @@ def communicate_driver_udp():
 
           if (calibrating["c"]):
             print('----------------------------------------AQUI----------------------------------------')
-            set_offsets (kinematics, trackers, hmd_quat, verbose=False)
+            set_offsets(kinematics, trackers, hmd_quat, verbose=False)
             calibrating["c"] = False
 
           else:
-            update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=False, offset_front=False, static_pos=False)
+            update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=True, offset_front=False, static_pos=False)
 
           for t in trackers.values():
             id = t.id
             quat = t.quat
             pos = t.pos
+
 
             payload = pack('=cfffffffbc', b'T', pos.x, pos.y, pos.z, quat.w, quat.x, quat.y, quat.z, id, b't')
 
