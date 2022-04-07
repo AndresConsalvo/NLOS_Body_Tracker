@@ -107,7 +107,7 @@ export default () => {
         </div>
       </div>
       <h3>Calibrate Trackers:</h3>
-      <div style={{marginLeft: '250px'}}>
+      <div style={{ marginLeft: '250px' }}>
         {calibrating ? (
           <>
             <CircularProgress style={{ marginLeft: '56px' }} />

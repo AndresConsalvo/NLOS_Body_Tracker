@@ -70,7 +70,7 @@ class ServerEvent:
 
     elif (payload["type"] == "POSITION"):
       print('[EVENT] position')
-      self.position_event(payload["data"])
+      self.position_event(payload["data"],args[1])
       pass
 
     elif (payload["type"] == "BODY_MEASUREMENTS"):
@@ -121,14 +121,14 @@ class ServerEvent:
     print('[CALIBRATING]')
     calibrating['c'] = True
 
-  def position_event(self, data):
+  def position_event(self, data, address):
 
     accel = data["accel"]
     gyro  = data["gyro"]
     id    = int(data["id"])
     quat  = data["quat"]
 
-    tracker = Tracker("127.0.0.1",
+    tracker = Tracker(str(address[0]),
                       accel,
                       gyro,
                       4.2,
