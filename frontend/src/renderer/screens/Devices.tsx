@@ -28,7 +28,7 @@ export default () => {
             <th>Body Part</th>
           </tr>
           {Object.values(devices).map((device) => (
-            <tr key={device.ip}>
+            <tr key={device.id}>
               <td>{device.id}</td>
               <td>{device.ip}</td>
               <td>{device.battery}</td>
