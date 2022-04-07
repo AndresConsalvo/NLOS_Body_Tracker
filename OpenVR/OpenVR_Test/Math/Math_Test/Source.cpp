@@ -4,7 +4,7 @@
 int main() {
 	
 	//https://ahrs.readthedocs.io/en/latest/filters/angular.html
-	ang_rate angle_vector(0, 1, 0);
+	ang_rate angle_vector(3.14, 0, 0);
 
 	omega omega_op(angle_vector);
 
@@ -59,9 +59,13 @@ int main() {
 	identity_Matrix.set_as_Identity();
 	double ang_mag = angular_velocity.getMag();
 
-
 	double scale_Ident = cos(ang_mag / 2.0);
 	double scale_Omega = (1.0 / ang_mag) * sin(ang_mag / 2);
+
+	printf("ang_mag: %f\n", ang_mag);
+	printf("scale_Ident: %f\n", scale_Ident);
+	printf("scale_Omega: %f\n", scale_Omega);
+
 	identity_Matrix.scale_Matrix(scale_Ident);
 	test_Omega.scale_Matrix(scale_Omega);
 	Matrix44_d result = test_Omega + identity_Matrix;

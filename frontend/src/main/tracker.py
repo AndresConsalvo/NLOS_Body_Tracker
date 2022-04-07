@@ -1,4 +1,5 @@
 import math
+from math_helpers import quaternion
 
 MAX_VOLTAGE = 4.2
 MIN_VOLTAGE = 3.0
@@ -13,6 +14,11 @@ class Tracker:
     self.gyro = gyro
     self.battery = self.compute_battery_percent(battery)
     self.body_part = body_part
+
+    # necessary
+    self.quat_from_imu = quaternion(1.0, 0.0, 0.0, 0.0)
+    self.quat = quaternion(1.0, 0.0, 0.0, 0.0)
+    self.pos = quaternion(0.0, 0.0, 0.0, 0.0)
 
   def get_data(self) -> dict:
     data = {
@@ -60,7 +66,7 @@ class Tracker:
   def compute_battery_percent(self,voltage):
     return math.floor(((MAX_VOLTAGE - voltage)/(MAX_VOLTAGE - MIN_VOLTAGE))* 100)
 
-  def refresh(self, id=None, ip=None, accel=None, gyro=None, battery=None, body_part=None):
+  def update(self, id=None, ip=None, accel=None, gyro=None,battery=None, voltage=None, body_part=None):
     if id is not None:
       self.id = id
     if ip is not None:
@@ -70,6 +76,8 @@ class Tracker:
     if gyro is not None:
       self.gyro = gyro
     if battery is not None:
-      self.battery = self.compute_battery_percent(battery)
+      self.battery = battery
+    if voltage is not None:
+      self.battery = self.compute_battery_percent(voltage)
     if body_part is not None:
       self.body_part = body_part

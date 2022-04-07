@@ -1,31 +1,21 @@
 #include <DeviceProvider.h>
 
+bool chest_en = true;
 bool waist_en = true;
-bool lfoot_en = false;
-bool rfoot_en = false;
-bool lthigh_en = false;
-bool rthigh_en = false;
+bool lknee_en = true;
+bool rknee_en = true;
+bool lfoot_en = true;
+bool rfoot_en = true;
 
 bool SocketActivated = false;
 
 DriverPose_t hmd_pose = { 0 };
+DriverPose_t chest_pose = { 0 };
 DriverPose_t waist_pose = { 0 };
+DriverPose_t lknee_pose = { 0 };
+DriverPose_t rknee_pose = { 0 };
 DriverPose_t lfoot_pose = { 0 };
 DriverPose_t rfoot_pose = { 0 };
-
-DriverPose_t neck_pose = { 0 };
-DriverPose_t tailbone_pose = { 0 };
-DriverPose_t lhip_pose = { 0 };
-DriverPose_t rhip_pose = { 0 };
-
-const double HMD_to_Head = 0.0;
-const double Head_to_Neck = 0.18;
-const double Neck_to_Waist = 0.62;
-const double Waist_to_Hip = 0.1;
-const double hip_width = 0.3;
-const double Head_to_Floor_len_m = 1.7;
-const double Head_to_Waist_len_m = 0.8;
-const double Hip_to_Foot_len_m = 0.9;
 
 EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 	EVRInitError initError = InitServerDriverContext(pDriverContext);
@@ -34,15 +24,34 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		return initError;
 	}
 
-	udpThread = new UDP();
-	udpThread->init();
+	HmdQuaternion_t quat;
+	quat.w = 1.0;
+	quat.x = 0.0;
+	quat.y = 0.0;
+	quat.z = 0.0;
+
+	if (chest_en) {
+		VRDriverLog()->Log("Initializing waist tracker...");
+
+		chest_pose.qRotation = quat;
+		chest_pose.qWorldFromDriverRotation = quat;
+		chest_pose.qDriverFromHeadRotation = quat;
+
+		chest_tracker = new TrackerDriver();
+		chest_tracker->setIndex(WAIST);
+
+		chest_tracker->SetModel("Chest_Tracker");
+		chest_tracker->SetVersion("0.0.1");
+
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_Chest_Tracker", TrackedDeviceClass_GenericTracker, chest_tracker);
+	}
 
 	if (waist_en) {
 		VRDriverLog()->Log("Initializing waist tracker...");
-		waist_pose.qRotation.w = 1.0;
-		waist_pose.qRotation.x = 0.0;
-		waist_pose.qRotation.y = 0.0;
-		waist_pose.qRotation.z = 0.0;
+
+		waist_pose.qRotation = quat;
+		waist_pose.qWorldFromDriverRotation = quat;
+		waist_pose.qDriverFromHeadRotation = quat;
 
 		waist_tracker = new TrackerDriver();
 		waist_tracker->setIndex(WAIST);
@@ -53,28 +62,60 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_Waist_Tracker", TrackedDeviceClass_GenericTracker, waist_tracker);
 	}
 
+	if (lknee_en) {
+		VRDriverLog()->Log("Initializing lknee tracker...");
+
+		lknee_pose.qRotation = quat;
+		lknee_pose.qWorldFromDriverRotation = quat;
+		lknee_pose.qDriverFromHeadRotation = quat;
+
+		lknee_tracker = new TrackerDriver();
+		lknee_tracker->setIndex(LKNEE);
+
+		lknee_tracker->SetModel("LKnee_Tracker");
+		lknee_tracker->SetVersion("0.0.1");
+
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LKnee_Tracker", TrackedDeviceClass_GenericTracker, lknee_tracker);
+	}
+
+	if (rknee_en) {
+		VRDriverLog()->Log("Initializing rknee tracker...");
+
+		rknee_pose.qRotation = quat;
+		rknee_pose.qWorldFromDriverRotation = quat;
+		rknee_pose.qDriverFromHeadRotation = quat;
+
+		rknee_tracker = new TrackerDriver();
+		rknee_tracker->setIndex(RKNEE);
+
+		rknee_tracker->SetModel("RKnee_Tracker");
+		rknee_tracker->SetVersion("0.0.1");
+
+		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RKnee_Tracker", TrackedDeviceClass_GenericTracker, rknee_tracker);
+	}
+
 	if (lfoot_en) {
 		VRDriverLog()->Log("Initializing left foot tracker...");
-		lfoot_pose.qRotation.w = 1.0;
-		lfoot_pose.qRotation.x = 0.0;
-		lfoot_pose.qRotation.y = 0.0;
-		lfoot_pose.qRotation.z = 0.0;
+
+		lfoot_pose.qRotation = quat;
+		lfoot_pose.qWorldFromDriverRotation = quat;
+		lfoot_pose.qDriverFromHeadRotation = quat;
 
 		lfoot_tracker = new TrackerDriver();
 		lfoot_tracker->setIndex(LFOOT);
 
-		waist_tracker->SetModel("LFoot_Tracker");
-		waist_tracker->SetVersion("0.0.1");
+		lfoot_tracker->SetModel("LFoot_Tracker");
+		lfoot_tracker->SetVersion("0.0.1");
 
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LFoot_Tracker", TrackedDeviceClass_GenericTracker, lfoot_tracker);
 	}
 
 	if (rfoot_en) {
 		VRDriverLog()->Log("Initializing right foot tracker...");
-		rfoot_pose.qRotation.w = 1.0;
-		rfoot_pose.qRotation.x = 0.0;
-		rfoot_pose.qRotation.y = 0.0;
-		rfoot_pose.qRotation.z = 0.0;
+
+		rfoot_pose.qRotation = quat;
+		rfoot_pose.qWorldFromDriverRotation = quat;
+		rfoot_pose.qDriverFromHeadRotation = quat;
 
 		rfoot_tracker = new TrackerDriver();
 		rfoot_tracker->setIndex(RFOOT);
@@ -85,23 +126,18 @@ EVRInitError DeviceProvider::Init(IVRDriverContext* pDriverContext) {
 		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RFoot_Tracker", TrackedDeviceClass_GenericTracker, rfoot_tracker);
 	}
 
-	if (lthigh_en) {
-		lthigh_tracker = new TrackerDriver();
-		lthigh_tracker->setIndex(LTHIGH);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS_LThigh_Tracker", TrackedDeviceClass_GenericTracker, lthigh_tracker);
-	}
 
-	if (rthigh_en) {
-		rthigh_tracker = new TrackerDriver();
-		rthigh_tracker->setIndex(RTHIGH);
-		VRServerDriverHost()->TrackedDeviceAdded("NLOS_RThigh_Tracker", TrackedDeviceClass_GenericTracker, rthigh_tracker);
-	}
 
+	udpThread = new UDP();
+	udpThread->init();
 
 	return VRInitError_None;
 }
 
 void DeviceProvider::Cleanup() {
+	delete chest_tracker;
+	chest_tracker = NULL;
+
 	delete waist_tracker;
 	waist_tracker = NULL;
 
@@ -111,11 +147,11 @@ void DeviceProvider::Cleanup() {
 	delete rfoot_tracker;
 	rfoot_tracker = NULL;
 
-	delete lthigh_tracker;
-	lthigh_tracker = NULL;
+	delete lknee_tracker;
+	lknee_tracker = NULL;
 
-	delete rthigh_tracker;
-	rthigh_tracker = NULL;
+	delete rknee_tracker;
+	rknee_tracker = NULL;
 }
 
 const char* const* DeviceProvider::GetInterfaceVersions() {
@@ -123,6 +159,10 @@ const char* const* DeviceProvider::GetInterfaceVersions() {
 }
 
 void DeviceProvider::RunFrame() {
+	if (chest_tracker) {
+		chest_tracker->RunFrame();
+	}
+
 	if (waist_tracker) {
 		waist_tracker->RunFrame();
 	}
@@ -135,12 +175,12 @@ void DeviceProvider::RunFrame() {
 		rfoot_tracker->RunFrame();
 	}
 
-	if (lthigh_tracker) {
-		lthigh_tracker->RunFrame();
+	if (lknee_tracker) {
+		lknee_tracker->RunFrame();
 	}
 
-	if (rthigh_tracker) {
-		rthigh_tracker->RunFrame();
+	if (rknee_tracker) {
+		rknee_tracker->RunFrame();
 	}
 }
 

@@ -5,21 +5,24 @@ import json
 import sys
 import time
 import argparse
+from dotenv import load_dotenv
 
 from tracker import Tracker
 
 # from zmq import SERVER
 # Generate random seeded data
 
-SERVER_ADDR_PORT = ("192.168.1.51", 20000)
+load_dotenv()
+
+SERVER_ADDR_PORT = ("127.0.0.1", 20001)
 BUFFER_SIZE      = 1024
 IP = socket.gethostbyname(socket.gethostname())
 
-def generate_accel():
+def generate_gyro():
   return [random.random(), random.random(), random.random()]
 
-def generate_gyro():
-  return [random.randint(0,359), random.randint(0,359), random.randint(0,359)]
+def generate_accel():
+  return [random.randint(0,359), random.randint(900,1100), random.randint(900,1100)]
 
 def generate_voltage():
   return random.random()+3
@@ -29,7 +32,7 @@ def handle_client(sock, id:int, verbose=False):
     print(f"[INFO] Tracker-{id} connecting...")
 
   voltage = generate_voltage()
-  tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, "Tracker-"+str(id))
+  tracker = Tracker(IP, generate_accel(), generate_gyro(), voltage, id)
   message = json.dumps(tracker.get_device())
   bytes_to_send = str.encode(message)
   sock.sendto(bytes_to_send,SERVER_ADDR_PORT)
@@ -54,7 +57,7 @@ def start_test(n_messages, n_trackers, verbose):
   for m in range(0,n_messages):
     for i in range(0,n_trackers):
       handle_client(sockets[i], i+1, verbose)
-      # time.sleep(1)
+      time.sleep(0.07)
 
   end = timeit.timeit()
 

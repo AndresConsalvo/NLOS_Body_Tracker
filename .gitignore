@@ -24,3 +24,5 @@ hs_err_pid*
 frontend/src/main/__pycache__/tracker.cpython-39.pyc
 frontend/src/main/__pycache__/tracker.cpython-39.pyc
 frontend/src/main/__pycache__/tracker.cpython-38.pyc
+__pycache__
+frontend/src/main/__pycache__/tracker.cpython-39.pyc

@@ -12,10 +12,10 @@
 
 using namespace vr;
 
-void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_ms);
+//void getNewPose(int limb, Vector3_d angle_vector, double elapsed_time_ms);
 
-void updateSkeleton();
+//void updateSkeleton();
 
-bool checkIfZero(double& val, double threshold);
+//bool checkIfZero(double& val, double threshold);
 
 Quaternion getQuaternionFromHMD(HmdMatrix34_t& matrix);

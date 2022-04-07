@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="json_test.cpp" />
     <ClCompile Include="math_helpers.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Source.cpp" />

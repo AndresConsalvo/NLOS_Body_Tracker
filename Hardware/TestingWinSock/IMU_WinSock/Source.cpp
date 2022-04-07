@@ -1,5 +1,6 @@
-
 #define _USE_MATH_DEFINES
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#pragma pack(n)
 
 #include <chrono>
 #include <iostream>
@@ -14,148 +15,201 @@
 
 using namespace std;
 
-const char* srcIP = "192.168.1.59";
-SOCKET sock;
-sockaddr_in local;
+
 WSADATA wsaData;
 
-u_long iMode = 0;
+SOCKET sock;
+sockaddr_in local;
+int localAddrSize = sizeof(local);
 
-int rec_err = 0;
-int BufLen = 25;
+const uint16_t serverPort = 4242;
 
-char RecvBuf[25];
+std::chrono::high_resolution_clock::time_point last_received;
+std::chrono::high_resolution_clock::time_point current_time;
+double elapsed_time_s;
 
-float Gx, Gy, Gz, Ax, Ay, Az = 0;
-double ang_x, ang_y, ang_z, acc_x, acc_y, acc_z = 0;
-double hmd_pos[3] = { 0, 1.8, 0};
-double waist_to_head = 0.8;
 
-double old_quat[4] = { 1, 0, 0, 0 }; // w, x, y, z
-double pose[4] = { 1, 0, 0, 0 };
+int bytes_read = 0;
+int BufLen = 255;
+
+char RecvBuf[255];
+
+float hmd_pos[3] = { 0.0, 1.8, 0.0 };
+float hmd_quat[4] = { -0.776, 0.249, 0.093, 0.573 };
+
+
+#pragma pack(push, 1)
+struct data_pkg {
+	uint8_t header = 'T';
+	float x = 0.0;
+	float y = 0.0;
+	float z = 0.0;
+	float qw = 1.0;
+	float qx = 0.0;
+	float qy = 0.0;
+	float qz = 0.0;
+	uint8_t tracker_id = 0;
+	uint8_t footer = 't';
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct cmd_pkg {
+	uint8_t header = 'P';
+	uint8_t msg = 45;
+	uint8_t footer = 'p';
+};
+#pragma pack(pop)
+
+
+cmd_pkg* server_response;
+data_pkg* payload;
+bool broadcast_en = true;
+bool server_connected = false;
 
 void readUDP() {
 	while (1) {
-		int localAddrSize = sizeof(local);
+		memset(RecvBuf, 0, sizeof(RecvBuf));
 		//printf("Scanning for data\n");
-		rec_err = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)&local, &localAddrSize);
+		bytes_read = recvfrom(sock, RecvBuf, BufLen, 0, (SOCKADDR*)&local, &localAddrSize);
+		//printf("%s\n", RecvBuf);
 
-		//printf("Message received.\n");
-		//printf("%d, %d, %d\n", Gx, Gy, Gz);
-		//printf("Converted to radians: \n");
+		if (bytes_read == sizeof(cmd_pkg)) {
+			server_response = (cmd_pkg*)RecvBuf;
+			//printf("Server responded\n");
+
+			if (server_response->header == 'P' && server_response->footer == 'p') {
+				last_received = std::chrono::high_resolution_clock::now();
+				printf("Server responded, ending broadcast.\n");
+				broadcast_en = false;
+				server_connected = true;
+			}
+
+			if (server_response->header == 'C' && server_response->footer == 'c') {
+				last_received = std::chrono::high_resolution_clock::now();
+				data_pkg hmd_payload;
+
+				switch (server_response->msg) {
+				case 0:
+					//printf("Sending hmd data\n");
+
+					hmd_payload.header = (uint8_t)'H';
+					hmd_payload.x = hmd_pos[0];
+					hmd_payload.y = hmd_pos[1];
+					hmd_payload.z = hmd_pos[2];
+					hmd_payload.qw = hmd_quat[0];
+					hmd_payload.qx = hmd_quat[1];
+					hmd_payload.qy = hmd_quat[2];
+					hmd_payload.qz = hmd_quat[3];
+					hmd_payload.tracker_id = 0;
+					hmd_payload.footer = (uint8_t)'h';
+
+					sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
+					break;
+				default:
+					printf("Invalid command\n");
+					break;
+				}
+			}
+		}
+
+		if (bytes_read == sizeof(data_pkg)) {
+
+			//printf("Data received.\n");
+			payload = (data_pkg*)RecvBuf;
+
+			if (payload->header == 'T' && payload->footer == 't') {
+				last_received = std::chrono::high_resolution_clock::now();
+				printf("Header and footer: %c %c\n", payload->header, payload->footer);
+				printf("Tracker ID: %d\n", payload->tracker_id);
+				printf("Rotation [w, x, y, z] = [%f, %f, %f, %f]\n", payload->qw, payload->qx, payload->qy, payload->qz);
+				printf("Position [x, y, z] = [%f, %f, %f]\n", payload->x, payload->y, payload->z);
+
+				if (payload->tracker_id == 6) {
+					Sleep(1000);
+					system("CLS");
+				}
+			}
+		}
+	}
+}
+
+void reconnectUDP() {
+	while (1) {
+		if (broadcast_en) {
+			cmd_pkg ping;
+			sendto(sock, (char*)&ping, sizeof(ping), 0, (sockaddr*)&local, localAddrSize);
+			printf("Broadcasting!\n");
+			Sleep(1000);
+		} else {
+			data_pkg hmd_payload;
+			hmd_payload.header = (uint8_t)'H';
+			hmd_payload.x = hmd_pos[0];
+			hmd_payload.y = hmd_pos[1];
+			hmd_payload.z = hmd_pos[2];
+			hmd_payload.qw = hmd_quat[0];
+			hmd_payload.qx = hmd_quat[1];
+			hmd_payload.qy = hmd_quat[2];
+			hmd_payload.qz = hmd_quat[3];
+			hmd_payload.tracker_id = 0;
+			hmd_payload.footer = (uint8_t)'h';
+
+			sendto(sock, (char*)&hmd_payload, sizeof(hmd_payload), 0, (sockaddr*)&local, localAddrSize);
+			Sleep(20);
+		}
+
 	}
 }
 
 int main() {
-	
+	current_time = std::chrono::high_resolution_clock::now();
+	last_received = std::chrono::high_resolution_clock::now();
 
 	printf("Starting program!\n");
 	int iResult;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-	std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
-
 	if (iResult != 0) {
 		printf("WSAStartup failed!\n");
 		return 0;
-	}
-	else {
+	} else {
+
+		local.sin_family = AF_INET;
+		local.sin_port = htons(serverPort);
+		local.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+		int enable = 1;
+		int iTimeout = 100;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(enable));
+		setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&iTimeout, sizeof(iTimeout));
+		// Set timeout
+
+
 		if (sock == INVALID_SOCKET) {
 			printf("Socket binding failed at step 1!\n");
 			return 0;
 		}
-
-		local.sin_family = AF_INET;
-		local.sin_port = htons(PORT);
-		local.sin_addr.s_addr = htonl(INADDR_ANY);
-
-
-		iResult = ioctlsocket(sock, FIONBIO, &iMode);
-		iResult = bind(sock, (SOCKADDR*)&local, sizeof(local));
-
+		//iResult = bind(sock, (sockaddr*)&local, sizeof(local));
 		if (iResult != 0) {
 			printf("Socket binding failed at step 2!\n");
 			return 0;
 		}
 	}
+
+	// Start threads
 	std::thread first(readUDP);
+	std::thread second(reconnectUDP);
 
 	while (1) {
-		printf("Bytes read: %d\n", rec_err);
-		if (rec_err > 0) {
-			
-			float* acc_x = (float*)RecvBuf;
-			float* acc_y = (float*)(RecvBuf + 4);
-			float* acc_z = (float*)(RecvBuf + 8);
-			float* gyr_x = (float*)(RecvBuf + 12);
-			float* gyr_y = (float*)(RecvBuf + 16);
-			float* gyr_z = (float*)(RecvBuf + 20);
-			printf("Tracker ID: %d\n", RecvBuf[24]);
-			printf("Acceleration: %f, %f, %f\n", *acc_x, *acc_y, *acc_z);
-			printf("Rotation: %f, %f, %f\n", *gyr_x, *gyr_y, *gyr_z);
-
-
-
-			// Below code is for raw data
-			/*
-			double waist_pos[3] = { 0, 0, 0 };
-			Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]) - 4;
-			Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]) + 4;
-			Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]) - 3;
-
-
-			printf("Raw: %d, %d, %d\n", Gx, Gy, Gz);
-
-			ang_x = deg_to_rad((double)Gx);
-			ang_y = deg_to_rad((double)Gy);
-			ang_z = deg_to_rad((double)Gz);
-
-			Vector3_d angle_vector(ang_x, ang_y, ang_z);
-			
-			
-			Quaternion q_t0(pose[0], pose[1], pose[2], pose[3]);
-			Matrix44_d omega_Matrix;
-			Matrix44_d identity_Matrix;
-			omega_Matrix.set_as_Omega_Matrix(angle_vector);
-			identity_Matrix.set_as_Identity();
-			double ang_mag = angle_vector.getMag();
-
-
-			double scale_Ident = cos(ang_mag / 2.0);
-			double scale_Omega = (1.0 / ang_mag) * sin(ang_mag / 2);
-			identity_Matrix.scale_Matrix(scale_Ident);
-			omega_Matrix.scale_Matrix(scale_Omega);
-			Matrix44_d result = omega_Matrix + identity_Matrix;
-
-			Quaternion q_t1 = result.getNewQuat(q_t0);
-			q_t1.normalize();
-			printf("x: %f, y: %f, z: %f\n", q_t1.x, q_t1.y, q_t1.z);
-			pose[0] = q_t1.w;
-			pose[1] = q_t1.x;
-			pose[2] = q_t1.y;
-			pose[3] = q_t1.z;
-
-			Quaternion posVec, newPos;
-			posVec = Quaternion(0, 0, 0.8, 0);
-			newPos = q_t1 * posVec * q_t1.GetInverse();
-			printf("w: %f, x: %f, y: %f, z: %f\n", newPos.w, newPos.x, newPos.y, newPos.z);
-
-			waist_pos[0] = hmd_pos[0] + newPos.x;
-			waist_pos[1] = hmd_pos[1] - newPos.y;
-			waist_pos[2] = hmd_pos[2] + newPos.z;
-
-
-			printf("x: %f, y: %f, z: %f\n", waist_pos[0], waist_pos[1], waist_pos[2]);
-			*/
-			
-
-
-			
+		current_time = std::chrono::high_resolution_clock::now();
+		elapsed_time_s = std::chrono::duration<double, std::milli>(current_time - last_received).count() / 1000.0;
+		if (elapsed_time_s > 5.0) {
+			broadcast_en = true;
+			server_connected = false;
 		}
-		Sleep(1000);
+
 	}
 	return 0;
-}	
-
+}

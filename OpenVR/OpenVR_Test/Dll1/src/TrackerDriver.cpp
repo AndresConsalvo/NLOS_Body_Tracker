@@ -68,16 +68,31 @@ void TrackerDriver::DebugRequest(const char* pchRequest, char* pchResponseBuffer
 
 DriverPose_t TrackerDriver::GetPose() {
 	switch (TrackerIndex) {
+	case (CHEST):
+		chest_pose.result = TrackingResult_Running_OK;
+		return chest_pose;
+		break;
 	case (WAIST):
+		waist_pose.result = TrackingResult_Running_OK;
 		return waist_pose;
 		break;
+	case (LKNEE):
+		lknee_pose.result = TrackingResult_Running_OK;
+		return lknee_pose;
+	case (RKNEE):
+		rknee_pose.result = TrackingResult_Running_OK;
+		return rknee_pose;
 	case (LFOOT):
+		lfoot_pose.result = TrackingResult_Running_OK;
 		return lfoot_pose;
 		break;
 	case (RFOOT):
+		rfoot_pose.result = TrackingResult_Running_OK;
 		return rfoot_pose;
 		break;
 	default:
+		DriverPose_t pose = { 0 };
+		return pose;
 		break;
 	}
 }

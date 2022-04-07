@@ -1,8 +1,8 @@
-import { useSensors } from '../hooks/useSensors';
+import useStores from '../hooks/useStores';
 
-interface Props extends ReturnType<typeof useSensors> {}
-export default (props: Props) => {
-  const { devices } = props;
+export default () => {
+  const { sensors } = useStores();
+  const { devices } = sensors;
   return (
     <>
       <div className="main">
@@ -21,10 +21,11 @@ export default (props: Props) => {
             <th>Gz</th>
           </tr>
           {Object.values(devices).map((device) => (
-            <tr key={device.ip}>
+            <tr key={device.id}>
               <th>{device.id}</th>
-              {[...device.accel, ...device.gyro].map((position) => (
-                <th key={position}>{position.toFixed(2)}</th>
+              {[...device.accel, ...device.gyro].map((position, index) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <th key={index + device.id}>{position.toFixed(2)}</th>
               ))}
             </tr>
           ))}

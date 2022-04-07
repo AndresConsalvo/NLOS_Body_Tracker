@@ -1,19 +1,11 @@
 #pragma once
 #include <UDP_receiver.h>
 
-
-#define PORT 20000
-const char* srcIP = "192.168.1.51";
-
+// For logging purposes (no use in normal operation)
 char log_str[100];
-char RecvBuf[25];
-
-float* gyr_x = (float*)(RecvBuf + 0);
-float* gyr_y = (float*)(RecvBuf + 4);
-float* gyr_z = (float*)(RecvBuf + 8);
-float* tracker_id = (float*)(RecvBuf + 12);
 
 
+// Initializes UDP socket
 void UDP::init() {
 	WSADATA wsaData;
 	int iResult;
@@ -28,10 +20,16 @@ void UDP::init() {
 	} else {
 		
 		local.sin_family = AF_INET;
-		local.sin_port = htons(PORT);
-		local.sin_addr.s_addr = inet_addr(srcIP);
+		local.sin_port = htons(serverPort);
+		local.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+		int enable = 1;
+		int iTimeout = 100;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(enable));
+		//setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&iTimeout, sizeof(iTimeout));
+
 		SocketActivated = true;
 		if (sock == INVALID_SOCKET) {
 			WSACleanup();
@@ -40,11 +38,8 @@ void UDP::init() {
 		}
 
 		receiveThread = new std::thread(&UDP::start, this);
+		broadcastThread = new std::thread(&UDP::start_broadcasting, this);
 	}
-
-	char message[] = "Hello";
-	int ret = sendto(sock, message, sizeof(message), 0, (struct sockaddr*)&local, sizeof(local));
-	VRDriverLog()->Log("Sent message!");
 }
 
 void UDP::deinit() {
@@ -53,146 +48,146 @@ void UDP::deinit() {
 		if (receiveThread) {
 			receiveThread->join();
 			delete receiveThread;
+
+			broadcastThread->join();
+			delete broadcastThread;
+
 			receiveThread = nullptr;
+			broadcastThread = nullptr;
 		}
 		closesocket(sock);
 		WSACleanup();
 	}
 }
 
-void UDP::start() {
 
-	
-	int localAddrSize = sizeof(local);
+
+void UDP::start() {
 	while (SocketActivated) {
-		vr::VRDriverLog()->Log("Receiving data!");
-		bytes_read = recvfrom(sock, RecvBuf, 25, 0, (sockaddr*)&local, &localAddrSize);
-		snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
-		VRDriverLog()->Log(log_str);
-		if (bytes_read == 16) {
-			VRDriverLog()->Log("Setting value!");
-			setValue((char*)RecvBuf);
+
+		//vr::VRDriverLog()->Log("Receiving data!");
+		bytes_read = recvfrom(sock, RecvBuf, BufLen, 0, (sockaddr*)&local, &localAddrSize);
+		//snprintf(log_str, 100, "Read %d bytes\n", bytes_read);
+		//VRDriverLog()->Log(log_str);
+			
+		if (bytes_read == sizeof(data_pkg)) {
+			payload = (data_pkg*)(RecvBuf);
+			if (payload->header == 'T' && payload->footer == 't') {
+				//VRDriverLog()->Log("Setting tracker position and rotation!");
+				setValue(payload);
+			}
+		} else if (bytes_read == sizeof(ping_pkg)) {
+			server_response = (ping_pkg*)(RecvBuf);
+
+			if (server_response->header == 'P' && server_response->footer == 'p') {
+				VRDriverLog()->Log("Server responded, ending broadcast.\n");
+				this->broadcast_en = false;
+			}
+			if (server_response->header == 'C' && server_response->footer == 'c') {
+				if (server_response->msg == 0) {
+					//VRDriverLog()->Log("HMD data requested!");
+					TrackedDevicePose_t device_pose[10];
+					VRServerDriverHost()->GetRawTrackedDevicePoses(0, device_pose, 10);
+					HmdMatrix34_t space_matrix = device_pose[k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+					Quaternion hmd_quat = getQuaternionFromHMD(space_matrix);
+
+					data_pkg hmd_data;
+
+					hmd_data.header = 'H';
+					hmd_data.x = space_matrix.m[0][3];
+					hmd_data.y = space_matrix.m[1][3];
+					hmd_data.z = space_matrix.m[2][3];
+					hmd_data.qw = hmd_quat.w;
+					hmd_data.qx = hmd_quat.x;
+					hmd_data.qy = hmd_quat.y;
+					hmd_data.qz = hmd_quat.z;
+					hmd_data.tracker_id = 0;
+					hmd_data.footer = 'h';
+					
+					sendto(sock, (char*)&hmd_data, sizeof(hmd_data), 0, (sockaddr*)&local, localAddrSize);
+				}
+			}
 		} else {
-			vr::VRDriverLog()->Log("No data received!");
+			//vr::VRDriverLog()->Log("No data received!");
 		}
 		t_recv_end = std::chrono::high_resolution_clock::now();
 	}
 }
 
-void UDP::setValue(char* RecvBuf) {
-	// Need to move the gyroscope receive and calculate somewhere else.
+void UDP::start_broadcasting() {
+	while (1) {
+		if (this->broadcast_en) {
+			ping_pkg ping;
+			sendto(sock, (char*)&ping, sizeof(ping), 0, (sockaddr*)&local, localAddrSize);
+			VRDriverLog()->Log("Broadcasting!\n");
+			Sleep(1000);
+		} else {
+			TrackedDevicePose_t device_pose[10];
+			VRServerDriverHost()->GetRawTrackedDevicePoses(0, device_pose, 10);
+			HmdMatrix34_t space_matrix = device_pose[k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+			Quaternion hmd_quat = getQuaternionFromHMD(space_matrix);
 
-	// short tracker_ID = (short)(RecvBuf[6]);
-	short tracker_ID = *tracker_id;
-	snprintf(log_str, 100, "TrackerID: %d\n", tracker_ID);
-	VRDriverLog()->Log(log_str);
+			data_pkg hmd_data;
 
-	/*
-	short Gx = (short)(RecvBuf[0] << 8 | RecvBuf[1]);
-	short Gy = (short)(RecvBuf[2] << 8 | RecvBuf[3]);
-	short Gz = (short)(RecvBuf[4] << 8 | RecvBuf[5]);
+			hmd_data.header = 'H';
+			hmd_data.x = space_matrix.m[0][3];
+			hmd_data.y = space_matrix.m[1][3];
+			hmd_data.z = space_matrix.m[2][3];
+			hmd_data.qw = hmd_quat.w;
+			hmd_data.qx = hmd_quat.x;
+			hmd_data.qy = hmd_quat.y;
+			hmd_data.qz = hmd_quat.z;
+			hmd_data.tracker_id = 0;
+			hmd_data.footer = 'h';
 
-	snprintf(log_str, 100, "Gx: %d, Gy: %d, Gz: %d\n", Gx, Gy, Gz);
-	VRDriverLog()->Log(log_str);
-	*/
-	// Because of how IMU is positioned, data received does not correspond with axis.
-
-
-	double ang_x = *gyr_x;
-	double ang_y = *gyr_y;
-	double ang_z = *gyr_z;
-
-	snprintf(log_str, 100, "ang_x: %f, ang_y: %f, ang_z: %f\n", ang_x, ang_y, ang_z);
-	VRDriverLog()->Log(log_str);
-	// red = x
-	// green = y
-	// blue = z ( -z is forwards)
-	
-
-	if (tracker_ID == 4) {
-		reset_trackers();
-	} else {
-		switch (tracker_ID) {
-		case WAIST:
-			VRDriverLog()->Log("Posing waist\n");
-
-			t_waist_last = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(t_waist_last - t_recv_end).count() / 1000.0;
-			getNewPose(WAIST, Vector3_d(-ang_x, -ang_y, -ang_z), elapsed_time_s);
-
-			waist_pose.poseIsValid = true;
-			waist_pose.result = TrackingResult_Running_OK;
-			waist_pose.deviceIsConnected = true;
-			break;
-		case LFOOT:
-			VRDriverLog()->Log("Posing left foot\n");
-			t_lfoot_last = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(t_lfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(LFOOT, Vector3_d(ang_x, ang_y, ang_z), elapsed_time_s);
-
-			lfoot_pose.poseIsValid = true;
-			lfoot_pose.result = TrackingResult_Running_OK;
-			lfoot_pose.deviceIsConnected = true;
-			break;
-		case RFOOT:
-			VRDriverLog()->Log("Posing right foot\n");
-
-			t_rfoot_last = std::chrono::high_resolution_clock::now();
-			elapsed_time_s = std::chrono::duration<double, std::milli>(t_rfoot_last - t_recv_end).count() / 1000.0;
-			getNewPose(RFOOT, Vector3_d(ang_x, ang_y, ang_z), elapsed_time_s);
-
-			rfoot_pose.poseIsValid = true;
-			rfoot_pose.result = TrackingResult_Running_OK;
-			rfoot_pose.deviceIsConnected = true;
-	
-		default:
-			break;
+			sendto(sock, (char*)&hmd_data, sizeof(hmd_data), 0, (sockaddr*)&local, localAddrSize);
+			Sleep(10);
 		}
-
-		updateSkeleton();
 	}
-
 }
 
-void UDP::reset_trackers() {
-	VRDriverLog()->Log("Resetting tracker pos!\n");
+void UDP::setValue(data_pkg* payload) {
+	DriverPose_t* pose = &hmd_pose;
 
-	neck_pose.vecPosition[0] = 0.0;
-	neck_pose.vecPosition[1] = 1.6;
-	neck_pose.vecPosition[2] = -Head_to_Neck;
+	switch (payload->tracker_id) {
+	case CHEST:
+		pose = &chest_pose;
+		break;
+	case WAIST:
+		pose = &waist_pose;
+		break;
+	case LKNEE:
+		pose = &lknee_pose;
+		break;
+	case RKNEE:
+		pose = &rknee_pose;
+		break;
+	case LFOOT:
+		pose = &lfoot_pose;
+		break;
+	case RFOOT:
+		pose = &rfoot_pose;
+		break;
+	default:
+		vr::VRDriverLog()->Log("Invalid tracker ID received! Default to HMD");
+		pose = &hmd_pose;
+		return;
+	}
 
-	waist_pose.vecPosition[0] = 0.0;
-	waist_pose.vecPosition[1] = neck_pose.vecPosition[1] - Neck_to_Waist;
-	waist_pose.vecPosition[2] = neck_pose.vecPosition[2];
+	pose->poseIsValid = true;
+	
+	pose->deviceIsConnected = true;
 
-	lfoot_pose.vecPosition[0] = lhip_pose.vecPosition[0];
-	lfoot_pose.vecPosition[1] = lhip_pose.vecPosition[1] - Hip_to_Foot_len_m;
-	lfoot_pose.vecPosition[2] = lhip_pose.vecPosition[2];
+	pose->qRotation.w = payload->qw;
+	pose->qRotation.x = payload->qx;
+	pose->qRotation.y = payload->qy;
+	pose->qRotation.z = payload->qz;
 
-	rfoot_pose.vecPosition[0] = rhip_pose.vecPosition[0];
-	rfoot_pose.vecPosition[1] = rhip_pose.vecPosition[1] - Hip_to_Foot_len_m;
-	rfoot_pose.vecPosition[2] = rhip_pose.vecPosition[2];
-
-	lfoot_pose.qRotation.w = 1.0;
-	lfoot_pose.qRotation.x = 0;
-	lfoot_pose.qRotation.y = 0;
-	lfoot_pose.qRotation.z = 0;
-
-
-	waist_pose.qRotation.w = 1.0;
-	waist_pose.qRotation.x = 0;
-	waist_pose.qRotation.y = 
-	waist_pose.qRotation.z = 0;
-
-	lfoot_pose.qRotation.w = 1.0;
-	lfoot_pose.qRotation.x = 0;
-	lfoot_pose.qRotation.y = 0;
-	lfoot_pose.qRotation.z = 0;
-
-	rfoot_pose.qRotation.w = 1.0;
-	rfoot_pose.qRotation.x = 0;
-	rfoot_pose.qRotation.y = 0;
-	rfoot_pose.qRotation.z = 0;
+	pose->vecPosition[0] = payload->x;
+	pose->vecPosition[1] = payload->y;
+	pose->vecPosition[2] = payload->z;
 
 	return;
 }
+
+

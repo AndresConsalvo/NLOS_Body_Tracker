@@ -7,230 +7,358 @@ import sys
 import argparse
 import threading
 import struct
-from tracker import Tracker
+import os
+import signal
+from dotenv import load_dotenv
 from psutil import process_iter
 from os import kill
 from signal import SIGTERM
 from ctypes import *
 
+from ctypes import *
+from struct import *
+
+from tracker import Tracker
+from server_events import ServerEvent
+
+# Rou's Packages
+from tracker import Tracker
+from kinematics import *
+from math_helpers import *
+from util import wlan_ip
+load_dotenv()
+
+# COMMUNICATE WITH THE DRIVER/OPENVR
+LOCAL_HOST = os.getenv("LOCAL_HOST")
+DRIVER_PORT = 4242
+DRIVER_ADDR = ("127.0.0.1", 4242)
+
+# COMMUNICATE WITH THE TRACKERS OVER WIFI
+LOCAL_IP = wlan_ip()
+BUFFER_SIZE = int(os.getenv("BUFFER_SIZE"))
+TRACKERS_PORT = 20000
+TRACKERS_ADDR = (LOCAL_IP,   TRACKERS_PORT)
+
+# COMMUNICATE WITH THE GUI OVER LOCALHOST
+GUI_PORT = int(os.getenv("LOCAL_PORT"))
+GUI_ADDR = (LOCAL_HOST, GUI_PORT)
 
 
-# LOCAL_IP = socket.gethostbyname(socket.gethostname())
-LOCAL_IP = "192.168.1.51"
-LOCAL_PORT = 20000
-BUFFER_SIZE = 1024
-ADDR = (LOCAL_IP, LOCAL_PORT)
 DISCONNECT = "!DISCONNECT"
+OPENVR_MESSAGE = "Hello\\x00"
+
+# OpenVR driver/server communication UDP socket
+driver_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+driver_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+driver_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64)
+
+# Trackers/Server communication UDP socket
+trackers_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+trackers_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64)
+
+# GUI/Server communication UDP socket
+gui_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+
+
 recv_counter = 0
 
-OPENVR_MESSAGE = "Hello\\x00"
-UDP_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+addresses = { "openvr": None,
+              "electron": None}
 
-def print_trackers(trackers:dict, go):
-  while go:
-    for tracker in trackers.values():
-      print(f"[INFO] Trackers data:")
-      pprint.pprint(tracker.get_device())
-    time.sleep(2)
+trackers:dict[int, Tracker] = {}
+for i in range (6):
+  trackers[i+1] = Tracker(socket.gethostbyname(socket.gethostname()), [0, 0, 0], [0, 0, 0], 4.0, i+1, i+1)
 
-def kill_process_confirm() -> bool:
-  msg = f"Another process has been found using port {LOCAL_PORT}.\n"\
+kinematics = Skeleton()
+
+body_measurements = {}
+server_events = ServerEvent()
+server_events.addresses = addresses
+server_events.trackers = trackers
+server_events.body_measurements = body_measurements
+
+run_server = True
+listening = True
+driver_found = False
+driver_addr = None
+calibrating = {'c' : False}
+
+def update_app(t, sock:socket.socket, trackers:dict[str, Tracker], address):
+  # ************
+  # Sends the trackers information to the GUI. Then pauses
+  # the thread for the specified period of time.
+  #
+  # @param {int} [t] The period of time to pause the thread.
+  # @param {socket.socket} [sock] The socket where the message
+  #        will be sent through.
+  # @param {dict[str, Tracker]} [trackers] A dictionary containing
+  #        the trackers with the info to be sent to the GUI.
+  # @param {_Address} [address] The address of the GUI.
+  # ************
+
+  if address:
+    for track in trackers.values():
+      message_to_send = json.dumps(track.get_device())
+      bytes_to_send = str.encode(message_to_send)
+      sock.sendto(bytes_to_send, address)
+  time.sleep(t)
+
+def kill_process_confirm(port) -> bool:
+  # ************
+  # Calls the open_popup function and prompts the user to kill
+  # or continue a process.
+  #
+  # @return {bool} If the user chooses to close the process
+  #         returns true, if not then returns false
+  # ************
+
+  msg = f"Another process has been found using port {port}.\n"\
          "Do you want to close this process to continue?"
   return True if open_popup(text=msg) == 6 else False
 
-
 def open_popup(title:str="WARNING!", text:str="Text") -> int:
+  # ************
+  # Open a Windows pop-up window with the choices `Yes` and `No`.
+  #
+  # @param {str} [title="WARNING!"] The title of the pop-up window.
+  # @param {str} [text="Text"] The question to be answered by the user
+  #        in terms of `yes` or `no`.
+  # @return {MessageBoxW} Returns the answer chosen by the user.
+  # ************
+
   _MessageBox = WinDLL("user32").MessageBoxW
   return _MessageBox(0, text, title, 4)
 
+def bind(sock:socket.socket, port:int, addr:tuple):
+  # ************
+  # Binds an UDP socket with a port, checking if the specific port
+  # is in use, a pop-up window will appear and ask the user permision
+  # to close the process using the port and address. If permision is
+  # denied then the program will exit.
+  #
+  # @param {socket.socket} [sock] socket to be binded with the port a
+  #                                and IP address.
+  # @param {int} [port] the network port to be check for binding.
+  # @param {tuple(string,int)} [addr] tuple with the IP address and port.
+  # ************
 
-def store_new_tracker(trackers:dict, tracker:Tracker):
-  if len(trackers) < 7:
-    trackers[tracker.id] = tracker
-    return True
-  else:
-    print("[ERROR] Maximum number of trackers reached")
-    return False
-
-def update_tracker_info(trackers:dict, tracker:Tracker, body_part="", body_part_update=False):
-  # print("[TEST]--->update_trackers_info")
-  # pprint.pprint(trackers.get(tracker.id).get_device())
-
-  trackers.get(tracker.id).accel = tracker.accel
-  trackers.get(tracker.id).gyro  = tracker.gyro
-  if body_part_update:
-    trackers.get(tracker.id).body_part = body_part
-
-
-
-def start(verbose:bool):
-  if verbose is None or not isinstance(verbose, bool):
-    verbose = False
-
-
-  print("[STARTING] server is starting...")
-  recv_counter = 0
-
-  print(f"[BINDING] {ADDR}...")
-
-  unbinded = True
-  while unbinded:
+  binded = False
+  while not binded:
     try:
-      UDP_server_socket.bind(ADDR)
-      unbinded = False
+      sock.bind(addr)
+      binded = True
     except OSError:
       for proc in process_iter():
         for conns in proc.connections(kind="inet"):
-          if conns.laddr.port == LOCAL_PORT:
-            if kill_process_confirm():
+          if conns.laddr.port == port:
+            if kill_process_confirm(port):
               proc.send_signal(SIGTERM)
             else:
               exit(1)
 
+def communicate_gui_udp(verbose:bool):
+  # ************
+  # Binds the GUI-Server socket with the designated port.
+  # Begins communications with the GUI.
+  #
+  # @params {bool} [verbose] Selects whether to output the
+  #         transmited data to the console or not.
+  # ************
+
+  global GUI_PORT
+  global recv_counter
+  global listening
+
+  if verbose is None or not isinstance(verbose, bool):
+    verbose = False
+
+  print("[STARTING] GUI server is starting...")
+  print(f"[BINDING] {GUI_ADDR}...")
+  bind(gui_server_socket, GUI_PORT, GUI_ADDR)
 
   print("[LISTENING] UDP socket is up and listening")
-  listening = True
 
-  trackers = {}
-  electron_address = None
-  openvr_address = None
 
-  # go = True
-  # print_thread = threading.Thread(target=print_trackers, args=(trackers,go,))
 
-  try:
-    while(listening):
+  while(listening):
+    try:
 
-      bytes_address_pair = UDP_server_socket.recvfrom(BUFFER_SIZE)
+      bytes_address_pair = gui_server_socket.recvfrom(BUFFER_SIZE)
 
       recv_counter += 1
 
       message = format(bytes_address_pair[0])
       address = bytes_address_pair[1]
+
       try:
         payload = json.loads(message[2:-1])
       except json.decoder.JSONDecodeError:
         payload = message[2:-1]
-        openvr_address = address
-        print(openvr_address)
+        addresses["openvr"] = address
 
-
-      # print(f"[PAYLOAD]--->{payload}")
-      # print(OPENVR_MESSAGE == payload)
-
-
-      if type(payload) is not dict and payload == DISCONNECT:
-        listening = False
-
-      elif type(payload) is dict:
+      if type(payload) is dict:
         if payload["type"] == DISCONNECT:
           listening = False
 
-        elif payload["type"] == "DEVICE":
-          # MESSAGE FROM CLIENT
-          new_tracker = Tracker(payload["data"]["ip"],
-                                payload["data"]["accel"],
-                                payload["data"]["gyro"],
-                                payload["data"]["battery"],
-                                payload["data"]["id"],
-                                payload["data"]["body_part"])
+        else:
+          server_events.handle_event(payload, gui_server_socket, address, kinematics, calibrating)
 
-          new_tracker.battery = payload["data"]["battery"]
+      if True:
+        print(f"[INFO] Client Address:\n{address}\n")
+        print("[INFO] message_json:")
 
-          if not (payload["data"]["id"] in trackers):
-            store_new_tracker(trackers, new_tracker)
-            # pprint.pprint(new_tracker.get_device())
+        print('Head_to_Neck' , kinematics.Head_to_Neck)
+        print('Chest_to_Waist' , kinematics.Chest_to_Waist)
+        print('Hip_to_Knee' , kinematics.Hip_to_Knee)
+        print('ankle_to_ground' , kinematics.ankle_to_ground)
+        pprint.pprint(payload)
 
-          else:
-            update_tracker_info(trackers, new_tracker)
+    except socket.timeout:
+      print("[DISCONNECTED] GUI/Server socket timeout")
 
-          if electron_address:
-            # Send data to app
-            # pprint.pprint(trackers)
-            message_to_send = json.dumps(trackers[payload["data"]["id"]].get_device())
-            bytes_to_send = str.encode(message_to_send)
-            UDP_server_socket.sendto(bytes_to_send, openvr_address)
+    except ConnectionResetError:
+      print("[DISCONNECTED] GUI/Server connection lost")
 
+  gui_server_socket.close()
+  print("[DISCONNECTED] GUI/Server socket terminated")
 
-        elif payload["type"] == "DEVICE_STATS":
-          pass
+def communicate_trackers_udp(verbose:bool):
+  # ************
+  # Binds the Trackers-Server socket with the designated port.
+  # Begins communications with the Trackers.
+  # ************
 
-        elif payload["type"] == "ELECTRON_HAND_SHAKE":
-          # message_from_server = "[CONNECTED] App and Server are communicating."
-          # bytes_to_send = str.encode(message_from_server)
-          # print(bytes_to_send)
-          # UDP_server_socket.sendto(bytes_to_send, address)
-          electron_address = address
-          pass
+  global TRACKERS_PORT
+  global recv_counter
+  global listening
 
-        elif payload["type"] == "CHANGE_ROLE":
-          pass
+  if verbose is None or not isinstance(verbose, bool):
+    verbose = False
 
-        elif payload["type"] == "POSITION":
-          accel = payload["data"]["accel"]
-          gyro  = payload["data"]["gyro"]
-          id    = payload["data"]["id"]
+  print("[STARTING] GUI server is starting...")
+  print(f"[BINDING] {TRACKERS_ADDR}...")
+  bind(trackers_server_socket, TRACKERS_PORT, TRACKERS_ADDR)
 
-          tracker = Tracker(address,
-                            accel,
-                            gyro,
-                            4.2,
-                            id,
-                            None)
+  print("[LISTENING] UDP socket is up and listening")
 
-          if not (id in trackers):
-            store_new_tracker(trackers, tracker)
-          else:
-            update_tracker_info(trackers, tracker)
+  while (listening):
+    try:
+      bytes_address_pair = trackers_server_socket.recvfrom(BUFFER_SIZE)
+      message = format(bytes_address_pair[0])
+      address = bytes_address_pair[1]
 
-          if openvr_address:
+      try:
+        payload = json.loads(message[2:-1])
+      except json.decoder.JSONDecodeError:
+        payload = message[2:-1]
+        addresses["openvr"] = address
 
-              arr = payload["data"]["gyro"]
-              arr.append(float(tracker.id))
-              message_to_send = arr
-              bytes_to_send = struct.pack('%sf' % len(message_to_send), *message_to_send)
-              print(f'[SIZE OF PCKG]--->{sys.getsizeof(bytes_to_send)}')
-              UDP_server_socket.sendto(bytes_to_send, openvr_address)
+      if type(payload) is dict:
+        if payload["type"] == DISCONNECT:
+          listening = False
 
+        else:
+          server_events.handle_event(payload)
 
-      if verbose:
+      if True:
         print(f"[INFO] Client Address:\n{address}\n")
         print("[INFO] message_json:")
         pprint.pprint(payload)
-        # if not print_thread.is_alive():
-        #   print('is not alive')
-        #   print_thread.start()
+
+    except socket.timeout:
+      print("[DISCONNECTED] Tracker/Server socket timeout")
+
+    except ConnectionResetError:
+      print("[DISCONNECTED] Tracker/Server connection lost")
 
 
 
-      # for t in trackers.values():
-      #   pprint.pprint(t.get_device())
+def communicate_driver_udp():
+  # ************
+  # Binds the Driver-Server socket with the designated port.
+  # Begins communications with the OpenVR Driver.
+  # ************
+
+  global listening
+  global driver_found
+  driver_server_socket.bind(DRIVER_ADDR)
+
+  while(listening):
+    try:
+      data, addr = driver_server_socket.recvfrom(BUFFER_SIZE)
+      payload_length = len(data)
+      if (payload_length == 3):
+        header, msg, footer = unpack("=cbc", data)
+
+        if (header == b'P' and footer == b'p'):
+          driver_found = True
+          
+          addresses['openvr'] = addr
+          payload = pack("=cbc", b'P', 45, b'p')
+          driver_server_socket.sendto(payload, addr)
+
+      elif (payload_length == 31):
+        header, x, y, z, qw, qx, qy, qz, id, footer = unpack("=cfffffffbc", data)
+
+        if (header == b'H' and footer == b'h'):
+          hmd_pos = quaternion(0, x, y, z)
+          hmd_quat = quaternion(qw, qx, qy, qz)
+
+          if (calibrating["c"]):
+            print('----------------------------------------AQUI----------------------------------------')
+            set_offsets(kinematics, trackers, hmd_quat, verbose=False)
+            calibrating["c"] = False
+
+          else:
+            update_body(kinematics, trackers, hmd_pos, hmd_quat, verbose=True, offset_front=False, static_pos=False)
+
+          for t in trackers.values():
+            id = t.id
+            quat = t.quat
+            pos = t.pos
 
 
-        # if recv_counter == 1:
-        #   start = timeit.timeit()
+            payload = pack('=cfffffffbc', b'T', pos.x, pos.y, pos.z, quat.w, quat.x, quat.y, quat.z, id, b't')
 
-        # if recv_counter%600 == 0:
-        #   # stop timer reset counter
-        #   end = timeit.timeit()
-        #   print(f"[INFO] Time elapsed for 600 messages = {end-start}")
-        #   recv_counter = 0
-    # go = False
-    # print_thread.join()
-    UDP_server_socket.close()
-    print("[DISCONNECTED]  Server Terminated.")
+            if addresses['openvr']:
+              driver_server_socket.sendto(payload, addresses['openvr'])
+    except socket.timeout:
+      print("[DISCONNECTED] Driver/Server socket timeout")
 
+    except ConnectionResetError:
+      print("[DISCONNECTED] Driver/Server connection lost")
 
-  except KeyboardInterrupt:
-    UDP_server_socket.close()
-    print("[DISCONNECTED]  Keyboard Interrupt found.")
-    pass
+def sigint_handler(signum, frame):
+  global listening
+  global run_server
 
+  print("Ctrl+C was entered!")
+  listening = False
+  run_server = False
+  exit(0)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('-v', type=bool)
 
+  a = parser.parse_args()
 
-  args = parser.parse_args()
-  start(args.v)
+  signal.signal(signal.SIGINT, sigint_handler)
+
+  gui_udp = threading.Thread(target=communicate_gui_udp, args=(a.v,), daemon=True)
+  gui_udp.start()
+
+  tracker_udp = threading.Thread(target=communicate_trackers_udp, args=(a.v,), daemon=True)
+  tracker_udp.start()
+
+  driver_udp = threading.Thread(target=communicate_driver_udp, daemon=True)
+  driver_udp.start()
+
+  while(run_server):
+    update_app(1, gui_server_socket, trackers, addresses['electron'])
+
+
+  gui_udp.join()
+  driver_udp.join()
+  tracker_udp.join()

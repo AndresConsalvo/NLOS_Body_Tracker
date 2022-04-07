@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 
+
 #include <cmath>
 #pragma comment(lib, "ws2_32.lib")
 
@@ -15,22 +16,22 @@
 // 12 13 14 15
 
 struct Vector3_d {
-	double x, y, z = 0;
+	float x, y, z = 0;
 
 	Vector3_d();
 
-	Vector3_d(double x, double y, double z);
+	Vector3_d(float x, float y, float z);
 
-	double getMag();
+	float getMag();
 };
 
 struct Quaternion {
-	double w = 1.0;
-	double x, y, z = 0.0;
+	float w = 1.0;
+	float x, y, z = 0.0;
 
 	Quaternion();
 
-	Quaternion(double w, double x, double y, double z);
+	Quaternion(float w, float x, float y, float z);
 
 	Quaternion operator*(const Quaternion&);
 
@@ -40,7 +41,7 @@ struct Quaternion {
 };
 
 struct Matrix44_d {
-	double m[16];
+	float m[16];
 
 	Matrix44_d();
 
@@ -48,9 +49,9 @@ struct Matrix44_d {
 
 	void set_as_Identity();
 
-	void scale_Matrix(double scale);
+	void scale_Matrix(float scale);
 
-	Quaternion getNewQuat(Quaternion& q_t0);
+	Quaternion getNewQuat(Quaternion* q_t0);
 
 	// Operators
 	Matrix44_d operator+(const Matrix44_d& r);
