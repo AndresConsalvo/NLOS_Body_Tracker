@@ -37,7 +37,7 @@ pyshell.on('message', function (message) {
 });
 
 const s = dgram.createSocket('udp4');
-const PORT = 4243;
+const PORT = 4242;
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
