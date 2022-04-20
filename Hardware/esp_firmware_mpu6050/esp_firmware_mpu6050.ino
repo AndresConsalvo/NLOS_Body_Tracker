@@ -59,7 +59,6 @@ struct sensor_data{
   float quat_x;
   float quat_y;
   float quat_z;
-  
 };
 
 // MPU control/status vars
@@ -132,6 +131,8 @@ void loop() {
   while (Serial.available()) {
     receive_length_ssid = Serial.readBytesUntil('\n', ssid, sizeof(ssid));
     receive_length_pass = Serial.readBytesUntil('\n', password, sizeof(password));
+
+    // This is dumb. I think I might need to have this broadcast its ip and port.
     receive_length_ip   = Serial.readBytesUntil('\n', ip, sizeof(ip));
     //receive_length_port = Serial.readBytesUntil('\n', port, sizeof(port));
     receive_length_trackerID = Serial.readBytesUntil('\n', trackerID_recv, sizeof(trackerID_recv)); 
@@ -182,13 +183,6 @@ void loop() {
 void imu_init(){
   
   devStatus = mpu.dmpInitialize();
-
-  //mpu.setXGyroOffset(-1914);
-  //mpu.setYGyroOffset(-267);
-  //mpu.setZGyroOffset(1046);
-  //mpu.setXAccelOffset(1760); // 1688 factory default for my test chip
-  //mpu.setYAccelOffset(1760); // 1688 factory default for my test chip
-  //mpu.setZAccelOffset(1760); // 1688 factory default for my test chip
   
   if (devStatus) {
     Serial.println("Failed to find MPU6050 chip");
@@ -206,6 +200,7 @@ void imu_init(){
   packetSize = mpu.dmpGetFIFOPacketSize();
 }
 
+// Could easily change this to take in a pointer to an already existing sensor_data object.
 sensor_data getMpuValues(){
   if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {
       mpu.dmpGetGyro(gyro, fifoBuffer);
@@ -215,6 +210,7 @@ sensor_data getMpuValues(){
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
   }
+
 
   sensor_data s;
   s.accel_x = aaReal.x;
@@ -256,6 +252,7 @@ void printImuValues(){
   //Serial.print(", Z: ");
   //Serial.print(s.accel_z);
   //Serial.println(" m/s^2");
+  
   Serial.print(gyro[0]);
   Serial.print(gyro[1]);
   Serial.println(gyro[2]);
@@ -320,6 +317,7 @@ void io_init(){
    *}
    */
 int packet_count = 100;
+
 void data_send(){  
   sensor_data s = getMpuValues();
   char ReplyBuffer[256];
