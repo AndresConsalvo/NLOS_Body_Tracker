@@ -293,7 +293,7 @@ def communicate_driver_udp():
 
         if (header == b'P' and footer == b'p'):
           driver_found = True
-          
+
           addresses['openvr'] = addr
           payload = pack("=cbc", b'P', 45, b'p')
           driver_server_socket.sendto(payload, addr)

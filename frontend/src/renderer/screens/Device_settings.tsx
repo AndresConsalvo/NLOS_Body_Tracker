@@ -107,22 +107,62 @@ export default () => {
         </div>
       </div>
       <h3>Calibrate Trackers:</h3>
+      <div style={{ marginLeft: '250px' }}>
+        {calibrating ? (
+          <>
+            <CircularProgress style={{ marginLeft: '56px' }} />
+            <p>Stand still in a "T" pose.</p>
+            <img
+              src="https://img.icons8.com/ios/452/t-pose.png"
+              height={'200px'}
+            />
+          </>
+        ) : (
+          <Button variant="contained" onClick={handleCalibration}>
+            Calibrate
+          </Button>
+        )}
+        {calibrated && <p>Finished calibration</p>}
+      </div>
+      <h3 style={{ marginTop: '30px' }}>WiFi Configuration:</h3>
 
-      {calibrating ? (
-        <>
-          <CircularProgress style={{ marginLeft: '56px' }} />
-          <p>Stand still in a "T" pose.</p>
-          <img
-            src="https://img.icons8.com/ios/452/t-pose.png"
-            height={'200px'}
+      <div
+        style={{ display: 'flex', flexDirection: 'row', paddingBottom: '30px' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <p style={{ margin: '29px 5px' }}>COM port #:</p>
+          <p style={{ margin: '29px 5px' }}>SSID:</p>
+          <p style={{ margin: '29px 5px' }}>Password:</p>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            marginLeft: '145px',
+          }}
+        >
+          <TextField
+            style={{ margin: '10px 5px' }}
+            id="outlined-basic"
+            label="COM Port"
+            variant="outlined"
+            type="number"
           />
-        </>
-      ) : (
-        <Button variant="contained" onClick={handleCalibration}>
-          Calibrate
-        </Button>
-      )}
-      {calibrated && <p>Finished calibration</p>}
+          <TextField
+            style={{ margin: '10px 5px' }}
+            id="outlined-basic"
+            label="SSID"
+            variant="outlined"
+          />
+          <TextField
+            style={{ margin: '10px 5px' }}
+            id="outlined-basic"
+            label="Password"
+            variant="outlined"
+            type="password"
+          />
+        </div>
+      </div>
     </div>
   );
 };
