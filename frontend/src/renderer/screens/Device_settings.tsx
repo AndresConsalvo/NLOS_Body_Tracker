@@ -1,12 +1,15 @@
 import { Button, CircularProgress, TextField } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { useMeasurements } from 'renderer/hooks/useMeasurements';
+import { useWConfig } from 'renderer/hooks/useWConfig';
 import useStores from '../hooks/useStores';
 
 export default () => {
-  const { sensors, measurementStore } = useStores();
+  const { sensors, measurementStore, wConfigStore } = useStores();
   const { devices, changeRole } = sensors;
   const { handleText, measurements, saveBodyMeasurements } = measurementStore;
+
+  const { handleWIFI, config, saveWConfig } = wConfigStore;
 
   const [calibrating, setCalibrating] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,7 +144,7 @@ export default () => {
             marginLeft: '145px',
           }}
         >
-          <TextField
+          {/* <TextField
             style={{ margin: '10px 5px' }}
             id="outlined-basic"
             label="COM Port"
@@ -160,7 +163,28 @@ export default () => {
             label="Password"
             variant="outlined"
             type="password"
-          />
+          /> */}
+
+          {Object.entries(config).map((entry) => {
+            const [key, input] = entry;
+            return (
+              <TextField
+                id="outlined-basic"
+                label={input.label}
+                value={input.value}
+                key={key}
+                name={key}
+                onChange={handleWIFI}
+                variant="outlined"
+                style={{ margin: '10px 5px' }}
+              />
+            );
+          })}
+          <div>
+            <Button variant="contained" color="success" onClick={saveWConfig}>
+              Save WiFi Configuration
+            </Button>
+          </div>
         </div>
       </div>
     </div>

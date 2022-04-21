@@ -2,6 +2,7 @@ import socket
 import json
 import pprint
 import struct
+import serial
 from dotenv import load_dotenv
 from math_helpers import *
 from tracker import Tracker
@@ -76,6 +77,11 @@ class ServerEvent:
     elif (payload["type"] == "BODY_MEASUREMENTS"):
       print('[EVENT] BODY_MEASUREMENTS')
       self.body_measurements_event(payload["data"], args[2])
+
+    elif(payload["type"] == "WIFI_CONFIG"):
+      print(["[EVENT] WIFI_CONFIG"])
+      self.wifi_config_event(payload["data"])
+
 
   def device_event(self,data, UDP_server_socket:socket.socket):
     tracker = Tracker(data["ip"],
@@ -166,5 +172,23 @@ class ServerEvent:
     kinematics.Hip_Width = float(self.body_measurements["hipWidth"]) / 100.0
     kinematics.Knee_to_Foot = float(self.body_measurements["kneeToFoot"]) / 100.0
     kinematics.Chest_to_Waist = float(self.body_measurements["chestToWaist"]) / 100.0
+
+  def wifi_config_event(self, data):
+    try:
+      port = data["COM"]["value"]
+      ssid = data["SSID"]["value"]
+      pasw = data["Password"]["value"]
+
+      ser = serial.Serial(port, 115299, timeout = 1)
+      print("[SETTING NETWORK CREDENTIALS]")
+      send_str = ssid.encode() + b'\n' + pasw.encode() + b'\n'
+      print(f"[INFO] {send_str}")
+
+      ser.write(send_str)
+
+      ser.close()
+
+    except serial.SerialException:
+      print("[ERROR] COM port not found")
 
 
