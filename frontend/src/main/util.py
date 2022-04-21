@@ -7,3 +7,5 @@ def wlan_ip():
         if 'wi-fi' in i: scan=1
         if scan:
             if 'ipv4' in i: return i.split(':')[1].strip()
+
+print(wlan_ip())

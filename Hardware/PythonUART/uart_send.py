@@ -2,23 +2,15 @@ import serial
 import socket
 
 
-def setNetwork(ser, ssid, password, ip_bytes, tracker_id):
+def setNetwork(ser, ssid, password):
     try:
        
         print("Setting network credentials")
-        send_str = ssid.encode() + b'\x0A' + password.encode() + b'\x0A' + ip_bytes + b'\x0A' + tracker_id + b'\x0A'
+        send_str = ssid.encode() + password.encode()
         print(send_str)
         
         
         ser.write(send_str)
-        sid = ser.readline()
-        print(sid)
-        pss = ser.readline()
-        print(pss)
-        ip = ser.readline()
-        print(ip)
-        id = ser.readline()
-        print(id)
 
         ser.close()
     except serial.SerialException:
@@ -33,20 +25,20 @@ print("Hi!")
 ser = serial.Serial("COM4", 115200, timeout = 1)
 COM = input("Enter COM port: ")
 
-ssid = input("Enter SSID: ")
-password = input("Enter password: ")
-ip = input("Enter IP: ")
-#ssid = "uam8nsw9dt9q"
-#password = "K-jRAw9YC5-U"
+#ssid = input("Enter SSID: ")
+#password = input("Enter password: ")
+#ip = input("Enter IP: ")
+ssid = "uam8nsw9dt9q"
+password = "K-jRAw9YC5-U"
 #ip = "192.168.1.59"
 
-ip_bytes = socket.inet_aton(ip)
+#ip_bytes = socket.inet_aton(ip)
 
 
-id = input("Enter id: ")
+#id = input("Enter id: ")
 #id = "2"
-id = int(id)
-id = id.to_bytes(1, 'big')
+#id = int(id)
+#id = id.to_bytes(1, 'big')
 
-setNetwork(ser, ssid, password, ip_bytes, id)
+setNetwork(ser, ssid, password)
 
