@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <AsyncUDP.h>
 #include <stdio.h>
 #include "EEPROM.h"
 #include "defines.h"
@@ -15,6 +16,7 @@
 MPU6050 mpu;
 
 WiFiUDP Udp;
+AsyncUDP Audp;
 
 int STATUS_LED_PIN = 2;
 
@@ -22,29 +24,32 @@ byte led_cycle[27] = {HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, HIGH, HIGH, LOW
 byte state = LOW;
 int count = 0;
 hw_timer_t * timer = NULL;
+
+bool serverFound;
 bool connected = false;
 
 int serialLength;
 char ssid[128];
 char password[128];
-char ip[5];
-//char port[16];
-char trackerID_recv[5];
+
+int receive_length_ssid;
+int receive_length_pass;
 
 int PORT = 20000;
 
 int TrackerID = 0;
-byte ip_arr[4];
+
 IPAddress udpAddress(0, 0, 0, 0);
-uint16_t net_port;
+uint16_t serverPort;
 
 int send_length;
 
-int receive_length_ssid;
-int receive_length_pass;
-int receive_length_ip;
-int receive_length_port;
-int receive_length_trackerID;
+
+struct __attribute__((packed)) ping {
+  uint8_t header = 'P';
+  uint8_t msg = 44;
+  uint8_t footer = 'p';
+} ping;
 
 struct sensor_data{
   float accel_x;
@@ -59,7 +64,6 @@ struct sensor_data{
   float quat_x;
   float quat_y;
   float quat_z;
-  
 };
 
 // MPU control/status vars
@@ -102,74 +106,42 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000);
 
-  if (!EEPROM.begin(EEPROM_SIZE)) {
-      Serial.println("failed to init EEPROM");
-      delay(1000000);
-  }
-  
-  ip[0] = EEPROM.read(0);
-  ip[1] = EEPROM.read(1);
-  ip[2] = EEPROM.read(2);
-  ip[3] = EEPROM.read(3);
-
 
   wifiConnect(WIFI_NETWORK, WIFI_PASSWORD);
   io_init();
+  imu_init();
   WiFi.onEvent(WiFiEvent);
   WiFi.begin();
-
-  //udpAddress = IPAddress(ip[0], ip[1], ip[2], ip[3]);
-  udpAddress = UDP_ADDRESS;
-  //net_port = EEPROM.read(4) << 8 | EEPROM.read(5);
-  TrackerID = EEPROM.read(6);
-  
-  imu_init();
 }
 
 void loop() {
-
-  
-  while (Serial.available()) {
+  serialLength = Serial.available();
+  if (serialLength) {
     receive_length_ssid = Serial.readBytesUntil('\n', ssid, sizeof(ssid));
     receive_length_pass = Serial.readBytesUntil('\n', password, sizeof(password));
-    receive_length_ip   = Serial.readBytesUntil('\n', ip, sizeof(ip));
-    //receive_length_port = Serial.readBytesUntil('\n', port, sizeof(port));
-    receive_length_trackerID = Serial.readBytesUntil('\n', trackerID_recv, sizeof(trackerID_recv)); 
 
+    wifiConnect(ssid, password);
     
-
-    
-    Serial.write("test");
-    
-    ip_arr[0] = ip[0];
-    ip_arr[1] = ip[1];
-    ip_arr[2] = ip[2];
-    ip_arr[3] = ip[3];
-    
-    udpAddress = IPAddress(ip[0], ip[1], ip[2], ip[3]);
-    //net_port = (port[0] << 8) | port[1];
-    TrackerID = trackerID_recv[0];
-
-    // writing byte-by-byte to EEPROM
-    EEPROM.write(0, ip[0]);
-    EEPROM.write(1, ip[1]);
-    EEPROM.write(2, ip[2]);
-    EEPROM.write(3, ip[3]);
-    //EEPROM.write(4, port[0]);
-    //EEPROM.write(5, port[1]);
-    EEPROM.write(6, trackerID_recv[0]);
-
-    EEPROM.commit();
-    
-    //memset(ssid, 0, sizeof(ssid));
-    //memset(password, 0, sizeof(password));
-    memset(ip, 0, sizeof(ip));
-    //memset(port, 0, sizeof(port));
-    memset(trackerID_recv, 0, sizeof(trackerID_recv));
+    memset(ssid, 0, sizeof(ssid));
+    memset(password, 0, sizeof(password));
   }
-  Serial.print(ssid);
+
   if (connected) {
-    data_send();
+    int packet_size = Udp.parsePacket();
+    if (packet_size > 0) {
+        if (udpAddress == IPAddress(0, 0, 0, 0)) {
+          udpAddress = Udp.remoteIP();
+          serverPort = Udp.remotePort();
+          serverFound = true;
+        }
+    }
+
+    if (serverFound) {
+      data_send();
+    } else {
+      Audp.broadcastTo((uint8_t*)&ping, sizeof(ping), 4242);
+      delay(1000);
+    }
   }
 
   //printImuValues();  
@@ -182,13 +154,6 @@ void loop() {
 void imu_init(){
   
   devStatus = mpu.dmpInitialize();
-
-  //mpu.setXGyroOffset(-1914);
-  //mpu.setYGyroOffset(-267);
-  //mpu.setZGyroOffset(1046);
-  //mpu.setXAccelOffset(1760); // 1688 factory default for my test chip
-  //mpu.setYAccelOffset(1760); // 1688 factory default for my test chip
-  //mpu.setZAccelOffset(1760); // 1688 factory default for my test chip
   
   if (devStatus) {
     Serial.println("Failed to find MPU6050 chip");
@@ -206,6 +171,7 @@ void imu_init(){
   packetSize = mpu.dmpGetFIFOPacketSize();
 }
 
+// Could easily change this to take in a pointer to an already existing sensor_data object.
 sensor_data getMpuValues(){
   if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {
       mpu.dmpGetGyro(gyro, fifoBuffer);
@@ -215,6 +181,7 @@ sensor_data getMpuValues(){
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
   }
+
 
   sensor_data s;
   s.accel_x = aaReal.x;
@@ -256,6 +223,7 @@ void printImuValues(){
   //Serial.print(", Z: ");
   //Serial.print(s.accel_z);
   //Serial.println(" m/s^2");
+  
   Serial.print(gyro[0]);
   Serial.print(gyro[1]);
   Serial.println(gyro[2]);
@@ -320,6 +288,7 @@ void io_init(){
    *}
    */
 int packet_count = 100;
+
 void data_send(){  
   sensor_data s = getMpuValues();
   char ReplyBuffer[256];
@@ -329,11 +298,7 @@ void data_send(){
   sprintf(ReplyBuffer, "%s%.2f%s%.2f%s%.2f%s%.4f%s%.4f%s%.4f%s%.4f%s%.4f%s%.4f%s%.4f%s%s%s", textBuffer, s.accel_x, ",", s.accel_y, ",", s.accel_z, "], \"gyro\": [", s.gyro_x, ",", s.gyro_y, ",", s.gyro_z, "], \"quat\": [", s.quat_w,",",s.quat_x,",",s.quat_y,",",s.quat_z,"], \"id\": ", String(TrackerID), "}}");
   
   if (udpAddress != IPAddress(0, 0, 0, 0)) {
-
-   
-      Serial.print(udpAddress);
-      Serial.println(PORT);
-      Udp.beginPacket(udpAddress, UDP_PORT);
+      Udp.beginPacket(udpAddress, serverPort);
       Udp.printf(ReplyBuffer);
       Udp.endPacket();
 

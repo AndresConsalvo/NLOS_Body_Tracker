@@ -38,6 +38,15 @@ LOCAL_IP = wlan_ip()
 BUFFER_SIZE = int(os.getenv("BUFFER_SIZE"))
 TRACKERS_PORT = 20000
 TRACKERS_ADDR = (LOCAL_IP,   TRACKERS_PORT)
+trackers_listening = False
+
+# BROADCAST HANDLER
+BROAD_SOCK = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+BROAD_IP = ""
+BROAD_PORT = 4242
+BROAD_ADDR = (BROAD_IP, BROAD_PORT)
+BROAD_SOCK.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+BROAD_SOCK.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 # COMMUNICATE WITH THE GUI OVER LOCALHOST
 GUI_PORT = int(os.getenv("LOCAL_PORT"))
@@ -232,6 +241,7 @@ def communicate_trackers_udp(verbose:bool):
   global TRACKERS_PORT
   global recv_counter
   global listening
+  global trackers_listening
 
   if verbose is None or not isinstance(verbose, bool):
     verbose = False
@@ -239,6 +249,8 @@ def communicate_trackers_udp(verbose:bool):
   print("[STARTING] GUI server is starting...")
   print(f"[BINDING] {TRACKERS_ADDR}...")
   bind(trackers_server_socket, TRACKERS_PORT, TRACKERS_ADDR)
+
+  trackers_listening = True
 
   print("[LISTENING] UDP socket is up and listening")
 
@@ -329,6 +341,31 @@ def communicate_driver_udp():
     except ConnectionResetError:
       print("[DISCONNECTED] Driver/Server connection lost")
 
+def broad_recv_udp():
+  BROAD_SOCK.bind(BROAD_ADDR)
+
+  # wait for trackers socket to start
+
+  global listening
+  global trackers_listening
+  
+  while(trackers_listening == False):
+    print("Trackers thread is not ready.")
+
+  while (listening):
+    print("Listening for a broadcast!")
+    data, addr = BROAD_SOCK.recvfrom(BUFFER_SIZE)
+    payload_length = len(data)
+    
+    if (payload_length == 3):
+      header, msg, footer = unpack("=cbc", data)
+
+      if (header == b'P' and msg == 44 and footer == b'p'):
+        print("Sending a message!")
+        print(addr)
+        payload = pack("=cbc", b'P', 45, b'p')
+        trackers_server_socket.sendto(payload, (addr[0], 4242))
+
 def sigint_handler(signum, frame):
   global listening
   global run_server
@@ -355,6 +392,10 @@ if __name__ == "__main__":
   driver_udp = threading.Thread(target=communicate_driver_udp, daemon=True)
   driver_udp.start()
 
+  broad_udp = threading.Thread(target=broad_recv_udp, daemon=True)
+  broad_udp.start()
+
+
   while(run_server):
     update_app(1, gui_server_socket, trackers, addresses['electron'])
 
@@ -362,3 +403,4 @@ if __name__ == "__main__":
   gui_udp.join()
   driver_udp.join()
   tracker_udp.join()
+  broad_udp.join()
