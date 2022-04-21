@@ -31,29 +31,21 @@ void loop() {
   if (serialLength) {
     receive_length_ssid = Serial.readBytesUntil('\n', ssid, sizeof(ssid));
     receive_length_pass = Serial.readBytesUntil('\n', password, sizeof(password));
-    receive_length_ip   = Serial.readBytesUntil('\n', ip, sizeof(ip));
-    receive_length_trackerID = Serial.readBytesUntil('\n', trackerID_recv, sizeof(trackerID_recv)); 
 
-    
     ssid[receive_length_ssid] = '\n';
     password[receive_length_pass] = '\n';
-    ip[receive_length_ip] = '\n';
-    trackerID_recv[receive_length_trackerID] = '\n';
+
     
     send_length = Serial.write(ssid);
     Serial.write(password);
-    Serial.write(ip);
-    Serial.write(trackerID_recv);
     
     memset(ssid, 0, sizeof(ssid));
     memset(password, 0, sizeof(password));
-    memset(ip, 0, sizeof(ip));
-    memset(port, 0, sizeof(port));
-    memset(trackerID_recv, 0, sizeof(trackerID_recv));
   }
 }
 
 void wifiConnect(const char* ssid, const char* pass) {
+  delay(5000);
   Serial.println("Connecting to WiFi network: " + String(ssid));
 
   // delete old config

@@ -29,15 +29,15 @@ bool serverFound;
 bool connected = false;
 
 int serialLength;
-char ssid[128];
-char password[128];
+char ssid[64];
+char password[64];
 
 int receive_length_ssid;
 int receive_length_pass;
 
 int PORT = 20000;
 
-int TrackerID = 0;
+int TrackerID = 1;
 
 IPAddress udpAddress(0, 0, 0, 0);
 uint16_t serverPort;
@@ -106,10 +106,9 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000);
 
-
-  wifiConnect(WIFI_NETWORK, WIFI_PASSWORD);
   io_init();
   imu_init();
+  Serial.println("If you see this, it means this restarted.");
   WiFi.onEvent(WiFiEvent);
   WiFi.begin();
 }
@@ -122,10 +121,16 @@ void loop() {
 
     wifiConnect(ssid, password);
     
-    memset(ssid, 0, sizeof(ssid));
-    memset(password, 0, sizeof(password));
-  }
+    ssid[receive_length_ssid] = '\n';
+    password[receive_length_pass] = '\n';
+    send_length = Serial.write(ssid);
+    Serial.write(password);
+    
 
+    
+    //memset(ssid, 0, sizeof(ssid));
+    //memset(password, 0, sizeof(password));
+  }
   if (connected) {
     int packet_size = Udp.parsePacket();
     if (packet_size > 0) {

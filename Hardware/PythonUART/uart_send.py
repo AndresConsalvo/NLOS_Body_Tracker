@@ -1,24 +1,25 @@
 import serial
 import socket
+import time
 
 
-def setNetwork(ser, ssid, password, ip_bytes, tracker_id):
+def setNetwork(ser, ssid, password):
     try:
-       
+        #ser = serial.Serial(port, 115200, timeout = 1)
         print("Setting network credentials")
-        send_str = ssid.encode() + b'\x0A' + password.encode() + b'\x0A' + ip_bytes + b'\x0A' + tracker_id + b'\x0A'
+        send_str = ssid.encode() + b'\n' + password.encode() + b'\n'
         print(send_str)
         
         
+
         ser.write(send_str)
+        while 1:
+            sid = ser.readline()
+            print(sid)
         sid = ser.readline()
         print(sid)
         pss = ser.readline()
         print(pss)
-        ip = ser.readline()
-        print(ip)
-        id = ser.readline()
-        print(id)
 
         ser.close()
     except serial.SerialException:
@@ -30,23 +31,23 @@ def setNetwork(ser, ssid, password, ip_bytes, tracker_id):
 # to do: if no write back with correct response, then assume that the ssid and password did not get sent, and resend it.
 
 print("Hi!")
-ser = serial.Serial("COM4", 115200, timeout = 1)
-COM = input("Enter COM port: ")
+#COM = input("Enter COM port: ")
+ser = serial.Serial("COM3", 115200, timeout = 1)
+time.sleep(5)
 
-ssid = input("Enter SSID: ")
-password = input("Enter password: ")
-ip = input("Enter IP: ")
-#ssid = "uam8nsw9dt9q"
-#password = "K-jRAw9YC5-U"
+#ssid = input("Enter SSID: ")
+#password = input("Enter password: ")
+#ip = input("Enter IP: ")
+ssid = "Oppai"
+password = "hero4fun"
 #ip = "192.168.1.59"
 
-ip_bytes = socket.inet_aton(ip)
+#ip_bytes = socket.inet_aton(ip)
 
 
-id = input("Enter id: ")
+#id = input("Enter id: ")
 #id = "2"
-id = int(id)
-id = id.to_bytes(1, 'big')
+#id = int(id)
+#id = id.to_bytes(1, 'big')
 
-setNetwork(ser, ssid, password, ip_bytes, id)
-
+setNetwork(ser, ssid, password)
