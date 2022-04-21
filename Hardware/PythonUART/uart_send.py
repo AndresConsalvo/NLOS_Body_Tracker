@@ -2,11 +2,11 @@ import serial
 import socket
 
 
-def setNetwork(ser, ssid, password):
+def setNetwork(port, ssid, password):
     try:
-       
+        ser = serial.Serial(port, 115200, timeout = 1)
         print("Setting network credentials")
-        send_str = ssid.encode() + password.encode()
+        send_str = ssid.encode() + b'\n' + password.encode() + b'\n'
         print(send_str)
         
         
@@ -22,7 +22,6 @@ def setNetwork(ser, ssid, password):
 # to do: if no write back with correct response, then assume that the ssid and password did not get sent, and resend it.
 
 print("Hi!")
-ser = serial.Serial("COM4", 115200, timeout = 1)
 COM = input("Enter COM port: ")
 
 #ssid = input("Enter SSID: ")
@@ -40,5 +39,5 @@ password = "K-jRAw9YC5-U"
 #id = int(id)
 #id = id.to_bytes(1, 'big')
 
-setNetwork(ser, ssid, password)
+setNetwork(COM, ssid, password)
 

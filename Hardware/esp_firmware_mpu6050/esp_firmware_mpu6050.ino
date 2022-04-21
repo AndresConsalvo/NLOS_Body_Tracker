@@ -107,7 +107,7 @@ void setup() {
   Wire.setClock(400000);
 
 
-  wifiConnect(WIFI_NETWORK, WIFI_PASSWORD);
+  //wifiConnect(WIFI_NETWORK, WIFI_PASSWORD);
   io_init();
   imu_init();
   WiFi.onEvent(WiFiEvent);
