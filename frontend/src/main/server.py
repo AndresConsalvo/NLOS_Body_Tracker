@@ -208,10 +208,10 @@ def communicate_gui_udp(verbose:bool):
         print(f"[INFO] Client Address:\n{address}\n")
         print("[INFO] message_json:")
 
-        print('Head_to_Neck' , kinematics.Head_to_Neck)
-        print('Chest_to_Waist' , kinematics.Chest_to_Waist)
-        print('Hip_to_Knee' , kinematics.Hip_to_Knee)
-        print('ankle_to_ground' , kinematics.ankle_to_ground)
+        # print('Head_to_Neck' , kinematics.Head_to_Neck)
+        # print('Chest_to_Waist' , kinematics.Chest_to_Waist)
+        # print('Hip_to_Knee' , kinematics.Hip_to_Knee)
+        # print('ankle_to_ground' , kinematics.ankle_to_ground)
         pprint.pprint(payload)
 
     except socket.timeout:
